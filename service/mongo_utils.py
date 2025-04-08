@@ -1,29 +1,3 @@
-from pymongo import MongoClient
-from pydantic import BaseModel
-import config
-
-# 型定義
-class Item(BaseModel):
-    word: str
-    meaning: str
-    example_sentence: str
-    example_sentence_translation: str 
-
-def connect_to_mongodb(uri=config.DB_URI):
-    client = MongoClient(uri)
-    return client[config.DB_NAME][config.COLLECTION_NAME]  # "items" コレクション使用
-
-def insert_item(item: Item):
-    collection = connect_to_mongodb()
-    result = collection.insert_one(item.dict())  # pydanticモデル → dict
-    print(f"[Insert] ID: {result.inserted_id}")
-    return str(result.inserted_id)
-
-def get_all_items():
-    collection = connect_to_mongodb()
-    items = list(collection.find({}, {"_id": 0}))  # _idを除外して取得
-    return items
-
 import os
 import re
 from dotenv import load_dotenv
@@ -63,8 +37,9 @@ def get_all_items():
     items = list(collection.find({}, {"_id": 0}))
     return items
 
-# 🔽 単語を受け取って、意味・例文・和訳を取得 → MongoDBに保存する関数
 def generate_and_insert_item(word: str):
+    """ 🔽 単語を受け取って、意味・例文・和訳を取得 → MongoDBに保存する関数 
+    """
     messages = [
         {
             "role": "user",
