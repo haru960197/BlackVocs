@@ -1,17 +1,12 @@
-import os
 import re
-from dotenv import load_dotenv
 from openai import OpenAI
 from pymongo import MongoClient
 from pydantic import BaseModel
 import config
 
-# .env読み込み
-load_dotenv()
-
 # DeepSeek APIクライアント設定
 client = OpenAI(
-    api_key=os.getenv("DEEPSEEK_API_KEY"),
+    api_key=config.DEEPSEEK_API_KEY,
     base_url="https://api.deepseek.com"
 )
 

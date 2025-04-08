@@ -2,7 +2,8 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import uvicorn 
-import service.src.mongo_utils as mongo_utils
+import mongo_utils
+import config
 
 app = FastAPI()
 
@@ -39,4 +40,4 @@ async def read_all_items():
     return {"items": items}
 
 if __name__ == "__main__":
-    uvicorn.run("app:app", host="127.0.0.1", port=3000, reload=True)
+    uvicorn.run("main:app", host="127.0.0.1", port=config.SERVICE_PORT, reload=True)
