@@ -1,0 +1,14 @@
+# git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Python
+__pycache__
+
+# others
+README.md
+.DS_Store
