@@ -1,10 +1,12 @@
 # start application
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+from pydantic.alias_generators import to_camel
 import uvicorn 
 import mongo_utils
 import config
+from typing import List
 
 app = FastAPI()
 
@@ -21,21 +23,29 @@ app.add_middleware(
 def test():
     return "Hello World!"
 
-# リクエストボディの型定義
-class Item(BaseModel):
+
+class CustomBaseModel(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel)
+    
+
+class Item(CustomBaseModel):
     word: str
     meaning: str
     example_sentence: str
     example_sentence_translation: str
 
 
-class InsertNewWordRequest(BaseModel):
+class InsertItemRequest(CustomBaseModel):
+    item: Item
+
+class InsertNewWordRequest(CustomBaseModel):
     word: str
 
 
 # POSTで受け取ったItemをMongoDBに保存
 @app.post("/dictionary")
-async def insert_item(item: Item):
+async def insert_item(request: InsertItemRequest):
+    item = request.item
     print("Received: ", item)
     inserted_id = mongo_utils.insert_item(item)  # Mongoに保存
     return {"message": f"Item '{item.name}' was saved.", "id": inserted_id}
@@ -50,7 +60,7 @@ async def insert_new_word(request: InsertNewWordRequest):
     inserted_id = mongo_utils.generate_and_insert_item(word)
     return {"message": f"Item '{word}' was saved."}
 
-@app.get("/items/all")
+@app.get("/items/all", response_model=List[Item])
 async def read_all_items():
     items = mongo_utils.get_all_items()
     return {"items": items}
