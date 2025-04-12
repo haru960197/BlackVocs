@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { registerNewWord } from './actions';
 
 export const WordForm = () => {
   const [input, setInput] = useState<string>('');
@@ -9,7 +10,7 @@ export const WordForm = () => {
   const handleClick = async () => {
     setIsLoading(true);
 
-    // TODO: 単語登録を行う
+    await registerNewWord(input);
 
     setIsLoading(false);
   };
@@ -27,7 +28,11 @@ export const WordForm = () => {
         />
       </fieldset>
       <div className="flex justify-end">
-        <button className="btn btn-primary btn-sm lg:btn-lg text-lg lg:text-xl">
+        <button
+          className="btn btn-primary btn-sm lg:btn-lg text-lg lg:text-xl"
+          disabled={!input}
+          onClick={handleClick}
+        >
           {isLoading ? <span className="loading loading-spinner" /> : '登録'}
         </button>
       </div>
