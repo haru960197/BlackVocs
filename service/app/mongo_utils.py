@@ -1,8 +1,8 @@
 import re
 from openai import OpenAI
 from pymongo import MongoClient
-from pydantic import BaseModel
 import config
+import schemas
 
 # DeepSeek APIクライアント設定
 client = OpenAI(
@@ -10,18 +10,11 @@ client = OpenAI(
     base_url="https://api.deepseek.com"
 )
 
-# 型定義
-class Item(BaseModel):
-    word: str
-    meaning: str
-    example_sentence: str
-    example_sentence_translation: str 
-
 def connect_to_mongodb(uri=config.DB_URI):
     client = MongoClient(uri)
-    return client[config.DB_NAME][config.COLLECTION_NAME]  # "items" コレクション使用
+    return client[config.DB_NAME][config.COLLECTION_NAME]  
 
-def insert_item(item: Item):
+def add_new_word(item: schemas.Item):
     collection = connect_to_mongodb()
     result = collection.insert_one(item.dict())
     print(f"[Insert] ID: {result.inserted_id}")
