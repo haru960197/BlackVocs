@@ -1,0 +1,52 @@
+version: "3.8"
+
+services:
+  fastapi:
+    image: "fastapi:${TAG-latest}"
+    links:
+      - mongo
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    volumes:
+      - ./app:/app:cached
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8000
+      LOG_LEVEL: info
+      LOGCONFIG: ./logging.conf
+      WORKERS: 1
+      APP_MODULE: main:app
+      DB_USERNAME: admin
+      DB_PASSWORD: password
+      DB_HOST: mongo
+      DB_PORT: 27017
+    tty: true
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:5.0
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_DATABASE: app
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - ./mongo_dev:/data/db
+    tty: true
+    restart: unless-stopped
+
+  mongoexpress:
+    image: mongo-express:0.54
+    links:
+      - mongo
+    ports:
+      - 8081:8081
+    environment:
+      VCAP_APP_HOST: 0.0.0.0
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: password
+    restart: unless-stopped
