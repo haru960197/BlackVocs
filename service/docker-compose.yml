@@ -9,18 +9,20 @@ services:
       context: ./app
       dockerfile: Dockerfile
     ports:
-      - 8000:8000
+      - 4000:${SERVICE_PORT}
     volumes:
       - ./app:/app:cached
+    env_file:
+      - ./.env
     environment:
       HOST: 0.0.0.0
-      PORT: 8000
+      PORT: ${SERVICE_PORT}
       LOG_LEVEL: info
       LOGCONFIG: ./logging.conf
       WORKERS: 1
       APP_MODULE: main:app
-      DB_USERNAME: admin
-      DB_PASSWORD: password
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
       DB_HOST: mongo
       DB_PORT: 27017
     tty: true
@@ -32,8 +34,8 @@ services:
       - 27017:27017
     environment:
       MONGO_INITDB_DATABASE: app
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     volumes:
       - ./mongo_dev:/data/db
     tty: true
@@ -47,6 +49,6 @@ services:
       - 8081:8081
     environment:
       VCAP_APP_HOST: 0.0.0.0
-      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
-      ME_CONFIG_MONGODB_ADMINPASSWORD: password
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${ME_CONFIG_MONGODB_ADMINUSERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${ME_CONFIG_MONGODB_ADMINPASSWORD}
     restart: unless-stopped
