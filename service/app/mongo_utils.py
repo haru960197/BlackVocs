@@ -62,11 +62,11 @@ Format:
     example_translation = translation_match.group(1).strip() if translation_match else "Not found"
 
     # Itemを作成してMongoDBに保存
-    item = Item(
+    item = schemas.Item(
         word=word,
         meaning=meaning,
         example_sentence=example_sentence,
         example_sentence_translation=example_translation
     )
 
-    return insert_item(item)
+    return add_new_word(item)
