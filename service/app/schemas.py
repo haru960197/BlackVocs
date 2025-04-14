@@ -20,7 +20,7 @@ class AddNewWordRequest(CustomBaseModel):
     item: Item
 
 class AddNewWordResponse(CustomBaseModel):
-    item: Item
+    message: str
 
 class GetAllItemsResponse(CustomBaseModel):
     items: List[Item]

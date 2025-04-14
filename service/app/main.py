@@ -2,14 +2,9 @@ from fastapi import FastAPI
 import uvicorn
 import mongo_utils
 import config
-from db.session import client, get_db
 import schemas
 
 app = FastAPI()
-
-@app.on_event("shutdown")
-def shutdown_event():
-    client.close()
 
 @app.get("/", status_code=200)
 def root():
