@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
-from typing import List
+from typing import List, Optional
 from pydantic_settings import BaseSettings
 from pydantic import Field
 
@@ -11,24 +11,18 @@ class CustomBaseModel(BaseModel):
         populate_by_name=True)
 
 class Item(CustomBaseModel):
+    id: str
     word: str
     meaning: str
     example_sentence: str
     example_sentence_translation: str 
 
 class AddNewWordRequest(CustomBaseModel):
-    item: Item
+    word: str
 
 class AddNewWordResponse(CustomBaseModel):
-    message: str
+    item: Item
 
 class GetAllItemsResponse(CustomBaseModel):
     items: List[Item]
 
-
-# DB
-class DBConfig(BaseSettings):
-    DB_USERNAME: str = Field(description="DBのユーザ名")
-    DB_PASSWORD: str = Field(description="DBのパスワード")
-    DB_HOST: str = Field(description="DBのホスト名")
-    DB_PORT: str = Field(description="DBのポート番号")
