@@ -1,0 +1,14 @@
+{
+    "cSpell.words": [
+        "ADMINPASSWORD",
+        "ADMINUSERNAME",
+        "fastapi",
+        "INITDB",
+        "LOGCONFIG",
+        "mongoexpress",
+        "VCAP"
+    ],
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true,
+    "audioCues.enabled": "off"
+}

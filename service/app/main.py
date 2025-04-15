@@ -2,7 +2,7 @@ from fastapi import FastAPI
 import uvicorn
 import mongo_utils
 import config
-import schemas
+import service.app.schemas.user_schema as user_schema
 import models
 
 app = FastAPI()
@@ -13,15 +13,15 @@ def root():
     return "成功！"
 
 
-@app.post("/add_new_word", response_model=schemas.AddNewWordResponse)
-async def add_new_word(request: schemas.AddNewWordRequest):
+@app.post("/add_new_word", response_model=user_schema.AddNewWordResponse)
+async def add_new_word(request: user_schema.AddNewWordRequest):
     """ 単語からitemを生成し，データベースに保存
     """
     word = request.word
     try:
         print("Received: ", word)
         new_item = mongo_utils.generate_and_insert_item(word)
-        return schemas.AddNewWordResponse(
+        return user_schema.AddNewWordResponse(
             item=model_to_schema(new_item)
         )
     except Exception as e:
@@ -29,23 +29,23 @@ async def add_new_word(request: schemas.AddNewWordRequest):
         return {"error": str(e)}
 
 
-@app.get("/items/all", response_model=schemas.GetAllItemsResponse)
+@app.get("/items/all", response_model=user_schema.GetAllItemsResponse)
 async def get_all_items():
     """ 全ての単語情報を取得
     """
     items = mongo_utils.get_all_items()
-    return schemas.GetAllItemsResponse(
+    return user_schema.GetAllItemsResponse(
         items=[model_to_schema(item) for item in items]
     )
 
 
-def model_to_schema(item: models.Item) -> schemas.Item:
+def model_to_schema(item: models.Item) -> user_schema.Item:
     """ model.Itemからレスポンス用のschemas.Itemへ変更する
     """
     if not item.id:
         raise ValueError("Error: Failed to covert to schema from model. [item.id] is undefined.")
     
-    return schemas.Item(
+    return user_schema.Item(
         id=item.id,
         word=item.word,
         meaning=item.meaning,
