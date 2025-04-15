@@ -1,28 +1,15 @@
-import { WordInfo } from '@/types/word';
+'use server';
+
+import * as client from '@/lib/api';
 import { WordListItem } from './WordListItem';
 
-export const WordList = () => {
-  const exampleWordInfos: WordInfo[] = [
-    {
-      id: '9jklfdsjkl',
-      word: 'cook',
-      meaning: '料理する',
-      exampleSentence: 'I usually cook because eating at a restaurant costs a lot.',
-      exampleSentenceTranslation: '外食はお金がたくさんかかるので，私は普段料理をします',
-    },
-    {
-      id: 'fdsjklwe',
-      word: 'traditional',
-      meaning: '伝統的な',
-      exampleSentence: 'I usually cook because eating at a restaurant costs a lot.',
-      exampleSentenceTranslation: '外食はお金がたくさんかかるので，私は普段料理をします',
-    },
-  ];
+export const WordList = async () => {
+  const wordInfoList = await client.getAllWordInfo();
 
   return (
-    <ul className="list bg-base-100 rounded-box shadow-md">
+    <ul className="list bg-base-100 rounded-box shadow-md w-full mx-4">
       <li className="p-4 pb-2 text-xs opacity-60 tracking-wide">英単語一覧</li>
-      {exampleWordInfos.map((wordInfo) => (
+      {wordInfoList.map((wordInfo) => (
         <WordListItem key={wordInfo.id} wordInfo={wordInfo} />
       ))}
     </ul>
