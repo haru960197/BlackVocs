@@ -2,7 +2,8 @@ import re
 from openai import OpenAI
 from pymongo import MongoClient
 import config
-import schemas
+import models
+from typing import List, Dict
 
 # DeepSeek APIクライアント設定
 client = OpenAI(
@@ -14,19 +15,25 @@ def connect_to_mongodb(uri=config.DB_URI):
     client = MongoClient(uri)
     return client[config.DB_NAME][config.COLLECTION_NAME]  
 
-def add_new_word(item: schemas.Item):
+
+def add_new_word(item: models.Item) -> str:
     collection = connect_to_mongodb()
-    result = collection.insert_one(item.dict())
+    result = collection.insert_one(item.to_dict())
     print(f"[Insert] ID: {result.inserted_id}")
+
     return str(result.inserted_id)
 
-def get_all_items():
-    collection = connect_to_mongodb()
-    items = list(collection.find({}, {"_id": 0}))
-    return items
 
-def generate_and_insert_item(word: str):
-    """ 🔽 単語を受け取って、意味・例文・和訳を取得 → MongoDBに保存する関数 
+def get_all_items() -> List[models.Item]:
+    """ DBに保存されている全ての単語情報を返す
+    """
+    collection = connect_to_mongodb()
+    items = list(collection.find({}))
+    return [doc_to_model(item) for item in items]
+
+
+def generate_and_insert_item(word: str) -> models.Item:
+    """ 単語を受け取って、意味・例文・和訳を取得 → MongoDBに保存する関数 
     """
     messages = [
         {
@@ -61,12 +68,33 @@ Format:
     example_sentence = example_match.group(1).strip() if example_match else "Not found"
     example_translation = translation_match.group(1).strip() if translation_match else "Not found"
 
-    # Itemを作成してMongoDBに保存
-    item = schemas.Item(
+    # Itemを作成
+    item = models.Item(
         word=word,
         meaning=meaning,
         example_sentence=example_sentence,
         example_sentence_translation=example_translation
     )
 
-    return add_new_word(item)
+    # MongoDBに保存
+    item_id = add_new_word(item)
+
+    return models.Item(
+        id=item_id,
+        word=word,
+        meaning=meaning,
+        example_sentence=example_sentence,
+        example_sentence_translation=example_translation
+    )
+
+
+def doc_to_model(doc: Dict) -> models.Item:
+    """ DBに保存されているdoc(document)をmodelに変換する
+    """
+    return models.Item(
+        id=str(doc["_id"]),  # ObjectId → str に変換
+        word=doc["word"],
+        meaning=doc["meaning"],
+        example_sentence=doc["exampleSentence"],
+        example_sentence_translation=doc["exampleSentenceTranslation"]
+    )
