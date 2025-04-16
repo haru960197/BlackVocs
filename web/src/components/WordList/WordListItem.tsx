@@ -8,7 +8,7 @@ type Props = {
 export const WordListItem = (props: Props) => {
   const { key, wordInfo } = props;
   return (
-    <li key={props.key} className="list-row flex flex-col gap-1">
+    <li key={key} className="list-row flex flex-col gap-1">
       <div className="flex gap-4">
         <div className="text-lg">{wordInfo.word}</div>
         <div className="text-lg">{wordInfo.meaning}</div>
