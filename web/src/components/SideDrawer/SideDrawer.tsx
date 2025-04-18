@@ -1,4 +1,18 @@
+'use client';
+
+import Link from 'next/link';
+import clsx from 'clsx';
+import { usePathname } from 'next/navigation';
+import { BiBookOpen, BiPencil } from 'react-icons/bi';
+
+const links = [
+  { name: 'Register Word', href: '/register-word', icon: BiPencil },
+  { name: 'Word List', href: '/word-list', icon: BiBookOpen },
+];
+
 export const SideDrawer = () => {
+  const pathName = usePathname();
+
   return (
     <div className="drawer">
       <input id="side-drawer" type="checkbox" className="drawer-toggle" />
@@ -22,15 +36,26 @@ export const SideDrawer = () => {
       </div>
       <div className="drawer-side z-50">
         <label htmlFor="side-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
-        <ul className="menu bg-base-200 text-base-content min-h-full w-80 p-4">
-          {/* Sidebar content here */}
-          <li>
-            <a>Sidebar Item 1</a>
-          </li>
-          <li>
-            <a>Sidebar Item 2</a>
-          </li>
-        </ul>
+        <div className="menu bg-base-200 text-base-content min-h-full w-80 p-4 flex flex-col gap-2">
+          {links.map((link) => {
+            const LinkIcon = link.icon;
+            return (
+              <Link
+                key={link.name}
+                href={link.href}
+                className={clsx(
+                  'flex h-[48px] items-center gap-2 rounded-md p-3 bg-info-content text-sm font-medium hover:bg-accent-content hover:text-accent md:flex-none md:justify-start md:p-2 md:px-3',
+                  {
+                    'bg-accent-content text-accent': pathName === link.href,
+                  }
+                )}
+              >
+                <LinkIcon className="w-6" />
+                {link.name}
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
