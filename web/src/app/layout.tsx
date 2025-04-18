@@ -26,6 +26,8 @@ export default function RootLayout({
   return (
     <html lang="en" className="w-full h-full">
       <body
+        // TODO: Providerで切り替え可能にする
+        data-theme="light"
         className={`${geistSans.variable} ${geistMono.variable} antialiased w-full h-full flex flex-col`}
       >
         <NavBar />
