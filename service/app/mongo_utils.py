@@ -1,4 +1,5 @@
 import re
+import motor.motor_asyncio
 from openai import OpenAI
 from pymongo import MongoClient
 import config
@@ -6,34 +7,49 @@ import models
 from typing import List, Dict
 
 # DeepSeek APIクライアント設定
-client = OpenAI(
+openai_client = OpenAI(
     api_key=config.DEEPSEEK_API_KEY,
     base_url="https://api.deepseek.com"
 )
 
-def connect_to_mongodb(uri=config.DB_URI):
-    client = MongoClient(uri)
-    return client[config.DB_NAME][config.COLLECTION_NAME]  
+# MongoDBクライアント作成
+mongo_client = motor.motor_asyncio.AsyncIOMotorClient(config.DB_URI)
 
+# データベース選択
+db = mongo_client[config.DB_NAME]
+
+# usersコレクション（ユーザー情報を格納するコレクション）を取得
+collection_user = db["users"]
+
+# --- 以下、単語帳用のMongoDB同期操作関数たち ---
+
+def connect_to_mongodb(uri=config.DB_URI):
+    """
+    同期版MongoDB接続関数
+    """
+    client = MongoClient(uri)
+    return client[config.DB_NAME][config.COLLECTION_NAME]
 
 def add_new_word(item: models.Item) -> str:
+    """
+    単語アイテムをMongoDBに追加する関数
+    """
     collection = connect_to_mongodb()
     result = collection.insert_one(item.to_dict())
     print(f"[Insert] ID: {result.inserted_id}")
-
     return str(result.inserted_id)
 
-
 def get_all_items() -> List[models.Item]:
-    """ DBに保存されている全ての単語情報を返す
+    """
+    MongoDBに保存されている全ての単語情報を取得する関数
     """
     collection = connect_to_mongodb()
     items = list(collection.find({}))
     return [doc_to_model(item) for item in items]
 
-
 def generate_and_insert_item(word: str) -> models.Item:
-    """ 単語を受け取って、意味・例文・和訳を取得 → MongoDBに保存する関数 
+    """
+    単語を受け取って意味・例文・和訳を生成し、MongoDBに保存する関数
     """
     messages = [
         {
@@ -52,7 +68,7 @@ Format:
         }
     ]
 
-    response = client.chat.completions.create(
+    response = openai_client.chat.completions.create(
         model="deepseek-chat",
         messages=messages,
     )
@@ -87,9 +103,9 @@ Format:
         example_sentence_translation=example_translation
     )
 
-
 def doc_to_model(doc: Dict) -> models.Item:
-    """ DBに保存されているdoc(document)をmodelに変換する
+    """
+    MongoDBドキュメントをmodels.Itemに変換する関数
     """
     return models.Item(
         id=str(doc["_id"]),  # ObjectId → str に変換

@@ -9,7 +9,9 @@ RUN apt-get update \
   && apt-get upgrade -y \
   && apt-get install -y wget curl build-essential \
   && pip install -U pip \
+  && pip install motor \
   && pip install poetry \
+  && pip install PyJWT \
   && poetry config virtualenvs.create false \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
