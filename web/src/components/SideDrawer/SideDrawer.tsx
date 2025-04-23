@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import clsx from 'clsx';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BiBookOpen, BiPencil } from 'react-icons/bi';
 
@@ -46,13 +46,11 @@ export const SideDrawer = () => {
                   key={link.name}
                   href={link.href}
                   className={clsx(
-                    'flex h-[48px] items-center gap-2 rounded-md p-3 bg-info-content text-sm font-medium hover:bg-accent-content hover:text-accent md:flex-none md:justify-start md:p-2 md:px-3',
-                    {
-                      'bg-accent-content text-accent': pathName === link.href,
-                    }
+                    'btn btn-soft justify-start items-center h-12',
+                    pathName === link.href && 'text-accent'
                   )}
                 >
-                  <LinkIcon className="w-6" />
+                  <LinkIcon className="w-4 h-4" />
                   {link.name}
                 </Link>
               );
