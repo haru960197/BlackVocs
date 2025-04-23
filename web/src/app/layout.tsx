@@ -25,10 +25,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="w-full h-full">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased w-full h-full flex flex-col`}>
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider>
-          <div className="w-full h-full flex flex-col">
+          <div className="w-full min-h-screen flex flex-col">
             <NavBar />
             {children}
           </div>
