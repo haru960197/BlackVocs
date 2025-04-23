@@ -16,7 +16,7 @@ export const WordForm = () => {
   };
 
   return (
-    <div className="flex flex-col border-1 border-amber-50 rounded-lg p-4 gap-2">
+    <div className="flex flex-col border-1 bg-base-200 border-base-300 rounded-lg p-4 gap-2">
       <fieldset className="fieldset">
         <legend className="fieldset-legend text-xl">英単語</legend>
         <input
