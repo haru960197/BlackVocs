@@ -4,4 +4,4 @@ export type WordInfo = {
   meaning: string;
   exampleSentence?: string;
   exampleSentenceTranslation?: string;
-}
+};
