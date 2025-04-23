@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { ThemeContext } from '@/context/ThemeContext';
 import { useContext } from 'react';
@@ -17,11 +17,8 @@ export const NavBar = () => {
         <a className="btn btn-ghost text-xl">BlackVocs</a>
       </div>
       <div className="flex-none flex gap-2">
-        <button className='btn btn-ghost rounded-full p-2' onClick={toggleTheme}>
-          {theme === "light"
-            ? <BiSun className='w-6 h-6'/>
-            : <BiMoon className='w-6 h-6'/>
-          }
+        <button className="btn btn-ghost rounded-full p-2" onClick={toggleTheme}>
+          {theme === 'light' ? <BiSun className="w-6 h-6" /> : <BiMoon className="w-6 h-6" />}
         </button>
         <button className="btn btn-square btn-ghost">
           <svg
