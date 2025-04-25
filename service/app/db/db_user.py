@@ -1,6 +1,6 @@
 from fastapi import HTTPException
-from mongo_utils import collection_user
-from auth_utils import AuthJwtCsrt
+from utils.mongo_utils import collection_user
+from utils.auth_utils import AuthJwtCsrt
 
 auth = AuthJwtCsrt()
 

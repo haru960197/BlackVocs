@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from schemas import word_schemas, user_schemas
-import mongo_utils
+import utils.mongo_utils
 import models
 
 router = APIRouter()

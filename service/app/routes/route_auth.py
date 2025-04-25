@@ -12,7 +12,7 @@ from db.db_user import (
     db_login,
     db_get_all_users,
 )
-from auth_utils import AuthJwtCsrt
+from utils.auth_utils import AuthJwtCsrt
 
 router = APIRouter()
 auth = AuthJwtCsrt()
