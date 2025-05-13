@@ -43,28 +43,48 @@ class AuthJwtCsrt():
         return self.pwd_ctx.verify(plain_pw, hashed_pw)
 
     # jwtを生成
-    def encode_jwt(self, email) -> str:  # ユーザーemail
+    def encode_jwt(self, subject: str, expires_delta: timedelta = timedelta(minutes=5)) -> str:
         """
-        jwtの生成(期限付き)
+        JWT（JSON Web Token）を生成
 
         Parameters:
-            email (str): トークンの対象となるユーザーのメールアドレス
+            subject (str): JWTの対象ユーザー情報。payload内の "sub" フィールドに設定される。
+            expires_delta (timedelta, optional): トークンの有効期間。デフォルトは5分, 公式では15分でやっている
 
         Returns:
-            str: エンコードされたJWTトークン
+            str: HS256アルゴリズムで署名されたJWTトークン。
 
         """
-
+        now = datetime.utcnow()
         payload = {
-            'exp': datetime.utcnow() + timedelta(days=0, minutes=5),  # jwtの有効期限ここでは５分
-            'iat': datetime.utcnow(),  # jwtが生成された日時
-            'sub': email  # ユーザーを一意に識別出来るものを指定
+            "sub": subject,
+            "iat": now,
+            "exp": now + expires_delta,
         }
-        return jwt.encode(
-            payload,
-            self.secret_key,
-            algorithm='HS256'  # アルゴリズム
-        )
+        return jwt.encode(payload, self.secret_key, algorithm="HS256")
+
+    # def encode_jwt(self, email) -> str:  # ユーザーemail
+    #     """
+    #     jwtの生成(期限付き)
+
+    #     Parameters:
+    #         email (str): トークンの対象となるユーザーのメールアドレス
+
+    #     Returns:
+    #         str: エンコードされたJWTトークン
+
+    #     """
+
+    #     payload = {
+    #         'exp': datetime.utcnow() + timedelta(days=0, minutes=5),  # jwtの有効期限ここでは５分
+    #         'iat': datetime.utcnow(),  # jwtが生成された日時
+    #         'sub': email  # ユーザーを一意に識別出来るものを指定
+    #     }
+    #     return jwt.encode(
+    #         payload,
+    #         self.secret_key,
+    #         algorithm='HS256'  # アルゴリズム
+    #     )
 
     def decode_jwt(self, token) -> str:
         """
