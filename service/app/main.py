@@ -2,9 +2,8 @@ from fastapi import FastAPI
 import uvicorn
 import config
 
-# ルーターをimport
-from routes.route_auth import router as auth_router
 from routes.route_word import router as word_router
+from routes.auth import router as auth_router
 
 app = FastAPI()
 
