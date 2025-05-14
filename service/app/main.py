@@ -10,12 +10,11 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # 変更可
+    allow_origins=["http://localhost:3000"],  # reactのurl? よくわからない    
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 # ルーター登録
 app.include_router(auth_router)
