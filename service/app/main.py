@@ -8,6 +8,7 @@ from routes.auth import router as auth_router
 
 app = FastAPI()
 
+# ここの必要性を後で確認したい
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],  # reactのurl? よくわからない    

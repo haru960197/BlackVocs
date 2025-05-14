@@ -108,3 +108,29 @@ async def login_for_access_token(
 @router.get("/users/me/", response_model=User)
 async def read_users_me(current_user: User = Depends(get_current_active_user)):
     return current_user
+
+# signup and login
+@router.post("/users/signup", status_code=status.HTTP_201_CREATED)
+async def create_user(db: db_dependency, create_user_request: CreateUserRequest):
+    hashed_password = bcrypt.hashpw(
+        create_user_request.password.encode("utf-8"), bcrypt.gensalt()
+    ).decode("utf-8")
+    create_user_model = Users(
+        email=create_user_request.email,
+        username=create_user_request.username,
+        first_name=create_user_request.first_name,
+        last_name=create_user_request.last_name,
+        is_admin=create_user_request.is_admin,
+        password=hashed_password,
+        is_active=True,
+    )
+    try:
+        db.add(create_user_model)
+        db.commit()
+        return {"msg": "user created"}
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User with this email or username already exists",
+        )
