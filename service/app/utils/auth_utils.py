@@ -45,7 +45,7 @@ class AuthJwtCsrt():
     # jwtを生成
     def encode_jwt(self, subject: str, expires_delta: timedelta = timedelta(minutes=5)) -> str:
         """
-        JWT（JSON Web Token）を生成
+        JWT(JSON Web Token)を生成
 
         Parameters:
             subject (str): JWTの対象ユーザー情報。payload内の "sub" フィールドに設定される。
@@ -63,38 +63,15 @@ class AuthJwtCsrt():
         }
         return jwt.encode(payload, self.secret_key, algorithm="HS256")
 
-    # def encode_jwt(self, email) -> str:  # ユーザーemail
-    #     """
-    #     jwtの生成(期限付き)
-
-    #     Parameters:
-    #         email (str): トークンの対象となるユーザーのメールアドレス
-
-    #     Returns:
-    #         str: エンコードされたJWTトークン
-
-    #     """
-
-    #     payload = {
-    #         'exp': datetime.utcnow() + timedelta(days=0, minutes=5),  # jwtの有効期限ここでは５分
-    #         'iat': datetime.utcnow(),  # jwtが生成された日時
-    #         'sub': email  # ユーザーを一意に識別出来るものを指定
-    #     }
-    #     return jwt.encode(
-    #         payload,
-    #         self.secret_key,
-    #         algorithm='HS256'  # アルゴリズム
-    #     )
-
     def decode_jwt(self, token) -> str:
         """
-        JWTトークンをデコードして、トークンの対象ユーザー（sub）を返す。
+        JWTトークンをデコードして、トークンの対象ユーザー(sub)を返す。
 
         Parameters:
             token (str): クライアントから渡されたJWTトークン
 
         Returns:
-            str: トークンに含まれるユーザー識別情報（例：email）
+            str: トークンに含まれるユーザー識別情報(例:email)
 
         Raises:
             HTTPException: トークンが期限切れまたは無効な場合は401エラーを返す

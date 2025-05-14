@@ -21,7 +21,6 @@ class UserPublic(BaseModel):
 class GetAllUsersResponse(BaseModel):
     users: List[UserPublic]
 
-# new User body
 # user --------------------------------------
 class User(BaseModel):
     username: str
