@@ -1,11 +1,21 @@
 from fastapi import FastAPI
 import uvicorn
 import config
+from fastapi.middleware.cors import CORSMiddleware
 
 from routes.route_word import router as word_router
 from routes.auth import router as auth_router
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # 変更可
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # ルーター登録
 app.include_router(auth_router)

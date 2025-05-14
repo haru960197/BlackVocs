@@ -1,7 +1,6 @@
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta 
 from fastapi import Request, Response, HTTPException, status, Depends, APIRouter
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from fastapi.encoders import jsonable_encoder
 import config
 from schemas.user_schemas import  (
     User,
@@ -43,7 +42,18 @@ def authenticate_user(fake_db, username: str, password: str):
         return False
     return user
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_token_from_cookie_or_header(
+    request: Request,
+    header_token: str = Depends(oauth2_scheme),
+):
+    token = request.cookies.get("access_token")
+    if token:
+        if token.startswith("Bearer "):
+            token = token[len("Bearer "):]
+        return token
+    return header_token
+
+async def get_current_user(token: str = Depends(get_token_from_cookie_or_header)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -51,7 +61,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     )
     try:
         username = auth.decode_jwt(token)
-        if (username is None):
+        print(username)
+        if username is None:
             raise credentials_exception
         token_data = TokenData(username=username)
     except HTTPException:
