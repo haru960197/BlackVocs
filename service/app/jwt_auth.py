@@ -6,7 +6,6 @@ import config
 
 JWT_KEY = config.JWT_KEY
 
-
 class AuthJwtCsrt():
     """
     認証関係をまとめたクラス

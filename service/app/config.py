@@ -2,7 +2,7 @@ from pydantic import Field
 from pydantic_settings import BaseSettings
 import os
 
-# DBの情報をクラスでまとめる
+# DB
 class DBConfig(BaseSettings):
     DB_USERNAME: str = Field(description="DBのユーザ名")
     DB_PASSWORD: str = Field(description="DBのパスワード")
@@ -11,10 +11,11 @@ class DBConfig(BaseSettings):
 
 db_config = DBConfig()
 
-DB_NAME = os.getenv('DB_NAME') 
-COLLECTION_NAME = os.getenv('COLLECTION_NAME') 
-DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
-SERVICE_PORT = int(os.getenv("SERVICE_PORT"))
-DB_URI = f"mongodb://{os.getenv('DB_USERNAME')}:{os.getenv('DB_PASSWORD')}@mongo:27017/"
+## user DB
+USER_COLLECTION_NAME = os.getenv("USER_COLLECTION_NAME")
 
+#jwt
 JWT_KEY = os.getenv('JWT_KEY')
+
+# API
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")

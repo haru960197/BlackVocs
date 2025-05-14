@@ -3,7 +3,6 @@ import uvicorn
 import config
 from fastapi.middleware.cors import CORSMiddleware
 from db.session import client
-from routes.route_word import router as word_router
 from routes.auth import router as auth_router
 
 app = FastAPI()
@@ -19,7 +18,6 @@ app.add_middleware(
 
 # ルーター登録
 app.include_router(auth_router)
-app.include_router(word_router)
 
 @app.on_event("shutdown")
 def shutdown_event():

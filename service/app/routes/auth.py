@@ -9,7 +9,7 @@ from schemas.user_schemas import  (
     Token,
     TokenData,
 ) 
-from utils.auth_utils import AuthJwtCsrt
+from jwt_auth import AuthJwtCsrt
 
 router = APIRouter()
 auth = AuthJwtCsrt()
