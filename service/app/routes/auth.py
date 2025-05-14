@@ -4,20 +4,11 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.encoders import jsonable_encoder
 import config
 from schemas.user_schemas import  (
-    UserBody, 
-    UserInfo,
-    GetAllUsersResponse,
     User,
     UserInDB,
     Token,
     TokenData,
 ) 
-from schemas.common_schemas import SuccessMsg
-from db.db_user import (
-    db_signup,
-    db_login,
-    db_get_all_users,
-)
 from utils.auth_utils import AuthJwtCsrt
 
 router = APIRouter()
