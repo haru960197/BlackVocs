@@ -1,16 +1,20 @@
-from typing import Optional
-from pydantic import BaseModel
-from typing import List, Union
+from pydantic import BaseModel, EmailStr
+from typing import Union
 
 # user --------------------------------------
 class User(BaseModel):
     username: str
-    email: Union[str, None] = None
-    full_name: Union[str, None] = None
-    disabled: Union[bool, None] = None
+    email: EmailStr
+    full_name: str | None = None
+    disabled: bool = False
 
 class UserInDB(User):
     hashed_password: str
+
+class UserCreate(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
 
 # token -------------------------------------
 class Token(BaseModel):

@@ -6,6 +6,7 @@ from db.session import get_db
 from schemas.user_schemas import  (
     User,
     UserInDB,
+    UserCreate,
     Token,
     TokenData,
 ) 
@@ -118,3 +119,6 @@ def post_item_in_box(item: str):
     # データベースにデータを追加
     result = db["box"].insert_one({"item": item})
     return {"id": str(result.inserted_id)}
+
+# signup
+@router.
