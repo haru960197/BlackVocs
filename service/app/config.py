@@ -1,6 +1,9 @@
 from pydantic import Field
 from pydantic_settings import BaseSettings
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # DB
 class DBConfig(BaseSettings):
