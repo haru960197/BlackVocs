@@ -4,6 +4,7 @@ import core.config as config
 from fastapi.middleware.cors import CORSMiddleware
 from db.session import client
 from routes.auth import router as auth_router
+from routes.vocab import router as vocab_router
 
 app = FastAPI()
 
@@ -16,6 +17,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(vocab_router)
 
 @app.on_event("shutdown")
 def shutdown_event():

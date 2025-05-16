@@ -16,6 +16,7 @@ db_config = DBConfig()
 
 ## user DB
 USER_COLLECTION_NAME = os.getenv("USER_COLLECTION_NAME")
+VOCAB_COLLECTION_NAME = os.getenv("VOCAB_COLLECTION_NAME")
 
 #jwt
 JWT_KEY = os.getenv("JWT_KEY")
