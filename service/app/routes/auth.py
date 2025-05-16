@@ -148,7 +148,6 @@ async def login_for_access_token(
 ):
     users_collection = db[USER_COLLECTION_NAME]
 
-    # ユーザー検索
     user_data = users_collection.find_one({"username": form_data.username})
     if not user_data:
         raise HTTPException(
