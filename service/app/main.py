@@ -1,13 +1,12 @@
 from fastapi import FastAPI
 import uvicorn
-import config
+import core.config as config
 from fastapi.middleware.cors import CORSMiddleware
 from db.session import client
 from routes.auth import router as auth_router
 
 app = FastAPI()
 
-# ここの必要性を後で確認したい
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],  # reactのurl? よくわからない    
@@ -16,7 +15,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ルーター登録
 app.include_router(auth_router)
 
 @app.on_event("shutdown")

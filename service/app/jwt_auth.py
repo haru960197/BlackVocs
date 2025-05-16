@@ -2,7 +2,7 @@ import jwt
 from fastapi import HTTPException
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
-import config
+import core.config as config
 
 JWT_KEY = config.JWT_KEY
 

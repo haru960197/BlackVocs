@@ -1,6 +1,5 @@
 from urllib import parse
-
-from config import db_config
+from core.config import db_config
 from pymongo import MongoClient
 from pymongo.database import Database
 
@@ -13,12 +12,6 @@ MONGO_DATABASE_URL: str = f"mongodb://{USER_NAME}:{PASSWORD}@{HOST}:{PORT}"
 
 client = MongoClient(MONGO_DATABASE_URL)
 
-
 def get_db() -> Database:
-    """DB取得
-
-    Returns:
-        Database: データべース
-    """
     db: Database = client.db
     return db

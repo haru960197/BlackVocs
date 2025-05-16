@@ -1,0 +1,2 @@
+# cookie settings
+ACCESS_TOKEN_EXPIRE_MINUTES = 30

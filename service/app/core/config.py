@@ -15,10 +15,10 @@ class DBConfig(BaseSettings):
 db_config = DBConfig()
 
 ## user DB
-USER_COLLECTION_NAME = os.getenv('USER_COLLECTION_NAME')
+USER_COLLECTION_NAME = os.getenv("USER_COLLECTION_NAME")
 
 #jwt
-JWT_KEY = os.getenv('JWT_KEY')
+JWT_KEY = os.getenv("JWT_KEY")
 
 # API
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")

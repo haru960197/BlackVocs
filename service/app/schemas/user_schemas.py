@@ -1,5 +1,4 @@
 from pydantic import BaseModel, EmailStr
-from typing import Union
 
 # user --------------------------------------
 class User(BaseModel):
@@ -25,6 +24,6 @@ class TokenData(BaseModel):
     username: str | None = None
 
 # login -------------------------------------
-class LoginRequest(BaseModel):
+class SigninRequest(BaseModel):
     username: str
     password: str

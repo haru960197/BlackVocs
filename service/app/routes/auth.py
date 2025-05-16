@@ -1,107 +1,37 @@
-from datetime import timedelta 
-from fastapi import Request, Response, HTTPException, status, Depends, APIRouter
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-import config
+from fastapi import Response, HTTPException, status, Depends, APIRouter
+import core.config as config
+import utils.user_utils as user_utils
+from jwt_auth import AuthJwtCsrt
 from db.session import get_db
 from schemas.user_schemas import  (
     User,
-    UserInDB,
     UserCreate,
     Token,
-    TokenData,
-    LoginRequest,
+    SigninRequest,
 ) 
-from jwt_auth import AuthJwtCsrt
 from pymongo.database import Database
 
 router = APIRouter()
 auth = AuthJwtCsrt()
-
 JWT_KEY = config.JWT_KEY
-USER_COLLECTION_NAME = config.USER_COLLECTION_NAME
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-
-def get_user(db: Database, username: str) -> UserInDB | None:
-    user_data = db[USER_COLLECTION_NAME].find_one({"username": username})
-    if user_data:
-        return UserInDB.model_validate(user_data)
-    return None
-
-# using verify_pw function defined in auth jwt class
-def authenticate_user(fake_db, username: str, password: str):
-    user = get_user(fake_db, username)
-    if not user:
-        return False
-    if not auth.verify_pw(password, user.hashed_password):
-        return False
-    return user
-
-async def get_token_from_cookie(request: Request) -> str:
-    token = request.cookies.get("access_token")
-    
-    if token is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Access token is missing in cookies",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    if token.startswith("Bearer "):
-        token = token[len("Bearer "):]
-
-    return token
-
-async def get_current_user(
-    token: str = Depends(get_token_from_cookie),
-    db: Database = Depends(get_db),
-):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        username = auth.decode_jwt(token)
-        if not username:
-            raise credentials_exception
-        token_data = TokenData(username=username)
-    except HTTPException:
-        raise credentials_exception
-
-    user = get_user(db, token_data.username)
-    if user is None:
-        raise credentials_exception
-    return user
-
-async def get_current_active_user(current_user: User = Depends(get_current_user)):
-    if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
-    return current_user
-
-def create_access_token(username: str) -> str:
-    expire = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    token = auth.encode_jwt(username, expires_delta=expire)
-    return token
 
 @router.post("/user/signin", response_model=Token)
-async def login(
-    login_data: LoginRequest,
+async def signin(
+    signin_data: SigninRequest,
     response: Response,
     db: Database = Depends(get_db),
 ):
-    users_collection = db[USER_COLLECTION_NAME]
+    users_collection = db[config.USER_COLLECTION_NAME]
 
-    user = users_collection.find_one({"username": login_data.username})
-    if not user or not auth.verify_pw(login_data.password, user["hashed_password"]):
+    user = users_collection.find_one({"username": signin_data.username})
+    if not user or not auth.verify_pw(signin_data.password, user["hashed_password"]):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
         )
 
-    token = create_access_token(user["username"])
+    token = user_utils.create_access_token(user["username"])
 
-    # needed?
     response.set_cookie(
         key="access_token",
         value=f"Bearer {token}",
@@ -116,7 +46,7 @@ async def login(
 # signup
 @router.post("/user/signup", response_model=User, status_code=201)
 async def signup(user_data: UserCreate, db: Database = Depends(get_db)):
-    users_collection = db[USER_COLLECTION_NAME]
+    users_collection = db[config.USER_COLLECTION_NAME]
 
     existing_user = users_collection.find_one({"username": user_data.username})
     if existing_user:
@@ -140,6 +70,6 @@ async def signup(user_data: UserCreate, db: Database = Depends(get_db)):
     return User(**user_dict)
 
 # get user from cookie
-@router.get("/user/get_user", response_model=User)
-async def read_users_me(current_user: User = Depends(get_current_active_user)):
+@router.get("/user/get_current_user", response_model=User)
+async def read_users_me(current_user: User = Depends(user_utils.get_current_active_user)):
     return current_user
