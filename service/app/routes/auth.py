@@ -9,6 +9,7 @@ from schemas.user_schemas import  (
     UserCreate,
     Token,
     TokenData,
+    LoginRequest,
 ) 
 from jwt_auth import AuthJwtCsrt
 from pymongo.database import Database
@@ -21,21 +22,11 @@ USER_COLLECTION_NAME = config.USER_COLLECTION_NAME
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-# test用データベース、後で消す
-fake_users_db = {
-    "johndoe": {
-        "username": "johndoe",
-        "full_name": "John Doe",
-        "email": "johndoe@example.com",
-        "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
-        "disabled": False,
-    }
-}
-    
-def get_user(db, username: str):
-    if username in db:
-        user_dict = db[username]
-        return UserInDB.model_validate(user_dict)
+def get_user(db: Database, username: str) -> UserInDB | None:
+    user_data = db[USER_COLLECTION_NAME].find_one({"username": username})
+    if user_data:
+        return UserInDB.model_validate(user_data)
+    return None
 
 # using verify_pw function defined in auth jwt class
 def authenticate_user(fake_db, username: str, password: str):
@@ -57,7 +48,10 @@ async def get_token_from_cookie_or_header(
         return token
     return header_token
 
-async def get_current_user(token: str = Depends(get_token_from_cookie_or_header)):
+async def get_current_user(
+    token: str = Depends(get_token_from_cookie_or_header),
+    db: Database = Depends(get_db),
+):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -65,14 +59,13 @@ async def get_current_user(token: str = Depends(get_token_from_cookie_or_header)
     )
     try:
         username = auth.decode_jwt(token)
-        print(username)
-        if username is None:
+        if not username:
             raise credentials_exception
         token_data = TokenData(username=username)
     except HTTPException:
         raise credentials_exception
-    
-    user = get_user(fake_users_db, username=token_data.username)
+
+    user = get_user(db, token_data.username)
     if user is None:
         raise credentials_exception
     return user
@@ -82,39 +75,42 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
-@router.post("/token", response_model = Token)
-async def login_for_access_token(
+def create_access_token(username: str) -> str:
+    expire = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    token = auth.encode_jwt(username, expires_delta=expire)
+    return token
+
+@router.post("/user/signin", response_model=Token)
+async def login(
+    login_data: LoginRequest,
     response: Response,
-    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Database = Depends(get_db),
 ):
-    user = authenticate_user(fake_users_db, form_data.username, form_data.password)
-    if not user:
+    users_collection = db[USER_COLLECTION_NAME]
+
+    user = users_collection.find_one({"username": login_data.username})
+    if not user or not auth.verify_pw(login_data.password, user["hashed_password"]):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
         )
-    
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = auth.encode_jwt(user.username, expires_delta=access_token_expires)
 
+    token = create_access_token(user["username"])
+
+    # needed?
     response.set_cookie(
         key="access_token",
-        value=f"Bearer {access_token}",
+        value=f"Bearer {token}",
         httponly=True,
-        samesite="none",  
-        secure=True        
+        samesite="none",
+        secure=True
     )
 
-    return Token(access_token=access_token, token_type="bearer")
+    return Token(access_token=token, token_type="bearer")
 
-# get user from cookie
-@router.get("/users/me/", response_model=User)
-async def read_users_me(current_user: User = Depends(get_current_active_user)):
-    return current_user
 
 # signup
-@router.post("/signup", response_model=User, status_code=201)
+@router.post("/user/signup", response_model=User, status_code=201)
 async def signup(user_data: UserCreate, db: Database = Depends(get_db)):
     users_collection = db[USER_COLLECTION_NAME]
 
@@ -132,11 +128,41 @@ async def signup(user_data: UserCreate, db: Database = Depends(get_db)):
         "disabled": False,
     }
 
-    # データベースに挿入
     result = users_collection.insert_one(user_dict)
 
-    # _id を除いたユーザー情報を返す
-    user_dict.pop("hashed_password")  # クライアントには返さない
+    user_dict.pop("hashed_password")  
     user_dict["id"] = str(result.inserted_id)
 
     return User(**user_dict)
+
+# get user from cookie
+@router.get("/user/get_user", response_model=User)
+async def read_users_me(current_user: User = Depends(get_current_active_user)):
+    return current_user
+
+# Token
+@router.post("/token", response_model=Token)
+async def login_for_access_token(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Database = Depends(get_db),
+):
+    users_collection = db[USER_COLLECTION_NAME]
+
+    # ユーザー検索
+    user_data = users_collection.find_one({"username": form_data.username})
+    if not user_data:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if not auth.verify_pw(form_data.password, user_data["hashed_password"]):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    access_token = create_access_token(user_data["username"])
+    return Token(access_token=access_token, token_type="bearer")

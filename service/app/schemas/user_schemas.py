@@ -23,3 +23,8 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
+
+# login -------------------------------------
+class LoginRequest(BaseModel):
+    username: str
+    password: str
