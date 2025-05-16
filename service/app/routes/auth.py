@@ -1,4 +1,5 @@
 from fastapi import Response, HTTPException, status, Depends, APIRouter
+from fastapi.responses import RedirectResponse
 import core.config as config
 import utils.user_utils as user_utils
 from jwt_auth import AuthJwtCsrt
@@ -69,7 +70,19 @@ async def signup(user_data: UserCreate, db: Database = Depends(get_db)):
 
     return User(**user_dict)
 
+@router.get("/user/signout")
+async def signout():
+    response = RedirectResponse(url="/")  # ログアウト後の遷移先を指定
+    response.delete_cookie(
+        key="access_token",
+        httponly=True,
+        samesite="none",
+        secure=True
+    )
+    return response
+
 # get user from cookie
 @router.get("/user/get_current_user", response_model=User)
 async def read_users_me(current_user: User = Depends(user_utils.get_current_active_user)):
     return current_user
+
