@@ -37,19 +37,23 @@ def authenticate_user(fake_db, username: str, password: str):
         return False
     return user
 
-async def get_token_from_cookie_or_header(
-    request: Request,
-    header_token: str = Depends(oauth2_scheme),
-):
+async def get_token_from_cookie(request: Request) -> str:
     token = request.cookies.get("access_token")
-    if token:
-        if token.startswith("Bearer "):
-            token = token[len("Bearer "):]
-        return token
-    return header_token
+    
+    if token is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Access token is missing in cookies",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if token.startswith("Bearer "):
+        token = token[len("Bearer "):]
+
+    return token
 
 async def get_current_user(
-    token: str = Depends(get_token_from_cookie_or_header),
+    token: str = Depends(get_token_from_cookie),
     db: Database = Depends(get_db),
 ):
     credentials_exception = HTTPException(
@@ -139,29 +143,3 @@ async def signup(user_data: UserCreate, db: Database = Depends(get_db)):
 @router.get("/user/get_user", response_model=User)
 async def read_users_me(current_user: User = Depends(get_current_active_user)):
     return current_user
-
-# Token
-@router.post("/token", response_model=Token)
-async def login_for_access_token(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    db: Database = Depends(get_db),
-):
-    users_collection = db[USER_COLLECTION_NAME]
-
-    user_data = users_collection.find_one({"username": form_data.username})
-    if not user_data:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    if not auth.verify_pw(form_data.password, user_data["hashed_password"]):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    access_token = create_access_token(user_data["username"])
-    return Token(access_token=access_token, token_type="bearer")
