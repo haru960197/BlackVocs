@@ -1,16 +1,20 @@
 'use client';
 
+import { useToast } from '@/context/ToastContext';
 import { useState } from 'react';
 import { registerNewWord } from './actions';
 
 export const WordForm = () => {
   const [input, setInput] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { showToast } = useToast();
 
   const handleClick = async () => {
     setIsLoading(true);
 
     await registerNewWord(input);
+
+    showToast('登録に成功しました', 'success');
 
     setIsLoading(false);
   };
