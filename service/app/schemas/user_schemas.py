@@ -1,36 +1,19 @@
-from typing import Optional
-from pydantic import BaseModel
-from typing import List, Union
+from pydantic import BaseModel, EmailStr
 
-
-# フロントから送られる型
-class UserBody(BaseModel):
-    email: str
-    password: str
-
-# 複数のエンドポイントで使う
-class UserInfo(BaseModel):
-    id: Optional[str] = None # Optionalで任意の値
-    email: str
-
-# emailのリストを集めるときに使う(for testing)
-class UserPublic(BaseModel):
-    id: str
-    email: str
-
-class GetAllUsersResponse(BaseModel):
-    users: List[UserPublic]
-
-# new User body
 # user --------------------------------------
 class User(BaseModel):
     username: str
-    email: Union[str, None] = None
-    full_name: Union[str, None] = None
-    disabled: Union[bool, None] = None
+    email: EmailStr
+    full_name: str | None = None
+    disabled: bool = False
 
 class UserInDB(User):
     hashed_password: str
+
+class UserCreate(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
 
 # token -------------------------------------
 class Token(BaseModel):
@@ -39,3 +22,8 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
+
+# login -------------------------------------
+class SigninRequest(BaseModel):
+    username: str
+    password: str

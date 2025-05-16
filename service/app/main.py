@@ -1,16 +1,25 @@
 from fastapi import FastAPI
 import uvicorn
-import config
-
-# ルーターをimport
-from routes.route_auth import router as auth_router
-from routes.route_word import router as word_router
+import core.config as config
+from fastapi.middleware.cors import CORSMiddleware
+from db.session import client
+from routes.auth import router as auth_router
 
 app = FastAPI()
 
-# ルーター登録
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # reactのurl? よくわからない    
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(auth_router)
-app.include_router(word_router)
+
+@app.on_event("shutdown")
+def shutdown_event():
+    client.close()
 
 @app.get("/", status_code=200)
 def root():
