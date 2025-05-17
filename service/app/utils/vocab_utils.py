@@ -5,7 +5,6 @@ from schemas.vocab_schemas import (
 )
 from models.vocab_models import Item as ItemModel
 import core.config as config
-import uuid
 
 VOCAB_COLLECTION_NAME = config.VOCAB_COLLECTION_NAME
 DEEPSEEK_API_KEY = config.DEEPSEEK_API_KEY
@@ -24,26 +23,12 @@ def generate_and_insert_item(word: str, db: Database) -> ItemModel:
     """
 
     vocab_collection = db[VOCAB_COLLECTION_NAME]
-
-    item = generate_item_with_API(word)
-
+    item = word2item_with_API(word)
     vocab_collection.insert_one(item.model_dump())
 
     return item
 
-def fetch_vocab_data_from_api(word: str) -> dict:
-    """
-    外部APIを使って語彙情報を取得する関数（仮実装）
-    実際のAPI呼び出しは後で実装
-    """
-    # 仮データ（実際にはAPIにリクエストを送る）
-    return {
-        "meaning": f"Definition of {word}",
-        "example_sentence": f"An example sentence with the word {word}.",
-        "example_sentence_translation": f"{word} を使った例文の翻訳です。",
-    }
-
-def generate_item_with_API(word: str) -> ItemModel:
+def word2item_with_API(word: str) -> ItemModel:
     """
     Generate a vocabulary item using DeepSeek API based on the given English word
     not put it into the dictionary
@@ -75,13 +60,12 @@ def generate_item_with_API(word: str) -> ItemModel:
         "Content-Type": "application/json"
     }
 
-    # ここのパラメータいまいちよくわからない、reviewする
     data = {
-        "model": "deepseek-chat",  # モデル名は必要に応じて変更 -> どれがいいの？
+        "model": "deepseek-chat",  
         "messages": [
             {"role": "user", "content": prompt}
         ],
-        "temperature": 0.7
+        "temperature": 0.7 # appropriate for our program, I think
     }
 
     response = requests.post(
@@ -95,9 +79,7 @@ def generate_item_with_API(word: str) -> ItemModel:
 
     content = response.json()["choices"][0]["message"]["content"]
 
-    # パース処理
     meaning = example_sentence = example_sentence_translation = ""
-
     for line in content.splitlines():
         if line.startswith("意味:"):
             meaning = line.replace("意味:", "").strip()
