@@ -47,6 +47,7 @@ async def signin(
 # signup
 @router.post("/user/signup", response_model=User, status_code=201)
 async def signup(user_data: UserCreate, db: Database = Depends(get_db)):
+    # TODO: add userID for each user
     users_collection = db[config.USER_COLLECTION_NAME]
 
     existing_user = users_collection.find_one({"username": user_data.username})
