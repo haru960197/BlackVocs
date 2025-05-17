@@ -18,13 +18,12 @@ async def add_new_word_test(  # TODO: 運用時に関数名を変更
     """単語から item を生成し、データベースに保存"""
     word = request.word
     try:
-        print("Received: ", word)
         new_item: Item = utils.generate_and_insert_item(word, db)
         return AddNewWordResponse(
             item=utils.model_to_schema(new_item)
         )
     except Exception as e:
         print("Error occurred:", e)
-        raise e  # または return JSONResponse(content={"error": str(e)}, status_code=500)
+        raise e  
 
 

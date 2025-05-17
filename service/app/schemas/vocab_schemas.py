@@ -1,7 +1,5 @@
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
-from typing import List
-from pydantic import Field
 
 class CustomBaseModel(BaseModel):
     model_config = ConfigDict(
