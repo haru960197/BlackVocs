@@ -19,7 +19,7 @@ def model_to_schema(item: ItemModel) -> ItemSchema:
 
 def generate_and_insert_item(word: str, db: Database) -> ItemModel:
     """
-    単語を受け取り、APIでれいぶんなどを含むItemを生成、データベースへ保存
+    単語を受け取り、APIで例文などを含むItemを生成、データベースへ保存
     """
 
     vocab_collection = db[VOCAB_COLLECTION_NAME]

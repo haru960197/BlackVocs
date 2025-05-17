@@ -11,7 +11,7 @@ from schemas.vocab_schemas import (
 router = APIRouter()
 
 @router.post("/vocab/add_new_word", response_model=AddNewWordResponse)
-async def add_new_word_test(  # TODO: 運用時に関数名を変更
+async def add_new_word(      
     request: AddNewWordRequest,
     db: Database = Depends(get_db)
 ):
