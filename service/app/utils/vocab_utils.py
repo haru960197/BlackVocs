@@ -11,10 +11,7 @@ VOCAB_COLLECTION_NAME = config.VOCAB_COLLECTION_NAME
 DEEPSEEK_API_KEY = config.DEEPSEEK_API_KEY
 
 def model_to_schema(item: ItemModel) -> ItemSchema:
-    if not item.id:
-        raise ValueError("item.id is missing")
     return ItemSchema(
-        id=item.id,
         word=item.word,
         meaning=item.meaning,
         example_sentence=item.example_sentence,
@@ -113,7 +110,6 @@ def generate_item_with_API(word: str) -> ItemModel:
         raise ValueError("Failed to parse DeepSeek response correctly")
 
     return ItemModel(
-        id=str(uuid.uuid4()),
         word=word,
         meaning=meaning,
         example_sentence=example_sentence,

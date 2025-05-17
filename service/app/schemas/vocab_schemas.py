@@ -7,7 +7,6 @@ class CustomBaseModel(BaseModel):
         populate_by_name=True)
 
 class Item(CustomBaseModel):
-    id: str
     word: str
     meaning: str
     example_sentence: str
