@@ -1,7 +1,7 @@
 from fastapi import Response, HTTPException, status, Depends, APIRouter
 from fastapi.responses import RedirectResponse
 import core.config as config
-import utils.user_utils as user_utils
+import utils.auth_utils as auth_utils
 from jwt_auth import AuthJwtCsrt
 from db.session import get_db
 from schemas.user_schemas import  (
@@ -31,7 +31,7 @@ async def signin(
             detail="Incorrect username or password",
         )
 
-    token = user_utils.create_access_token(user["username"])
+    token = auth_utils.create_access_token(user["username"])
 
     response.set_cookie(
         key="access_token",
@@ -84,6 +84,6 @@ async def signout():
 
 # get user from cookie
 @router.get("/user/get_current_user", response_model=User)
-async def read_users_me(current_user: User = Depends(user_utils.get_current_active_user)):
+async def read_users_me(current_user: User = Depends(auth_utils.get_current_active_user)):
     return current_user
 
