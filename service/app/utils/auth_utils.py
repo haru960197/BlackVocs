@@ -64,7 +64,27 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
-def create_access_token(username: str) -> str:
+def create_access_token(user_id: str) -> str:
+    """user_idを入力とし、jwtトークンを生成"""
     expire = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    token = auth.encode_jwt(username, expires_delta=expire)
+    token = auth.encode_jwt(user_id, expires_delta=expire)
     return token
+
+async def get_user_id_from_cookie(request: Request) -> str:
+    """
+    Cookie に含まれる JWT から user_id を取得して返す。
+
+    Raises:
+        HTTPException: Cookie が無い、または JWT が無効な場合
+    """
+    token = request.cookies.get("access_token")
+    if token is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Access token not found in cookie"
+        )
+
+    if token.startswith("Bearer "):
+        token = token.replace("Bearer ", "", 1)
+
+    return auth.decode_jwt(token)

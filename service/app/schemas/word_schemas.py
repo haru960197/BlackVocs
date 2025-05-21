@@ -18,3 +18,5 @@ class AddNewWordRequest(CustomBaseModel):
 class AddNewWordResponse(CustomBaseModel):
     item: Item
 
+class AddNewWordWithUseridResponse(CustomBaseModel):
+    item: Item
