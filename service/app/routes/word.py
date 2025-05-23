@@ -17,18 +17,14 @@ async def add_new_word(
     db: Database = Depends(get_db)
 ):
     """
+    input: an English word
+
     1. 単語入力からアイテムを生成
-    input: str
-
     2. ItemをDBに登録
-    input: Item
-    output: 登録されたItemのID
-
     3. cookieからuser_id取得
-
     4. user_wordテーブルにuser_id, word_idを保存
 
-    return user_word_id
+    return: itemのid, user_wordテーブルid
     """
     word = word_request.word
 
