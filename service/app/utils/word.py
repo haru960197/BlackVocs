@@ -17,17 +17,6 @@ def model_to_schema(item: ItemModel) -> ItemSchema:
         example_sentence_translation=item.example_sentence_translation
     )
 
-def generate_and_insert_item(word: str, db: Database) -> ItemModel:
-    """
-    単語を受け取り、APIで例文などを含むItemを生成、データベースへ保存
-    """
-
-    word_collection = db[WORD_COLLECTION_NAME]
-    item = word2item_with_API(word)
-    word_collection.insert_one(item.model_dump())
-
-    return item
-
 def word2item_with_API(word: str) -> ItemModel:
     """
     Generate a word item using DeepSeek API based on the given English word
@@ -97,3 +86,22 @@ def word2item_with_API(word: str) -> ItemModel:
         example_sentence=example_sentence,
         example_sentence_translation=example_sentence_translation
     )
+
+def insert_word_item(item: ItemModel, db: Database) -> str:
+    """
+    Insert the given word item into the MongoDB collection and return the inserted document ID as a string.
+
+    Args:
+        item (ItemModel): The word item to insert.
+        db (Database): The MongoDB database instance.
+
+    Returns:
+        str: The ID of the inserted document.
+    """
+    result = db[WORD_COLLECTION_NAME].insert_one({
+        "word": item.word,
+        "meaning": item.meaning,
+        "example_sentence": item.example_sentence,
+        "example_sentence_translation": item.example_sentence_translation
+    })
+    return str(result.inserted_id)
