@@ -1,9 +1,9 @@
 from pymongo.database import Database
 import requests
-from schemas.word_schemas import (
+from schemas.word import (
     Item as ItemSchema,
 )
-from models.word_models import Item as ItemModel
+from models.word import Item as ItemModel
 import core.config as config
 
 WORD_COLLECTION_NAME = config.WORD_COLLECTION_NAME

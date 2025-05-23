@@ -16,7 +16,4 @@ class AddNewWordRequest(CustomBaseModel):
     word: str
 
 class AddNewWordResponse(CustomBaseModel):
-    item: Item
-
-class AddNewWordWithUseridResponse(CustomBaseModel):
-    item: Item
+    user_word_id: str 

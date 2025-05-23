@@ -1,7 +1,7 @@
 from datetime import timedelta 
 from fastapi import Request, HTTPException, status, Depends
 from db.session import get_db
-from schemas.user_schemas import  (
+from schemas.user import  (
     User,
     UserInDB,
     TokenData,
