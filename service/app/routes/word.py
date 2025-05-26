@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request, HTTPException
 from pymongo.database import Database
 from db.session import get_db
 import utils.word as word_utils
-import utils.auth as auth_utils
+import utils.user as auth_utils
 import utils.user_word as user_word_utils
 import schemas.word as schemas
 import models.word as word_models

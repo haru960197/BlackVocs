@@ -1,7 +1,7 @@
 from fastapi import Response, HTTPException, status, Depends, APIRouter, Request
 from fastapi.responses import RedirectResponse
 import core.config as config
-import utils.auth as auth_utils
+import utils.user as auth_utils
 from jwt_auth import AuthJwtCsrt
 from db.session import get_db
 from schemas.user import  (
