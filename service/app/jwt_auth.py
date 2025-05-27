@@ -42,7 +42,7 @@ class AuthJwtCsrt():
         return self.pwd_ctx.verify(plain_pw, hashed_pw)
 
     # jwtを生成
-    def encode_jwt(self, subject: str, expires_delta: timedelta = timedelta(minutes=5)) -> str:
+    def encode_jwt(self, user_id: str, expires_delta: timedelta = timedelta(minutes=5)) -> str:
         """
         JWT(JSON Web Token)を生成
 
@@ -56,7 +56,7 @@ class AuthJwtCsrt():
         """
         now = datetime.utcnow()
         payload = {
-            "sub": subject,
+            "sub": user_id,
             "iat": now,
             "exp": now + expires_delta,
         }
@@ -70,7 +70,7 @@ class AuthJwtCsrt():
             token (str): クライアントから渡されたJWTトークン
 
         Returns:
-            str: トークンに含まれるユーザー識別情報(例:email)
+            str: トークンに含まれるユーザーid
 
         Raises:
             HTTPException: トークンが期限切れまたは無効な場合は401エラーを返す
