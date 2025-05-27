@@ -1,5 +1,6 @@
 from pymongo.database import Database
 import requests
+from bson import ObjectId
 from schemas.word import (
     Item as ItemSchema,
 )
@@ -105,3 +106,8 @@ def insert_word_item(item: ItemModel, db: Database) -> str:
         "example_sentence_translation": item.example_sentence_translation
     })
     return str(result.inserted_id)
+
+def get_items_by_ids(word_ids: list[str], db: Database) -> list[ItemModel]:
+    collection = db[WORD_COLLECTION_NAME]
+    cursor = collection.find({"_id": {"$in": [ObjectId(wid) for wid in word_ids]}})
+    return [ItemModel(**doc) for doc in cursor]

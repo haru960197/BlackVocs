@@ -22,3 +22,8 @@ def insert_user_word(user_id: str, word_id: str, db: Database) -> str:
         "word_id": ObjectId(word_id),
     })
     return str(result.inserted_id)
+
+def get_user_word_ids(user_id: str, db: Database) -> list[str]:
+    collection = db[USER_WORD_COLLECTION_NAME]
+    cursor = collection.find({"user_id": ObjectId(user_id)})
+    return [str(doc["word_id"]) for doc in cursor]
