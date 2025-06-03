@@ -4,12 +4,7 @@ import core.config as config
 import utils.user as auth_utils
 from jwt_auth import AuthJwtCsrt
 from db.session import get_db
-from schemas.user import  (
-    User,
-    UserCreate,
-    Token,
-    SigninRequest,
-) 
+import schemas.user as user_schemas
 import models.user as user_model
 from pymongo.database import Database
 
@@ -17,12 +12,22 @@ router = APIRouter()
 auth = AuthJwtCsrt()
 JWT_KEY = config.JWT_KEY
 
-@router.post("/user/signin", response_model=Token)
+@router.post(
+    "/user/signin", 
+    response_description="sign in user",
+    response_model=user_schemas.SigninResponse, 
+    status_code=status.HTTP_201_CREATED,
+)
 async def signin(
-    signin_data: SigninRequest,
+    signin_data: user_schemas.SigninRequest,
     response: Response,
     db: Database = Depends(get_db),
 ):
+    """
+    sign in user
+    temporal token is created, and set on cookie
+    """
+
     users_collection = db[config.USER_COLLECTION_NAME]
 
     user = users_collection.find_one({"username": signin_data.username})
@@ -42,12 +47,20 @@ async def signin(
         secure=True
     )
 
-    return Token(access_token=token, token_type="bearer")
-
+    return user_schemas.SigninResponse(access_token=token, token_type="bearer")
 
 # signup
-@router.post("/user/signup", response_model=User, status_code=201)
-async def signup(user_data: UserCreate, db: Database = Depends(get_db)):
+@router.post(
+    "/user/signup",
+    response_description="add new user", 
+    response_model=user_schemas.SignupResponse, 
+    status_code=status.HTTP_201_CREATED,
+    response_model_by_alias=False, 
+)
+async def signup(user_data: user_schemas.SignupRequest, db: Database = Depends(get_db)):
+    """
+    insert a new user record
+    """
     users_collection = db[config.USER_COLLECTION_NAME]
 
     if users_collection.find_one({"username": user_data.username}):
@@ -65,7 +78,7 @@ async def signup(user_data: UserCreate, db: Database = Depends(get_db)):
 
     result = users_collection.insert_one(user_in_db.dict())
 
-    return User(
+    return user_schemas.SignupResponse (
         id=str(result.inserted_id),
         username=user_in_db.username,
         email=user_in_db.email,
@@ -73,7 +86,12 @@ async def signup(user_data: UserCreate, db: Database = Depends(get_db)):
         disabled=user_in_db.disabled
     )
 
-@router.get("/user/signout")
+@router.get(
+    "/user/signout",
+    response_description="sign out of the user account", 
+    status_code=status.HTTP_200_OK,
+    response_model_by_alias=False,  
+)
 async def signout():
     response = RedirectResponse(url="/")  
     response.delete_cookie(
@@ -84,7 +102,3 @@ async def signout():
     )
     return response
 
-# get current user id from cookie
-@router.get("/user/me")
-async def get_me(current_user_id: str = Depends(auth_utils.get_user_id_from_cookie)):
-    return current_user_id

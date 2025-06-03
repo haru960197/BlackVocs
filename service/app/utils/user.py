@@ -1,11 +1,8 @@
 from datetime import timedelta 
 from fastapi import Request, HTTPException, status, Depends
 from db.session import get_db
-from schemas.user import  (
-    User,
-    UserInDB,
-    TokenData,
-) 
+from models.user import TokenData, User
+from models.user import UserInDB 
 from pymongo.database import Database
 import core.config as config
 import core.const as const

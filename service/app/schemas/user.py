@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 # user --------------------------------------
 class User(BaseModel):
@@ -7,23 +7,20 @@ class User(BaseModel):
     full_name: str | None = None
     disabled: bool = False
 
-class UserInDB(User):
-    hashed_password: str
-
-class UserCreate(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
-
-# token -------------------------------------
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-class TokenData(BaseModel):
-    username: str | None = None
-
-# login -------------------------------------
+# sign in -------------------------------------
 class SigninRequest(BaseModel):
     username: str
     password: str
+
+class SigninResponse(BaseModel):
+    access_token: str
+    token_type: str
+
+# sign up -------------------------------------
+class SignupRequest(User):
+    password: str
+
+class SignupResponse(User):
+    id: str = Field(..., alias="_id")
+    class Config:
+        populate_by_name = True

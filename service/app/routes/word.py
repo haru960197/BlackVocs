@@ -48,12 +48,13 @@ async def add_new_word(
     except Exception as e:
         print("Error occurred in user ID retrieval:", e)
         raise e   
-    
+
     # 4. user_wordテーブルに保存
     try: 
         user_word_id = user_word_utils.insert_user_word(user_id, word_id, db)
     except Exception as e: 
         print("Error occured in user_word_item insertion:", e)
+        raise HTTPException(status_code=500, detail="Failed to insert user-word item") 
 
     return {
         "item": word_utils.model_to_schema(new_item),
