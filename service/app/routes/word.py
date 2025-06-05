@@ -56,10 +56,10 @@ async def add_new_word(
         print("Error occured in user_word_item insertion:", e)
         raise HTTPException(status_code=500, detail="Failed to insert user-word item") 
 
-    return {
-        "item": word_utils.model_to_schema(new_item),
-        "user_word_id": user_word_id     
-    }
+    return schemas.AddNewWordResponse(
+        item=word_utils.model_to_schema(new_item),
+        user_word_id=user_word_id
+    )
 
 @router.get("/word/get_user_word_list", response_model=schemas.GetUserWordListResponse)
 async def get_user_word_list(
