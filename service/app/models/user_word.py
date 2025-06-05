@@ -8,8 +8,8 @@ class UserWordModel(BaseModel):
     Container for a user-word record
     """
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
-    user_id: PyObjectId
-    word_id: PyObjectId
+    user_id: str 
+    word_id: str 
 
     class Config:
         allow_population_by_field_name = True  

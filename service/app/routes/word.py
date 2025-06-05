@@ -90,7 +90,7 @@ async def get_user_word_list(
         print("Error retrieving items from word IDs:", e)
         raise HTTPException(status_code=500, detail="Failed to retrieve word details")
 
-    return { 
-        "wordlist": [word_utils.model_to_schema(item) for item in items],
-        "userid": user_id
-    }
+    return schemas.GetUserWordListResponse(
+        wordlist=[word_utils.model_to_schema(item) for item in items],
+        userid=user_id
+    )
