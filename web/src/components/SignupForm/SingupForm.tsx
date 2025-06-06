@@ -3,9 +3,8 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
-export const LoginForm = () => {
+export const SignupForm = () => {
   const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleClick = async () => {
@@ -27,31 +26,22 @@ export const LoginForm = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-
-        <label className="label text-lg">Password</label>
-        <input
-          type="password"
-          className="input text-xl"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
       </fieldset>
 
       <div className="flex justify-end">
         <button
           className="btn btn-primary btn-sm lg:btn-lg text-lg lg:text-xl"
-          disabled={!email || !password}
+          disabled={!email}
           onClick={handleClick}
         >
-          {isLoading ? <span className="loading loading-spinner" /> : 'ログイン'}
+          {isLoading ? <span className="loading loading-spinner" /> : '登録'}
         </button>
       </div>
 
       <p>
-        アカウントをお持ちでない方：
-        <Link href={'/signup'} className="link link-primary">
-          登録
+        アカウントをお持ちの方：
+        <Link href={'/login'} className="link link-primary">
+          ログイン
         </Link>
       </p>
     </div>
