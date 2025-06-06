@@ -9,6 +9,13 @@ export type AddNewWordResponse = {
     userWordId: string;
 };
 
+export type GeneralErrorResponse = {
+    /**
+     * エラーメッセージ（文字列）
+     */
+    detail: string;
+};
+
 export type GetUserWordListResponse = {
     wordlist: Array<Item>;
     userid: string;
@@ -66,9 +73,25 @@ export type SigninUserSigninPostData = {
 
 export type SigninUserSigninPostErrors = {
     /**
+     * リクエスト不正
+     */
+    400: GeneralErrorResponse;
+    /**
+     * 認証失敗
+     */
+    401: GeneralErrorResponse;
+    /**
+     * 権限なし
+     */
+    403: GeneralErrorResponse;
+    /**
      * Validation Error
      */
     422: HttpValidationError;
+    /**
+     * サーバー内部エラー
+     */
+    500: GeneralErrorResponse;
 };
 
 export type SigninUserSigninPostError = SigninUserSigninPostErrors[keyof SigninUserSigninPostErrors];
@@ -91,9 +114,25 @@ export type SignupUserSignupPostData = {
 
 export type SignupUserSignupPostErrors = {
     /**
+     * リクエスト不正
+     */
+    400: GeneralErrorResponse;
+    /**
+     * 認証失敗
+     */
+    401: GeneralErrorResponse;
+    /**
+     * 権限なし
+     */
+    403: GeneralErrorResponse;
+    /**
      * Validation Error
      */
     422: HttpValidationError;
+    /**
+     * サーバー内部エラー
+     */
+    500: GeneralErrorResponse;
 };
 
 export type SignupUserSignupPostError = SignupUserSignupPostErrors[keyof SignupUserSignupPostErrors];
@@ -114,6 +153,27 @@ export type SignoutUserSignoutGetData = {
     url: '/user/signout';
 };
 
+export type SignoutUserSignoutGetErrors = {
+    /**
+     * リクエスト不正
+     */
+    400: GeneralErrorResponse;
+    /**
+     * 認証失敗
+     */
+    401: GeneralErrorResponse;
+    /**
+     * 権限なし
+     */
+    403: GeneralErrorResponse;
+    /**
+     * サーバー内部エラー
+     */
+    500: GeneralErrorResponse;
+};
+
+export type SignoutUserSignoutGetError = SignoutUserSignoutGetErrors[keyof SignoutUserSignoutGetErrors];
+
 export type SignoutUserSignoutGetResponses = {
     /**
      * sign out of the user account
@@ -130,9 +190,25 @@ export type AddNewWordWordAddNewWordPostData = {
 
 export type AddNewWordWordAddNewWordPostErrors = {
     /**
+     * リクエスト不正
+     */
+    400: GeneralErrorResponse;
+    /**
+     * 認証失敗
+     */
+    401: GeneralErrorResponse;
+    /**
+     * 権限なし
+     */
+    403: GeneralErrorResponse;
+    /**
      * Validation Error
      */
     422: HttpValidationError;
+    /**
+     * サーバー内部エラー
+     */
+    500: GeneralErrorResponse;
 };
 
 export type AddNewWordWordAddNewWordPostError = AddNewWordWordAddNewWordPostErrors[keyof AddNewWordWordAddNewWordPostErrors];
@@ -152,6 +228,27 @@ export type GetUserWordListWordGetUserWordListGetData = {
     query?: never;
     url: '/word/get_user_word_list';
 };
+
+export type GetUserWordListWordGetUserWordListGetErrors = {
+    /**
+     * リクエスト不正
+     */
+    400: GeneralErrorResponse;
+    /**
+     * 認証失敗
+     */
+    401: GeneralErrorResponse;
+    /**
+     * 権限なし
+     */
+    403: GeneralErrorResponse;
+    /**
+     * サーバー内部エラー
+     */
+    500: GeneralErrorResponse;
+};
+
+export type GetUserWordListWordGetUserWordListGetError = GetUserWordListWordGetUserWordListGetErrors[keyof GetUserWordListWordGetUserWordListGetErrors];
 
 export type GetUserWordListWordGetUserWordListGetResponses = {
     /**

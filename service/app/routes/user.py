@@ -4,6 +4,7 @@ import core.config as config
 import utils.user as auth_utils
 from jwt_auth import AuthJwtCsrt
 from db.session import get_db
+import schemas.common_schemas as common_schemas
 import schemas.user as user_schemas
 import models.user as user_model
 from pymongo.database import Database
@@ -17,6 +18,7 @@ JWT_KEY = config.JWT_KEY
     response_description="sign in user",
     response_model=user_schemas.SigninResponse, 
     status_code=status.HTTP_201_CREATED,
+    responses=common_schemas.COMMON_ERROR_RESPONSES
 )
 async def signin(
     signin_data: user_schemas.SigninRequest,
@@ -56,6 +58,7 @@ async def signin(
     response_model=user_schemas.SignupResponse, 
     status_code=status.HTTP_201_CREATED,
     response_model_by_alias=False, 
+    responses=common_schemas.COMMON_ERROR_RESPONSES
 )
 async def signup(user_data: user_schemas.SignupRequest, db: Database = Depends(get_db)):
     """
@@ -91,6 +94,7 @@ async def signup(user_data: user_schemas.SignupRequest, db: Database = Depends(g
     response_description="sign out of the user account", 
     status_code=status.HTTP_200_OK,
     response_model_by_alias=False,  
+    responses=common_schemas.COMMON_ERROR_RESPONSES
 )
 async def signout():
     response = RedirectResponse(url="/")  
