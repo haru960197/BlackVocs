@@ -1,6 +1,6 @@
 "use server";
 
-import { SignupResponse, signupUserSignupPost, SignupUserSignupPostError } from "@/lib/api";
+import { HttpValidationError, SignupResponse, signupUserSignupPost, SignupUserSignupPostError } from "@/lib/api";
 
 /**
  * ユーザーを新規登録する

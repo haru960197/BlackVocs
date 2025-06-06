@@ -1,10 +1,10 @@
 'use client';
 
-import { useToast } from '@/context/ToastContext';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { signupUser } from './actions';
+import { signupUser } from './action';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/context/ToastContext';
 
 export const SignupForm = () => {
   const router = useRouter();
