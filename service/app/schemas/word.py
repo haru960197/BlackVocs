@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
+from typing import List
 
 class CustomBaseModel(BaseModel):
     model_config = ConfigDict(
@@ -18,3 +19,7 @@ class AddNewWordRequest(CustomBaseModel):
 class AddNewWordResponse(CustomBaseModel):
     item: Item
     user_word_id: str
+
+class GetUserWordListResponse(BaseModel):
+    wordlist: List[Item]
+    userid: str
