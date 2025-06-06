@@ -1,19 +1,22 @@
 'use client';
 
+import { useToast } from '@/context/ToastContext';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { signupUser } from './action';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { signupUser } from './actions';
 
 export const SignupForm = () => {
+  const router = useRouter();
+
+  const { showToast } = useToast();
+
   const [email, setEmail] = useState<string>('');
   const [userName, setUserName] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isDisabled, setIsDisabled] = useState<boolean>(!email || !userName || !password);
 
-  useEffect(() => {
-    setIsDisabled(!email || !userName || !password);
-  }, [email, userName, password]);
+  const isDisabled = !email || !userName || !password;
 
   const handleClick = async () => {
     if (isDisabled) {
@@ -22,7 +25,19 @@ export const SignupForm = () => {
 
     setIsLoading(true);
 
-    await signupUser(userName, email, password);
+    const response = await signupUser(userName, email, password);
+
+    if (response.success) {
+      // 登録に成功したので，ログインページにリダイレクトする
+      showToast('登録に成功しました', 'success');
+      router.push('/login');
+    } else {
+      if (typeof response.error?.detail === 'string') {
+        showToast(response.error?.detail, 'error');
+      } else {
+        showToast('予期せぬエラーが発生しました', 'error');
+      }
+    }
 
     setIsLoading(false);
   };
