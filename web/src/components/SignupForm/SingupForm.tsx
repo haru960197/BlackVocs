@@ -3,8 +3,14 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { signupUser } from './action';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/context/ToastContext';
 
 export const SignupForm = () => {
+  const router = useRouter();
+
+  const { showToast } = useToast();
+
   const [email, setEmail] = useState<string>('');
   const [userName, setUserName] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -22,7 +28,19 @@ export const SignupForm = () => {
 
     setIsLoading(true);
 
-    await signupUser(userName, email, password);
+    const response = await signupUser(userName, email, password);
+
+    if (response.success) {
+      // 登録に成功したので，ログインページにリダイレクトする
+      showToast('登録に成功しました', 'success');
+      router.push('/login');
+    } else {
+      if (typeof response.error?.detail === 'string') {
+        showToast(response.error?.detail, 'error');
+      } else {
+        showToast('予期せぬエラーが発生しました', 'error');
+      }
+    }
 
     setIsLoading(false);
   };
