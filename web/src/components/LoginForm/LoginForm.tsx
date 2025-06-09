@@ -1,17 +1,41 @@
 'use client';
 
+import { useToast } from '@/context/ToastContext';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { signinUser } from './actions';
 
 export const LoginForm = () => {
-  const [email, setEmail] = useState<string>('');
+  const router = useRouter();
+  const { showToast } = useToast();
+
+  const [userName, setUserName] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const isDisabled = !userName || !password;
+
   const handleClick = async () => {
+    if (isDisabled) {
+      return;
+    }
+
     setIsLoading(true);
 
-    // TODO: ログインAPIを叩く
+    const response = await signinUser(userName, password);
+
+    if (response.success) {
+      // 登録に成功したので，単語登録ページにリダイレクトする
+      showToast('登録に成功しました', 'success');
+      router.push('/register-word');
+    } else {
+      if (typeof response.error?.detail === 'string') {
+        showToast(response.error?.detail, 'error');
+      } else {
+        showToast('予期せぬエラーが発生しました', 'error');
+      }
+    }
 
     setIsLoading(false);
   };
@@ -19,13 +43,13 @@ export const LoginForm = () => {
   return (
     <div className="flex flex-col border-1 bg-base-200 border-base-300 rounded-lg p-4 gap-2">
       <fieldset className="fieldset">
-        <label className="label text-lg">Email</label>
+        <label className="label text-lg">User name</label>
         <input
-          type="email"
+          type="text"
           className="input text-xl"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          placeholder="User name"
+          value={userName}
+          onChange={(e) => setUserName(e.target.value)}
         />
 
         <label className="label text-lg">Password</label>
@@ -41,7 +65,7 @@ export const LoginForm = () => {
       <div className="flex justify-end">
         <button
           className="btn btn-primary btn-sm lg:btn-lg text-lg lg:text-xl"
-          disabled={!email || !password}
+          disabled={isDisabled}
           onClick={handleClick}
         >
           {isLoading ? <span className="loading loading-spinner" /> : 'ログイン'}
