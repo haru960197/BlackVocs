@@ -1,0 +1,5 @@
+{
+  "venvPath": "../..",       // app から見た親ディレクトリ
+  "venv": "venv",         // venv のフォルダ名
+  "pythonVersion": "3.10"
+}

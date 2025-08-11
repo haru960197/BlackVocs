@@ -79,7 +79,7 @@ async def signup(user_data: user_schemas.SignupRequest, db: Database = Depends(g
     result = users_collection.insert_one(user_in_db.dict())
 
     return user_schemas.SignupResponse (
-        id=str(result.inserted_id),
+        _id=str(result.inserted_id),
         username=user_in_db.username,
         email=user_in_db.email,
         full_name=user_in_db.full_name,
