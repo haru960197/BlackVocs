@@ -10,7 +10,7 @@ router = APIRouter(prefix="/user", tags=["auth"])
 
 @router.post(
     "/signin",
-    operation_id="auth_signin",
+    operation_id="signin",
     response_description="sign in user",
     response_model=auth_schemas.SigninResponse,
     status_code=status.HTTP_201_CREATED,
