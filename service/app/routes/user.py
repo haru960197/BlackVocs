@@ -1,11 +1,11 @@
 from fastapi import Response, HTTPException, status, Depends, APIRouter, Request
 from fastapi.responses import RedirectResponse
 import core.config as config
-import utils.user as auth_utils
+import utils.auth_utils as auth_utils
 from jwt_auth import AuthJwtCsrt
 import schemas.common_schemas as common_schemas
 from repositories.session import get_db
-import schemas.auth as user_schemas
+import schemas.auth_schemas as user_schemas
 import models.user as user_model
 from pymongo.database import Database
 

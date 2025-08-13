@@ -1,11 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pymongo.database import Database
-import utils.word as word_utils
-import utils.user as auth_utils
-import utils.user_word as user_word_utils
+import utils.auth_utils as auth_utils
 import schemas.common_schemas as common_schemas
-import schemas.word as schemas
-import models.word as word_models
 from repositories.session import get_db
 from services.word_service import WordService
 from schemas.word import (
