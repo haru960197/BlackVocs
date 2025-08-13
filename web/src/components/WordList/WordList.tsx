@@ -2,9 +2,18 @@
 
 import { getUserWordList } from '@/lib/api';
 import { WordListItem } from './WordListItem';
+import { cookies } from 'next/headers';
 
 export const WordList = async () => {
-  const res = await getUserWordList();
+  const cookieStore = await cookies();
+  const tokenCookie = cookieStore.get('access_token');
+
+  const res = await getUserWordList({
+    headers: {
+      Cookie: `${tokenCookie?.name}=${tokenCookie?.value}`,
+    },
+  });
+
   const wordInfoList = res.data ? res.data.wordlist : [];
 
   return (
@@ -16,3 +25,4 @@ export const WordList = async () => {
     </ul>
   );
 };
+
