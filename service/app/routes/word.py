@@ -11,7 +11,7 @@ import models.word as word_models
 router = APIRouter()
 
 
-@router.post("/word/add_new_word", response_model=schemas.AddNewWordResponse, responses=common_schemas.COMMON_ERROR_RESPONSES)
+@router.post("/word/add_new_word", operation_id="add_new_word", response_model=schemas.AddNewWordResponse, responses=common_schemas.COMMON_ERROR_RESPONSES)
 async def add_new_word(      
     request: Request,
     word_request: schemas.AddNewWordRequest,
@@ -62,7 +62,7 @@ async def add_new_word(
         user_word_id=user_word_id
     )
 
-@router.get("/word/get_user_word_list", response_model=schemas.GetUserWordListResponse, responses=common_schemas.COMMON_ERROR_RESPONSES)
+@router.get("/word/get_user_word_list", operation_id="get_user_word_list", response_model=schemas.GetUserWordListResponse, responses=common_schemas.COMMON_ERROR_RESPONSES)
 async def get_user_word_list(
     request: Request,
     db: Database = Depends(get_db)

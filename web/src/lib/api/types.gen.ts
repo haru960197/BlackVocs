@@ -64,14 +64,14 @@ export type ValidationError = {
     type: string;
 };
 
-export type SigninUserSigninPostData = {
+export type SigninUserData = {
     body: SigninRequest;
     path?: never;
     query?: never;
     url: '/user/signin';
 };
 
-export type SigninUserSigninPostErrors = {
+export type SigninUserErrors = {
     /**
      * リクエスト不正
      */
@@ -94,25 +94,25 @@ export type SigninUserSigninPostErrors = {
     500: GeneralErrorResponse;
 };
 
-export type SigninUserSigninPostError = SigninUserSigninPostErrors[keyof SigninUserSigninPostErrors];
+export type SigninUserError = SigninUserErrors[keyof SigninUserErrors];
 
-export type SigninUserSigninPostResponses = {
+export type SigninUserResponses = {
     /**
      * sign in user
      */
     201: SigninResponse;
 };
 
-export type SigninUserSigninPostResponse = SigninUserSigninPostResponses[keyof SigninUserSigninPostResponses];
+export type SigninUserResponse = SigninUserResponses[keyof SigninUserResponses];
 
-export type SignupUserSignupPostData = {
+export type SignupUserData = {
     body: SignupRequest;
     path?: never;
     query?: never;
     url: '/user/signup';
 };
 
-export type SignupUserSignupPostErrors = {
+export type SignupUserErrors = {
     /**
      * リクエスト不正
      */
@@ -135,25 +135,25 @@ export type SignupUserSignupPostErrors = {
     500: GeneralErrorResponse;
 };
 
-export type SignupUserSignupPostError = SignupUserSignupPostErrors[keyof SignupUserSignupPostErrors];
+export type SignupUserError = SignupUserErrors[keyof SignupUserErrors];
 
-export type SignupUserSignupPostResponses = {
+export type SignupUserResponses = {
     /**
      * add new user
      */
     201: SignupResponse;
 };
 
-export type SignupUserSignupPostResponse = SignupUserSignupPostResponses[keyof SignupUserSignupPostResponses];
+export type SignupUserResponse = SignupUserResponses[keyof SignupUserResponses];
 
-export type SignoutUserSignoutGetData = {
+export type SignoutUserData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/user/signout';
 };
 
-export type SignoutUserSignoutGetErrors = {
+export type SignoutUserErrors = {
     /**
      * リクエスト不正
      */
@@ -172,23 +172,23 @@ export type SignoutUserSignoutGetErrors = {
     500: GeneralErrorResponse;
 };
 
-export type SignoutUserSignoutGetError = SignoutUserSignoutGetErrors[keyof SignoutUserSignoutGetErrors];
+export type SignoutUserError = SignoutUserErrors[keyof SignoutUserErrors];
 
-export type SignoutUserSignoutGetResponses = {
+export type SignoutUserResponses = {
     /**
      * sign out of the user account
      */
     200: unknown;
 };
 
-export type AddNewWordWordAddNewWordPostData = {
+export type AddNewWordData = {
     body: AddNewWordRequest;
     path?: never;
     query?: never;
     url: '/word/add_new_word';
 };
 
-export type AddNewWordWordAddNewWordPostErrors = {
+export type AddNewWordErrors = {
     /**
      * リクエスト不正
      */
@@ -211,25 +211,25 @@ export type AddNewWordWordAddNewWordPostErrors = {
     500: GeneralErrorResponse;
 };
 
-export type AddNewWordWordAddNewWordPostError = AddNewWordWordAddNewWordPostErrors[keyof AddNewWordWordAddNewWordPostErrors];
+export type AddNewWordError = AddNewWordErrors[keyof AddNewWordErrors];
 
-export type AddNewWordWordAddNewWordPostResponses = {
+export type AddNewWordResponses = {
     /**
      * Successful Response
      */
     200: AddNewWordResponse;
 };
 
-export type AddNewWordWordAddNewWordPostResponse = AddNewWordWordAddNewWordPostResponses[keyof AddNewWordWordAddNewWordPostResponses];
+export type AddNewWordResponse2 = AddNewWordResponses[keyof AddNewWordResponses];
 
-export type GetUserWordListWordGetUserWordListGetData = {
+export type GetUserWordListData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/word/get_user_word_list';
 };
 
-export type GetUserWordListWordGetUserWordListGetErrors = {
+export type GetUserWordListErrors = {
     /**
      * リクエスト不正
      */
@@ -248,16 +248,16 @@ export type GetUserWordListWordGetUserWordListGetErrors = {
     500: GeneralErrorResponse;
 };
 
-export type GetUserWordListWordGetUserWordListGetError = GetUserWordListWordGetUserWordListGetErrors[keyof GetUserWordListWordGetUserWordListGetErrors];
+export type GetUserWordListError = GetUserWordListErrors[keyof GetUserWordListErrors];
 
-export type GetUserWordListWordGetUserWordListGetResponses = {
+export type GetUserWordListResponses = {
     /**
      * Successful Response
      */
     200: GetUserWordListResponse;
 };
 
-export type GetUserWordListWordGetUserWordListGetResponse = GetUserWordListWordGetUserWordListGetResponses[keyof GetUserWordListWordGetUserWordListGetResponses];
+export type GetUserWordListResponse2 = GetUserWordListResponses[keyof GetUserWordListResponses];
 
 export type RootGetData = {
     body?: never;

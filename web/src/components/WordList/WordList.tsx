@@ -1,10 +1,11 @@
 'use server';
 
-import * as client from '@/lib/api';
+import { getUserWordList } from '@/lib/api';
 import { WordListItem } from './WordListItem';
 
 export const WordList = async () => {
-  const wordInfoList = await client.getAllWordInfo();
+  const res = await getUserWordList();
+  const wordInfoList = res.data ? res.data.wordlist : [];
 
   return (
     <ul className="list bg-base-100 rounded-box shadow-md w-full mx-4">

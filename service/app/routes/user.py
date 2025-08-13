@@ -15,6 +15,7 @@ JWT_KEY = config.JWT_KEY
 
 @router.post(
     "/user/signin", 
+    operation_id="signin_user",
     response_description="sign in user",
     response_model=user_schemas.SigninResponse, 
     status_code=status.HTTP_201_CREATED,
@@ -54,6 +55,7 @@ async def signin(
 # signup
 @router.post(
     "/user/signup",
+    operation_id="signup_user",
     response_description="add new user", 
     response_model=user_schemas.SignupResponse, 
     status_code=status.HTTP_201_CREATED,
@@ -91,6 +93,7 @@ async def signup(user_data: user_schemas.SignupRequest, db: Database = Depends(g
 
 @router.get(
     "/user/signout",
+    operation_id="signout_user",
     response_description="sign out of the user account", 
     status_code=status.HTTP_200_OK,
     response_model_by_alias=False,  

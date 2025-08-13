@@ -4,7 +4,7 @@ import { useToast } from '@/context/ToastContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { signinUserSigninPost } from '@/lib/api';
+import { signinUser } from '@/lib/api';
 
 export const LoginForm = () => {
   const router = useRouter();
@@ -23,7 +23,7 @@ export const LoginForm = () => {
 
     setIsLoading(true);
 
-    const res = await signinUserSigninPost({
+    const res = await signinUser({
       body: {
         username: userName,
         password: password,

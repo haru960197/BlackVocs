@@ -1,16 +1,16 @@
 "use server";
 
-import { HttpValidationError, SignupResponse, signupUserSignupPost, SignupUserSignupPostError } from "@/lib/api";
+import { SignupResponse, signupUser, SignupUserError } from "@/lib/api";
 
 /**
  * ユーザーを新規登録する
  */
-export const signupUser = async (userName: string, email: string, password: string): Promise<{
+export const handleSignupUser = async (userName: string, email: string, password: string): Promise<{
     success: boolean;
-    error?: SignupUserSignupPostError;
+    error?: SignupUserError;
     data?: SignupResponse;
 }> => {
-  const res = await signupUserSignupPost({
+  const res = await signupUser({
     body: {
       username: userName,
       email: email,
