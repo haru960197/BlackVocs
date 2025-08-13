@@ -24,7 +24,7 @@ async def signin(
     """
     svc = AuthService(db)
     try:
-        user = svc.signin(payload.username, payload.password)
+        user = svc.signin(payload.username_or_email, payload.password)
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

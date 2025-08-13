@@ -17,15 +17,17 @@ class UserRepository:
         res = self.col.insert_one(doc)
         return str(res.inserted_id)
 
-    def find_by_id(self, _id: str | ObjectId) -> Optional[Dict[str, Any]]:
+    def find_by_id(self, _id: str | ObjectId) -> dict[str, Any] | None:
         """Find user by _id."""
         oid = ObjectId(_id) if isinstance(_id, str) else _id
         return self.col.find_one({"_id": oid})
 
-    def find_by_username(self, username: str) -> Optional[Dict[str, Any]]:
-        """Find user by username."""
-        return self.col.find_one({"username": username})
+    def find_by_username_or_email(self, identifier: str) -> dict[str, Any] | None:
+        """Find user by username or email."""
+        return self.col.find_one(
+            {"$or": [{"username": identifier}, {"email": identifier}]}
+        )
 
-    def exists_username(self, username: str) -> bool:
-        """Check if username exists."""
-        return self.find_by_username(username) is not None
+    def exists_username_or_email(self, identifier: str) -> bool: 
+        """Check if username or email exists."""
+        return self.find_by_username_or_email(identifier) is not None
