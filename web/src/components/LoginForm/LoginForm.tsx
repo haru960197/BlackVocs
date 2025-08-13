@@ -4,7 +4,7 @@ import { useToast } from '@/context/ToastContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { signinUser } from '@/lib/api';
+import { handleSignUp } from './actions';
 
 export const LoginForm = () => {
   const router = useRouter();
@@ -23,13 +23,7 @@ export const LoginForm = () => {
 
     setIsLoading(true);
 
-    const res = await signinUser({
-      body: {
-        username: userName,
-        password: password,
-      },
-      credentials: "include",
-    });
+    const res = await handleSignUp(userName, password);
 
     if (!res.error) {
       // ログインに成功したので，単語一覧ページにリダイレクトする
