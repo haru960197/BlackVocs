@@ -28,7 +28,8 @@ export const LoginForm = () => {
       body: {
         username: userName,
         password: password,
-      }
+      },
+      credentials: "include",
     });
 
     if (!res.error) {
