@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, Request, HTTPException
+from typing import List
+from fastapi import APIRouter, Depends, Query, Request, HTTPException 
 from pymongo.database import Database
 from db.session import get_db
 import utils.word as word_utils
@@ -93,4 +94,29 @@ async def get_user_word_list(
     return schemas.GetUserWordListResponse(
         wordlist=[word_utils.model_to_schema(item) for item in items],
         userid=user_id
+    )
+
+# for test 
+@router.get("/word/suggest", response_model=schemas.SuggestWordsResponse) 
+async def suggest_words( 
+    q: str = Query(..., min_length=1, max_length=64, description="prefix or exact text"), 
+    limit: int = Query(10, ge=10, le=50), 
+    case_insensitive: bool = Query(True, description="ignore whether upper or lowercase"),
+    db: Database = Depends(get_db), 
+): 
+    """
+    入力文字列 q に対して、word フィールドのスペルが一致（完全一致を優先・前方一致で補完）
+    するアイテムを最大 limit 件返す。
+    """
+
+    try:
+        items: List[word_models.Item] = word_utils.find_items_by_spelling(
+            q=q, db=db, limit=limit, case_insensitive=case_insensitive
+        )
+    except Exception as e:
+        print("Error occurred in suggest_words:", e)
+        raise HTTPException(status_code=500, detail="Failed to search suggestions")
+
+    return schemas.SuggestWordsResponse(
+        items=[word_utils.model_to_schema(it) for it in items]
     )

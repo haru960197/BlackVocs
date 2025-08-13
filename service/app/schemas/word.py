@@ -23,3 +23,6 @@ class AddNewWordResponse(CustomBaseModel):
 class GetUserWordListResponse(BaseModel):
     wordlist: List[Item]
     userid: str
+
+class SuggestWordsResponse(BaseModel):
+    items: List[Item]
