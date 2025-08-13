@@ -33,7 +33,7 @@ export type Item = {
 };
 
 export type SigninRequest = {
-    username: string;
+    username_or_email: string;
     password: string;
 };
 
@@ -58,123 +58,74 @@ export type SignupResponse = {
     _id: string;
 };
 
+export type SuggestWordsResponse = {
+    items: Array<Item>;
+};
+
 export type ValidationError = {
     loc: Array<string | number>;
     msg: string;
     type: string;
 };
 
-export type SigninUserData = {
+export type SigninData = {
     body: SigninRequest;
     path?: never;
     query?: never;
     url: '/user/signin';
 };
 
-export type SigninUserErrors = {
-    /**
-     * リクエスト不正
-     */
-    400: GeneralErrorResponse;
-    /**
-     * 認証失敗
-     */
-    401: GeneralErrorResponse;
-    /**
-     * 権限なし
-     */
-    403: GeneralErrorResponse;
+export type SigninErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
-    /**
-     * サーバー内部エラー
-     */
-    500: GeneralErrorResponse;
 };
 
-export type SigninUserError = SigninUserErrors[keyof SigninUserErrors];
+export type SigninError = SigninErrors[keyof SigninErrors];
 
-export type SigninUserResponses = {
+export type SigninResponses = {
     /**
      * sign in user
      */
     201: SigninResponse;
 };
 
-export type SigninUserResponse = SigninUserResponses[keyof SigninUserResponses];
+export type SigninResponse2 = SigninResponses[keyof SigninResponses];
 
-export type SignupUserData = {
+export type AuthSignupData = {
     body: SignupRequest;
     path?: never;
     query?: never;
     url: '/user/signup';
 };
 
-export type SignupUserErrors = {
-    /**
-     * リクエスト不正
-     */
-    400: GeneralErrorResponse;
-    /**
-     * 認証失敗
-     */
-    401: GeneralErrorResponse;
-    /**
-     * 権限なし
-     */
-    403: GeneralErrorResponse;
+export type AuthSignupErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
-    /**
-     * サーバー内部エラー
-     */
-    500: GeneralErrorResponse;
 };
 
-export type SignupUserError = SignupUserErrors[keyof SignupUserErrors];
+export type AuthSignupError = AuthSignupErrors[keyof AuthSignupErrors];
 
-export type SignupUserResponses = {
+export type AuthSignupResponses = {
     /**
      * add new user
      */
     201: SignupResponse;
 };
 
-export type SignupUserResponse = SignupUserResponses[keyof SignupUserResponses];
+export type AuthSignupResponse = AuthSignupResponses[keyof AuthSignupResponses];
 
-export type SignoutUserData = {
+export type AuthSignoutData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/user/signout';
 };
 
-export type SignoutUserErrors = {
-    /**
-     * リクエスト不正
-     */
-    400: GeneralErrorResponse;
-    /**
-     * 認証失敗
-     */
-    401: GeneralErrorResponse;
-    /**
-     * 権限なし
-     */
-    403: GeneralErrorResponse;
-    /**
-     * サーバー内部エラー
-     */
-    500: GeneralErrorResponse;
-};
-
-export type SignoutUserError = SignoutUserErrors[keyof SignoutUserErrors];
-
-export type SignoutUserResponses = {
+export type AuthSignoutResponses = {
     /**
      * sign out of the user account
      */
@@ -259,6 +210,37 @@ export type GetUserWordListResponses = {
 
 export type GetUserWordListResponse2 = GetUserWordListResponses[keyof GetUserWordListResponses];
 
+export type SuggestWordsData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * prefix / exact-first query
+         */
+        q: string;
+        limit?: number;
+    };
+    url: '/word/suggest_words';
+};
+
+export type SuggestWordsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SuggestWordsError = SuggestWordsErrors[keyof SuggestWordsErrors];
+
+export type SuggestWordsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuggestWordsResponse;
+};
+
+export type SuggestWordsResponse2 = SuggestWordsResponses[keyof SuggestWordsResponses];
+
 export type RootGetData = {
     body?: never;
     path?: never;
@@ -274,5 +256,5 @@ export type RootGetResponses = {
 };
 
 export type ClientOptions = {
-    baseUrl: 'http://127.0.0.1:4000' | (string & {});
+    baseUrl: 'http://localhost:4000' | (string & {});
 };
