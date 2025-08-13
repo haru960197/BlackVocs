@@ -44,8 +44,7 @@ async def add_new_word(
         user_word_id=link_id or "",  # empty if already linked (or you can return existing id)
     )
 
-
-@router.get("/get_user_word_list", operation_id="get_user_word_list", response_model=schemas.GetUserWordListResponse, responses=common_schemas.COMMON_ERROR_RESPONSES)
+@router.get("/get_user_word_list", operation_id="get_user_word_list", response_model=GetUserWordListResponse, responses=common_schemas.COMMON_ERROR_RESPONSES)
 async def get_user_word_list(
     request: Request,
     db: Database = Depends(get_db)
@@ -61,8 +60,7 @@ async def get_user_word_list(
     items = [ItemSchema(**d) for d in docs]
     return GetUserWordListResponse(wordlist=items, userid=user_id)
 
-
-@router.get("/suggest", response_model=SuggestWordsResponse)
+@router.get("/suggest_words", response_model=SuggestWordsResponse, operation_id="suggest_words")
 async def suggest_words(
     q: str = Query(..., description="prefix / exact-first query"),
     limit: int = Query(10, ge=1, le=50),
