@@ -4,7 +4,7 @@ import { useToast } from '@/context/ToastContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { signinUser } from './actions';
+import { signinUserSigninPost } from '@/lib/api';
 
 export const LoginForm = () => {
   const router = useRouter();
@@ -23,18 +23,20 @@ export const LoginForm = () => {
 
     setIsLoading(true);
 
-    const response = await signinUser(userName, password);
-
-    if (response.success) {
-      // 登録に成功したので，単語登録ページにリダイレクトする
-      showToast('登録に成功しました', 'success');
-      router.push('/register-word');
-    } else {
-      if (typeof response.error?.detail === 'string') {
-        showToast(response.error?.detail, 'error');
-      } else {
-        showToast('予期せぬエラーが発生しました', 'error');
+    const res = await signinUserSigninPost({
+      body: {
+        username: userName,
+        password: password,
       }
+    });
+
+    if (!res.error) {
+      // ログインに成功したので，単語一覧ページにリダイレクトする
+      showToast('ログインに成功しました', 'success');
+      router.push('/word-list');
+    } else {
+      // ログインに失敗
+      showToast('ログインに失敗しました', 'error');
     }
 
     setIsLoading(false);
