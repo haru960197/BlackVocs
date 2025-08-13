@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.responses import RedirectResponse
 from pymongo.database import Database
 from repositories.session import get_db
-import schemas.auth as auth_schemas
+import schemas.auth_schemas as auth_schemas
 from services.auth_service import AuthService
 from utils.auth_utils import create_access_token
 router = APIRouter(prefix="/user", tags=["auth"])
