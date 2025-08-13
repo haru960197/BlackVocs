@@ -5,7 +5,6 @@ from repositories.session import get_db
 import schemas.auth as auth_schemas
 from services.auth_service import AuthService
 from utils.auth_utils import create_access_token
-
 router = APIRouter(prefix="/user", tags=["auth"])
 
 @router.post(

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict, Any
 from pymongo.database import Database
 from pymongo.collection import Collection
 from bson import ObjectId
@@ -17,12 +17,12 @@ class UserRepository:
         res = self.col.insert_one(doc)
         return str(res.inserted_id)
 
-    def find_by_id(self, _id: str | ObjectId) -> Optional[dict]:
+    def find_by_id(self, _id: str | ObjectId) -> Optional[Dict[str, Any]]:
         """Find user by _id."""
         oid = ObjectId(_id) if isinstance(_id, str) else _id
         return self.col.find_one({"_id": oid})
 
-    def find_by_username(self, username: str) -> Optional[dict]:
+    def find_by_username(self, username: str) -> Optional[Dict[str, Any]]:
         """Find user by username."""
         return self.col.find_one({"username": username})
 

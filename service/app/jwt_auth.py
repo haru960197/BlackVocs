@@ -1,87 +1,76 @@
 import jwt
 from fastapi import HTTPException
 from passlib.context import CryptContext
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import core.config as config
 
-JWT_KEY = config.JWT_KEY
+JWT_KEY = config.JWT_KEY  # MUST be a non-empty string
 
-class AuthJwtCsrt():
+class AuthJwtCsrt:
     """
-    認証関係をまとめたクラス
-    JWTを使用
-    cite: https://qiita.com/kou1121/items/ed29920bc22ef98a1993
+    Auth helper that handles password hashing and JWT encode/decode.
     """
 
-    pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    secret_key = JWT_KEY
+    def __init__(self, secret_key: str | None = None, algorithm: str = "HS256"):
+        # Use instance attributes (easier to test/override)
+        self.pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        self.secret_key = (secret_key or JWT_KEY or "").strip()
+        self.algorithm = algorithm
 
-    def generate_hashed_pw(self, password) -> str:
-        """
-        与えられた平文のパスワードをbcryptでハッシュ化して返す
+        # Fail fast if key is not configured
+        if not self.secret_key:
+            raise RuntimeError("JWT secret key is missing. Set JWT_KEY in your config/env.")
 
-        Parameters:
-            password (str): ハッシュ化する平文のパスワード
-
-        Returns:
-            str: ハッシュ化されたパスワード文字列
-        """
+    # -------- Password helpers --------
+    def generate_hashed_pw(self, password: str) -> str:
+        """Return bcrypt-hashed password."""
         return self.pwd_ctx.hash(password)
 
-    def verify_pw(self, plain_pw, hashed_pw) -> bool:
-        """
-        平文パスワードとハッシュ化したパスワードを比較
-
-        Parameters: 
-            plain_pw: 平文
-            hashed_pw: 保存されたhash
-
-        Returns: 
-            bool: 一致 -> true, 不一致 -> false;
-        """
+    def verify_pw(self, plain_pw: str, hashed_pw: str) -> bool:
+        """Return True if plain password matches the hashed one."""
         return self.pwd_ctx.verify(plain_pw, hashed_pw)
 
-    # jwtを生成
-    def encode_jwt(self, user_id: str, expires_delta: timedelta = timedelta(minutes=5)) -> str:
+    # -------- JWT helpers --------
+    def encode_jwt(self, user_id: str, expires_delta: timedelta = timedelta(minutes=15)) -> str:
         """
-        JWT(JSON Web Token)を生成
-
-        Parameters:
-            subject (str): JWTの対象ユーザー情報。payload内の "sub" フィールドに設定される。
-            expires_delta (timedelta, optional): トークンの有効期間。デフォルトは5分, 公式では15分でやっている
-
-        Returns:
-            str: HS256アルゴリズムで署名されたJWTトークン。
-
+        Create a signed JWT with subject = user_id.
+        - Uses UTC timestamps for iat/exp to avoid timezone issues.
         """
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
+        exp = now + expires_delta
         payload = {
             "sub": user_id,
-            "iat": now,
-            "exp": now + expires_delta,
+            "iat": int(now.timestamp()),
+            "exp": int(exp.timestamp()),
         }
-        return jwt.encode(payload, self.secret_key, algorithm="HS256")
+        return jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
 
-    def decode_jwt(self, token) -> str:
+    def decode_jwt(self, token: str, leeway_seconds: int = 0) -> str:
         """
-        JWTトークンをデコードして、トークンの対象ユーザー(sub)を返す。
-
-        Parameters:
-            token (str): クライアントから渡されたJWTトークン
-
-        Returns:
-            str: トークンに含まれるユーザーid
-
-        Raises:
-            HTTPException: トークンが期限切れまたは無効な場合は401エラーを返す
+        Decode JWT and return subject (user_id).
+        - Accepts optional leeway to tolerate small clock skews.
+        - Raises HTTP 401 on any invalid token.
         """
-
         try:
-            payload = jwt.decode(token, self.secret_key, algorithms=['HS256'])
-            return payload['sub']
-        except jwt.ExpiredSignatureError:  # jwtトークンが執行している
-            raise HTTPException(
-                status_code=401, detail='The JWT has expired'
+            payload = jwt.decode(
+                token,
+                self.secret_key,
+                algorithms=[self.algorithm],
+                options={"require": ["sub", "exp", "iat"]},
+                leeway=leeway_seconds,
             )
-        except jwt.InvalidTokenError as e:  # jwtに準拠していない値、空のトークンが渡されたとき
-            raise HTTPException(status_code=401, detail='JWT is not valid')
+            sub = payload.get("sub")
+            if not sub:
+                raise HTTPException(status_code=401, detail="JWT 'sub' claim is missing")
+            return sub
+
+        except jwt.ExpiredSignatureError:
+            # Token is expired
+            raise HTTPException(status_code=401, detail="The JWT has expired")
+        except jwt.InvalidSignatureError:
+            raise HTTPException(status_code=401, detail="JWT signature is invalid")
+        except jwt.DecodeError:
+            raise HTTPException(status_code=401, detail="JWT is malformed or could not be decoded")
+        except jwt.InvalidTokenError:
+            # Generic invalid token
+            raise HTTPException(status_code=401, detail="JWT is not valid")
