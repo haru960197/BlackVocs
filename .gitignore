@@ -4,3 +4,5 @@
 venv
 # mac
 .DS_Store
+
+/web/src/lib/api/

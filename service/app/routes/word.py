@@ -1,123 +1,68 @@
-from typing import List
-from fastapi import APIRouter, Depends, Query, Request, HTTPException 
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pymongo.database import Database
-from db.session import get_db
-import utils.word as word_utils
-import utils.user as auth_utils
-import utils.user_word as user_word_utils
+import utils.auth_utils as auth_utils
 import schemas.common_schemas as common_schemas
-import schemas.word as schemas
-import models.word as word_models
+from repositories.session import get_db
+from services.word_service import WordService
+from schemas.word import (
+    AddNewWordRequest,
+    AddNewWordResponse,
+    GetUserWordListResponse,
+    SuggestWordsResponse,
+    Item as ItemSchema,
+)
+from utils.auth_utils import get_user_id_from_cookie  
 
-router = APIRouter()
+router = APIRouter(prefix="/word", tags=["word"])
 
-
-@router.post("/word/add_new_word", operation_id="add_new_word", response_model=schemas.AddNewWordResponse, responses=common_schemas.COMMON_ERROR_RESPONSES)
-async def add_new_word(      
+@router.post("/add_new_word", operation_id="add_new_word", response_model=AddNewWordResponse, responses=common_schemas.COMMON_ERROR_RESPONSES)
+async def add_new_word(
+    payload: AddNewWordRequest,
     request: Request,
-    word_request: schemas.AddNewWordRequest,
-    db: Database = Depends(get_db)
+    db: Database = Depends(get_db),
 ):
-    """
-    input: an English word
+    """Generate a word via DeepSeek (if needed), insert it, and link to current user."""
 
-    1. 単語入力からアイテムを生成
-    2. ItemをDBに登録
-    3. cookieからuser_id取得
-    4. user_wordテーブルにuser_id, word_idを保存
-
-    return: itemのid, user_wordテーブルid
-    """
-    word = word_request.word
-
-    # 1. アイテム生成
     try:
-        new_item: word_models.Item = word_utils.word2item_with_API(word)
-    except Exception as e:
-        print("Error occurred in item generation:", e)
-        raise e  
-    
-    # 2. ItemをDBに登録
-    try: 
-        word_id: str = word_utils.insert_word_item(new_item, db)
-    except Exception as e:
-        print("Error occurred in item insertion:", e)
-        raise e  
+        user_id = await get_user_id_from_cookie(request)
+    except Exception:
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
-    # 3. cookieからuser_id取得
-    try: 
-        user_id: str = await auth_utils.get_user_id_from_cookie(request)
+    svc = WordService(db)
+    try:
+        word_doc, link_id = svc.add_new_word(payload.word, user_id)
     except Exception as e:
-        print("Error occurred in user ID retrieval:", e)
-        raise e   
+        raise HTTPException(status_code=502, detail=f"Failed to add new word: {e}")
 
-    # 4. user_wordテーブルに保存
-    try: 
-        user_word_id = user_word_utils.insert_user_word(user_id, word_id, db)
-    except Exception as e: 
-        print("Error occured in user_word_item insertion:", e)
-        raise HTTPException(status_code=500, detail="Failed to insert user-word item") 
-
-    return schemas.AddNewWordResponse(
-        item=word_utils.model_to_schema(new_item),
-        user_word_id=user_word_id
+    return AddNewWordResponse(
+        item=ItemSchema(**word_doc),
+        user_word_id=link_id or "",  
     )
 
-@router.get("/word/get_user_word_list", operation_id="get_user_word_list", response_model=schemas.GetUserWordListResponse, responses=common_schemas.COMMON_ERROR_RESPONSES)
+@router.get("/get_user_word_list", operation_id="get_user_word_list", response_model=GetUserWordListResponse, responses=common_schemas.COMMON_ERROR_RESPONSES)
 async def get_user_word_list(
     request: Request,
     db: Database = Depends(get_db)
 ):
-    """
-    Get the list of words saved by the current user.
-    """
-    # 1. get user_id 
+    """Return the current user's saved word list."""
     try:
-        user_id: str = await auth_utils.get_user_id_from_cookie(request)
-    except Exception as e:
-        print("Error occurred in user ID retrieval:", e)
+        user_id = await auth_utils.get_user_id_from_cookie(request)
+    except Exception:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
-    # 2. get word_id list from user_word_db
-    try:
-        word_ids: list[str] = user_word_utils.get_user_word_ids(user_id, db)
-    except Exception as e:
-        print("Error retrieving user word list:", e)
-        raise HTTPException(status_code=500, detail="Failed to retrieve word list")
+    svc = WordService(db)
+    docs = svc.get_user_word_list(user_id)
+    items = [ItemSchema(**d) for d in docs]
+    return GetUserWordListResponse(wordlist=items, userid=user_id)
 
-    # 3. word item list from word_db
-    try:
-        items: list[word_models.Item] = word_utils.get_items_by_ids(word_ids, db)
-    except Exception as e:
-        print("Error retrieving items from word IDs:", e)
-        raise HTTPException(status_code=500, detail="Failed to retrieve word details")
-
-    return schemas.GetUserWordListResponse(
-        wordlist=[word_utils.model_to_schema(item) for item in items],
-        userid=user_id
-    )
-
-# for test 
-@router.get("/word/suggest", response_model=schemas.SuggestWordsResponse) 
-async def suggest_words( 
-    q: str = Query(..., min_length=1, max_length=64, description="prefix or exact text"), 
-    limit: int = Query(10, ge=10, le=50), 
-    case_insensitive: bool = Query(True, description="ignore whether upper or lowercase"),
-    db: Database = Depends(get_db), 
-): 
-    """
-    入力文字列 q に対して、word フィールドのスペルが一致（完全一致を優先・前方一致で補完）
-    するアイテムを最大 limit 件返す。
-    """
-
-    try:
-        items: List[word_models.Item] = word_utils.find_items_by_spelling(
-            q=q, db=db, limit=limit, case_insensitive=case_insensitive
-        )
-    except Exception as e:
-        print("Error occurred in suggest_words:", e)
-        raise HTTPException(status_code=500, detail="Failed to search suggestions")
-
-    return schemas.SuggestWordsResponse(
-        items=[word_utils.model_to_schema(it) for it in items]
-    )
+@router.get("/suggest_words", response_model=SuggestWordsResponse, operation_id="suggest_words")
+async def suggest_words(
+    q: str = Query(..., description="prefix / exact-first query"),
+    limit: int = Query(10, ge=1, le=50),
+    db: Database = Depends(get_db),
+):
+    """Return suggestions (exact-first then prefix)."""
+    svc = WordService(db)
+    docs = svc.suggest_words(q=q, limit=limit)
+    items = [ItemSchema(**d) for d in docs]
+    return SuggestWordsResponse(items=items)

@@ -9,7 +9,7 @@ class User(BaseModel):
 
 # sign in -------------------------------------
 class SigninRequest(BaseModel):
-    username: str
+    username_or_email: str
     password: str
 
 class SigninResponse(BaseModel):

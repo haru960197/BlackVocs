@@ -1,18 +1,18 @@
 'use server'
 
-import { signinUser, SigninUserError, SigninUserResponse } from "@/lib/api";
+import { signin, SigninError, SigninResponse } from "@/lib/api";
 import { cookies } from "next/headers";
 
 export const handleSignUp = async (userName: string, password: string): Promise<{
   success: boolean;
-  error?: SigninUserError;
-  data?: SigninUserResponse;
+  error?: SigninError;
+  data?: SigninResponse;
 }> => {
   const cookieStore = await cookies();
 
-  const res = await signinUser({
+  const res = await signin({
     body: {
-      username: userName,
+      username_or_email: userName,
       password: password,
     },
   });
