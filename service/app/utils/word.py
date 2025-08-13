@@ -1,4 +1,6 @@
+from typing import List
 from pymongo.database import Database
+import re
 import requests
 from bson import ObjectId
 from schemas.word import (
@@ -106,3 +108,65 @@ def get_items_by_ids(word_ids: list[str], db: Database) -> list[ItemModel]:
     collection = db[WORD_COLLECTION_NAME]
     cursor = collection.find({"_id": {"$in": [ObjectId(wid) for wid in word_ids]}})
     return [ItemModel(**doc) for doc in cursor]
+
+def find_items_by_spelling(
+    q: str,
+    db: Database,
+    limit: int = 10,
+    case_insensitive: bool = True
+) -> List[ItemModel]:
+    """
+    入力文字列 q に対して、word フィールドのスペルが一致する（完全一致を優先しつつ前方一致も含む）
+    アイテムを最大 limit 件返す。
+
+    - 完全一致（^q$）を先に集め、残りを前方一致（^q）で補完
+    - 大文字小文字は既定で無視（case_insensitive=True）
+    - 返り値は ItemModel のリスト
+    """
+
+    q = (q or "").strip()
+    if not q:
+        return []
+
+    options = "i" if case_insensitive else ""
+    collection = db[WORD_COLLECTION_NAME]
+
+    # --- 1) 完全一致を優先 ---
+    pattern_exact = f"^{re.escape(q)}$"
+    exact_cursor = (
+        collection.find(
+            {"word": {"$regex": pattern_exact, "$options": options}},
+        )
+        .sort("word", 1)
+        .limit(limit)
+    )
+
+    results: List[ItemModel] = []
+    seen_ids = set()
+
+    for doc in exact_cursor:
+        results.append(ItemModel(**doc))
+        seen_ids.add(doc["_id"])
+
+    if len(results) >= limit:
+        return results[:limit]
+
+    # --- 2) 前方一致で補完（既に拾った _id は除外） ---
+    pattern_prefix = f"^{re.escape(q)}"
+    prefix_filter = {"word": {"$regex": pattern_prefix, "$options": options}}
+    if seen_ids:
+        prefix_filter = {"$and": [prefix_filter, {"_id": {"$nin": list(seen_ids)}}]}
+
+    remain = limit - len(results)
+    prefix_cursor = (
+        collection.find(prefix_filter)
+        .sort("word", 1)
+        .limit(remain)
+    )
+
+    for doc in prefix_cursor:
+        results.append(ItemModel(**doc))
+        if len(results) >= limit:
+            break
+
+    return results
