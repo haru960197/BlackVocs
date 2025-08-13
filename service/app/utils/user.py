@@ -1,6 +1,6 @@
 from datetime import timedelta 
 from fastapi import Request, HTTPException, status, Depends
-from db.session import get_db
+from repositories.session import get_db
 from models.user import TokenData, User
 from models.user import UserInDB 
 from pymongo.database import Database
