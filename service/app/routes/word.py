@@ -15,7 +15,7 @@ from schemas.word import (
     SuggestWordsResponse,
     Item as ItemSchema,
 )
-from utils.auth_utils import get_user_id_from_cookie  # cookie から user_id を取る既存関数
+from utils.auth_utils import get_user_id_from_cookie  
 
 router = APIRouter(prefix="/word", tags=["word"])
 
@@ -38,10 +38,9 @@ async def add_new_word(
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Failed to add new word: {e}")
 
-    # NOTE: response_model is camelCase via alias generator in your schema
     return AddNewWordResponse(
         item=ItemSchema(**word_doc),
-        user_word_id=link_id or "",  # empty if already linked (or you can return existing id)
+        user_word_id=link_id or "",  
     )
 
 @router.get("/get_user_word_list", operation_id="get_user_word_list", response_model=GetUserWordListResponse, responses=common_schemas.COMMON_ERROR_RESPONSES)
