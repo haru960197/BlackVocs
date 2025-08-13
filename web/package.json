@@ -10,9 +10,8 @@
     "format": "prettier --write --ignore-path .gitignore './**/*.{js,jsx,ts,tsx,json,css}' && next lint --fix",
     "openapi-ts": "openapi-ts"
   },
-
   "dependencies": {
-    "@hey-api/client-fetch": "^0.10.2",
+    "@hey-api/client-next": "^0.5.1",
     "clsx": "^2.1.1",
     "next": "15.2.4",
     "react": "^19.0.0",

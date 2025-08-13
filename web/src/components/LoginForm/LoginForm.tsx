@@ -23,6 +23,7 @@ export const LoginForm = () => {
 
     setIsLoading(true);
 
+    // Cookieを受け取るため，クライアントでAPIを呼ぶ
     const res = await signinUser({
       body: {
         username: userName,

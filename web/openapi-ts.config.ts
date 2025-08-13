@@ -6,5 +6,8 @@ dotenv.config();
 export default defineConfig({
   input: `${process.env.SERVICE_URI}/openapi.json`,
   output: 'src/lib/api/',
-  plugins: ['@hey-api/client-fetch'],
+  plugins: [{
+    name: '@hey-api/client-next',
+    runtimeConfigPath: './src/hey-api.ts',
+  }],
 });
