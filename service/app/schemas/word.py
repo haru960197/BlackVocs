@@ -26,3 +26,10 @@ class GetUserWordListResponse(BaseModel):
 
 class SuggestWordsResponse(BaseModel):
     items: List[Item]
+
+class GenerateNewWordEntryRequest(BaseModel): 
+    word: str
+
+class GenerateNewWordEntryResponse(BaseModel): 
+    item: Item 
+

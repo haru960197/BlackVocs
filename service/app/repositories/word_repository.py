@@ -1,7 +1,7 @@
 from typing import Optional, List
 from pymongo.database import Database
 from pymongo.collection import Collection
-from bson import ObjectId
+from bson import ObjectId # type: ignore
 import core.config as config 
 
 WORD_COL = config.WORD_COLLECTION_NAME
