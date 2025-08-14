@@ -21,15 +21,20 @@ export const SideDrawer = () => {
       {/* ハンバーガーメニューボタン（ログイン状態での展開） */}
       <input id="side-drawer" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content">
-        <label
-          htmlFor='side-drawer'
-          className={clsx(
-            "btn btn-square btn-ghost drawer-button p-2",
-            !isLoggedIn && "btn-disabled"
-          )}
+        <div
+          className={!isLoggedIn ? 'tooltip tooltip-bottom tooltip-warning' : undefined}
+          data-tip={!isLoggedIn && "Login!"}
         >
-          <BiMenu className='w-6 h-6' />
-        </label>
+          <label
+            htmlFor='side-drawer'
+            className={clsx(
+              "btn btn-square btn-ghost drawer-button p-2",
+              !isLoggedIn && "btn-disabled"
+            )}
+          >
+            <BiMenu className='w-6 h-6' />
+          </label>
+        </div>
       </div>
 
       {/* ドロワー本体 */}
