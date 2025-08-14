@@ -24,3 +24,7 @@ class SignupResponse(User):
     id: str = Field(..., alias="_id")
     class Config:
         allow_population_by_field_name = True
+
+class SignedInCheckResponse(BaseModel):
+    signed_in: bool
+    user_id: str | None = None

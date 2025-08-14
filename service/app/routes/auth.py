@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Response
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from fastapi.responses import RedirectResponse
 from pymongo.database import Database
 from repositories.session import get_db
 import schemas.auth_schemas as auth_schemas
 from services.auth_service import AuthService
-from utils.auth_utils import create_access_token
+from utils.auth_utils import create_access_token, get_user_id_from_cookie
 router = APIRouter(prefix="/user", tags=["auth"])
 
 @router.post(
@@ -88,3 +88,16 @@ async def signout():
         secure=True,
     )
     return response
+
+@router.get(
+    "/signed_in_check", 
+    operation_id="signed_in_check", 
+    status_code=status.HTTP_200_OK,
+    response_model=auth_schemas.SignedInCheckResponse,
+) 
+async def signed_in_check(request: Request): 
+    try: 
+        user_id = await get_user_id_from_cookie(request)
+        return auth_schemas.SignedInCheckResponse(signed_in=True, user_id=user_id)
+    except Exception:
+        return auth_schemas.SignedInCheckResponse(signed_in=False, user_id=None)
