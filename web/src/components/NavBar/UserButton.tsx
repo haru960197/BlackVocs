@@ -2,22 +2,26 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { BiSolidUser } from "react-icons/bi";
 
 export const UserButton = () => {
   const router = useRouter();
   const { showToast } = useToast();
-  const { isLoading, logout } = useAuth();
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const { isLoggedIn, isLoading, logout } = useAuth();
 
   const handleLogoutClick = async () => {
+    if (!isLoggedIn) {
+      // ログインしていないので，ログインページにリダイレクトする
+      showToast('まだログインしていません', 'warning');
+      router.push('/login');
+      return;
+    }
+
     const result = await logout();
 
     if (result) {
       // ログアウトに成功したので，ログインページにリダイレクトする
       showToast('ログアウトしました', 'success');
-      setIsOpen(false);
       router.push('/login');
     } else {
       showToast('ログアウトに失敗しました', 'error');
