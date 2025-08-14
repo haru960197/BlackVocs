@@ -60,7 +60,7 @@ export const loggedInCheck = async (): Promise<{
     return { success: false };
   }
 
-  return { success: true, data: res.response };
+  return { success: true, data: res.data };
 }
 
 
