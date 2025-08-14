@@ -1,5 +1,6 @@
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BiSolidUser } from "react-icons/bi";
@@ -32,6 +33,9 @@ export const UserButton = () => {
         }
       </div>
       <ul tabIndex={0} className="dropdown-content menu bg-base-300 rounded-box z-1 w-28 p-2 shadow-sm">
+        <li className="btn btn-ghost">
+          <Link href={"/login"} className="bg-transparent">Login</Link>
+        </li>
         <li className="btn btn-ghost" onClick={handleLogoutClick}>Log out</li>
       </ul>
     </div> 
