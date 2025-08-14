@@ -3,6 +3,8 @@
 import { signedInCheck, SignedInCheckResponse, signin, SigninError, SigninResponse, signout } from "@/lib/api";
 import { cookies } from "next/headers";
 
+const ACCESS_TOKEN_KEY = "access_token";
+
 export const handleLogin = async (userName: string, password: string): Promise<{
   success: boolean;
   error?: SigninError;
@@ -21,7 +23,7 @@ export const handleLogin = async (userName: string, password: string): Promise<{
     return { success: false, error: res.error };
   }
 
-  cookieStore.set("access_token", res.data.access_token, {
+  cookieStore.set(ACCESS_TOKEN_KEY, res.data.access_token, {
     httpOnly: true,
     maxAge: 60 * 60,
     sameSite: "none",
@@ -34,11 +36,15 @@ export const handleLogin = async (userName: string, password: string): Promise<{
 export const handleLogout = async (): Promise<{
   success: boolean;
 }> => {
+  const cookieStore = await cookies();
+
   const res = await signout();
 
   if (res.error) {
     return { success: false };
   }
+
+  cookieStore.delete(ACCESS_TOKEN_KEY);
 
   return { success: true };
 }
