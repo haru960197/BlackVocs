@@ -44,7 +44,7 @@ async def signin(
 
 @router.post(
     "/signup",
-    operation_id="auth_signup",
+    operation_id="signup",
     response_description="add new user",
     response_model=auth_schemas.SignupResponse,
     status_code=status.HTTP_201_CREATED,
@@ -71,7 +71,7 @@ async def signup(payload: auth_schemas.SignupRequest, db: Database = Depends(get
 
 @router.get(
     "/signout",
-    operation_id="auth_signout", 
+    operation_id="signout", 
     response_description="sign out of the user account",
     status_code=status.HTTP_200_OK,
     response_model_by_alias=False,
