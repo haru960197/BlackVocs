@@ -4,15 +4,15 @@ import { useToast } from '@/context/ToastContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { handleSignUp } from './actions';
+import { useAuth } from '@/context/AuthContext';
 
 export const LoginForm = () => {
   const router = useRouter();
   const { showToast } = useToast();
+  const { isLoading, login } = useAuth();
 
   const [userName, setUserName] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const isDisabled = !userName || !password;
 
@@ -21,11 +21,9 @@ export const LoginForm = () => {
       return;
     }
 
-    setIsLoading(true);
+    const result = await login(userName, password);
 
-    const res = await handleSignUp(userName, password);
-
-    if (!res.error) {
+    if (result) {
       // ログインに成功したので，単語一覧ページにリダイレクトする
       showToast('ログインに成功しました', 'success');
       router.push('/word-list');
@@ -33,8 +31,6 @@ export const LoginForm = () => {
       // ログインに失敗
       showToast('ログインに失敗しました', 'error');
     }
-
-    setIsLoading(false);
   };
 
   return (
