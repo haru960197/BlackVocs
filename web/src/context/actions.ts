@@ -1,9 +1,9 @@
 'use server'
 
-import { signin, SigninError, SigninResponse } from "@/lib/api";
+import { signedInCheck, SignedInCheckResponse, signin, SigninError, SigninResponse, signout } from "@/lib/api";
 import { cookies } from "next/headers";
 
-export const handleSignUp = async (userName: string, password: string): Promise<{
+export const handleLogin = async (userName: string, password: string): Promise<{
   success: boolean;
   error?: SigninError;
   data?: SigninResponse;
@@ -34,4 +34,33 @@ export const handleSignUp = async (userName: string, password: string): Promise<
 export const handleLogout = async (): Promise<{
   success: boolean;
 }> => {
-  const res = await authSi
+  const res = await signout();
+
+  if (res.error) {
+    return { success: false };
+  }
+
+  return { success: true };
+}
+
+export const loggedInCheck = async (): Promise<{
+  success: boolean;
+  data?: SignedInCheckResponse;
+}> => {
+  const cookieStore = await cookies();
+  const tokenCookie = cookieStore.get('access_token');
+
+  const res = await signedInCheck({
+    headers: {
+      Cookie: `${tokenCookie?.name}=${tokenCookie?.value}`,
+    },
+  });
+
+  if (res.error) {
+    return { success: false };
+  }
+
+  return { success: true, data: res.response };
+}
+
+
