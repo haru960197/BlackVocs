@@ -10,7 +10,7 @@ class GeneralErrorResponse(BaseModel):
     detail: str = Field(..., description="エラーメッセージ（文字列）")
 
 # 共通の responses 定義（400／401／403／500 はすべて同じモデルを使う例）
-COMMON_ERROR_RESPONSES: Dict[int, Dict[str, Any]] = {
+COMMON_ERROR_RESPONSES: Dict[int | str, Dict[str, Any]] = {
     status.HTTP_400_BAD_REQUEST: {
         "description": "リクエスト不正",
         "model": GeneralErrorResponse,
