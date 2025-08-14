@@ -4,6 +4,7 @@ import { ThemeContext } from '@/context/ThemeContext';
 import { useContext } from 'react';
 import { BiMoon, BiSun } from 'react-icons/bi';
 import { SideDrawer } from '../SideDrawer';
+import { UserButton } from './UserButton';
 
 export const NavBar = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
@@ -17,9 +18,12 @@ export const NavBar = () => {
         <a className="btn btn-ghost text-xl">BlackVocs</a>
       </div>
       <div className="flex-none flex gap-2">
+        <UserButton />
+
         <button className="btn btn-ghost rounded-full p-2" onClick={toggleTheme}>
           {theme === 'light' ? <BiSun className="w-6 h-6" /> : <BiMoon className="w-6 h-6" />}
         </button>
+
         <button className="btn btn-square btn-ghost">
           <svg
             xmlns="http://www.w3.org/2000/svg"

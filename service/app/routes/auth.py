@@ -76,18 +76,17 @@ async def signup(payload: auth_schemas.SignupRequest, db: Database = Depends(get
     status_code=status.HTTP_200_OK,
     response_model_by_alias=False,
 )
-async def signout():
+async def signout(response: Response):
     """
     Delete JWT cookie and redirect.
     """
-    response = RedirectResponse(url="/")
     response.delete_cookie(
         key="access_token",
         httponly=True,
         samesite="none",
         secure=True,
     )
-    return response
+    return { "message": "Successfully signed out" }
 
 @router.get(
     "/signed_in_check", 
