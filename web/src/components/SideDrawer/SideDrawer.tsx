@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import clsx from 'clsx';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BiBookOpen, BiPencil } from 'react-icons/bi';
+import { BiBookOpen, BiPencil, BiMenu } from 'react-icons/bi';
 
 const links = [
   { name: 'Register Word', href: '/register-word', icon: BiPencil },
@@ -24,24 +24,11 @@ export const SideDrawer = () => {
         <label
           htmlFor='side-drawer'
           className={clsx(
-            "btn btn-square btn-ghost drawer-button",
+            "btn btn-square btn-ghost drawer-button p-2",
             !isLoggedIn && "btn-disabled"
           )}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            className="inline-block h-5 w-5 stroke-current"
-          >
-            {' '}
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M4 6h16M4 12h16M4 18h16"
-            ></path>{' '}
-          </svg>
+          <BiMenu className='w-6 h-6' />
         </label>
       </div>
 
