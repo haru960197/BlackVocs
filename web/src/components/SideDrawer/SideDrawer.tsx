@@ -15,6 +15,7 @@ export const SideDrawer = () => {
 
   return (
     <div className="drawer">
+      {/* ハンバーガーメニューボタン */}
       <input id="side-drawer" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content">
         <label htmlFor="side-drawer" className="btn btn-square btn-ghost drawer-button">
@@ -34,6 +35,8 @@ export const SideDrawer = () => {
           </svg>
         </label>
       </div>
+
+      {/* ドロワー本体 */}
       <div className="drawer-side z-50">
         <label htmlFor="side-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
         <div className="menu bg-base-200 text-base-content min-h-full w-80 p-4 flex flex-col gap-2">
