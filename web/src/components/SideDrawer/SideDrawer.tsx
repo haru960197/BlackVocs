@@ -1,5 +1,6 @@
 'use client';
 
+import { useAuth } from '@/context/AuthContext';
 import clsx from 'clsx';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -13,12 +14,20 @@ const links = [
 export const SideDrawer = () => {
   const pathName = usePathname();
 
+  const { isLoggedIn } = useAuth();
+
   return (
     <div className="drawer">
-      {/* ハンバーガーメニューボタン */}
+      {/* ハンバーガーメニューボタン（ログイン状態での展開） */}
       <input id="side-drawer" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content">
-        <label htmlFor="side-drawer" className="btn btn-square btn-ghost drawer-button">
+        <label
+          htmlFor='side-drawer'
+          className={clsx(
+            "btn btn-square btn-ghost drawer-button",
+            !isLoggedIn && "btn-disabled"
+          )}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
