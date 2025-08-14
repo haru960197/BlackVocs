@@ -24,17 +24,17 @@ export const UserButton = () => {
   }
   
   return (
-    <details className="dropdown">
-      <summary className="btn btn-ghost p-2">
+    <div className="dropdown">
+      <div tabIndex={0} role="button" className="btn btn-ghost p-2">
         {isLoading
-          ?  <span className="loading loading-spinner" />
-          :  <BiSolidUser className="w-6 h-6" />
+          ? <span className="loading loading-spinner" />
+          : <BiSolidUser className="w-6 h-6" />
         }
-      </summary>
-      <ul className="menu dropdown-content dropdown-open bg-base-300 rounded-box z-1 w-28 p-2 shadow-sm">
+      </div>
+      <ul tabIndex={0} className="dropdown-content menu bg-base-300 rounded-box z-1 w-28 p-2 shadow-sm">
         <li className="btn btn-ghost" onClick={handleLogoutClick}>Log out</li>
       </ul>
-    </details>
+    </div> 
   );
 }
 
