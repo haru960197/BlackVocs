@@ -43,7 +43,6 @@ export const LoginForm = () => {
           type="text"
           className="input text-xl"
           placeholder="User name"
-          autoComplete='username'
           value={userName}
           onChange={(e) => setUserName(e.target.value)}
         />
@@ -53,7 +52,6 @@ export const LoginForm = () => {
           type="password"
           className="input text-xl"
           placeholder="Password"
-          autoComplete='current-password'
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
