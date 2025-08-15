@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from typing import Tuple, List
 from pymongo.database import Database
 import utils.auth_utils as auth_utils
 import schemas.common_schemas as common_schemas
@@ -38,25 +39,26 @@ async def get_user_word_list(
 @router.get(
     "/suggest_words", 
     response_model=word_schemas.SuggestWordsResponse, 
-    operation_id="suggest_words"
+    operation_id="suggest_words",
     responses=common_schemas.common_schemas.COMMON_ERROR_RESPONSES
 )
 async def suggest_words(
+    request: word_schemas.SuggestWordsRequest,
     limit: int = Query(10, ge=1, le=50),
     db: Database = Depends(get_db),
 ):
     svc = WordService(db)
-    query = q.strip()
-    if not query:
-        raise HTTPException(status_code=400, detail="Query 'q' must be non-empty.")
+    input_word = request.input_word
+    if not input_word:
+        raise HTTPException(status_code=400, detail="input_word is required.")
 
-    subseq = svc.make_subsequence_regex(query)
+    subseq = svc.make_subsequence_regex(input_word)
     regex = {"$regex": subseq, "$options": "i"}  # case-insensitive
 
-    # Tune this cap based on your data size & latency budget.
-    CANDIDATE_CAP = 300
+    CANDIDATE_CAP = 100
 
-    # Project minimal fields to reduce payload.
+    # --- 1) 正規表現を用いてDBから候補となる単語のリストを取得 ---
+    # TODO: この処理はword.repositoryに移す
     cursor = db["items"].find(
         {"entry.word": regex},
         {"entry.word": 1, "registered_count": 1}
@@ -65,30 +67,30 @@ async def suggest_words(
     candidates = list(cursor)
 
     if not candidates:
-        return word_schemas.SuggestWordsResponse(suggestions=[])
+        return word_schemas.SuggestWordsResponse(items=[])
 
     # --- 2) Score by true LCS ---
-    scored: List[Tuple[float, int, str]] = []  # (score, registered_count, word)
-    q_lower = query.lower()
+    # TODO: この配列には，models.Itemも持たせる(レスポンスに必要なため）
+    scored_word_infos: List[Tuple[float, int, str]] = []  # (score, registered_count, word)
+    input_word = input_word.lower()
     for doc in candidates:
         word = str(doc.get("entry", {}).get("word", ""))
         if not word:
             continue
-        score = lcs_score(q_lower, word.lower())
+        score = svc.lcs_score(input_word, word.lower())
         reg_cnt = int(doc.get("registered_count", 0))
-        scored.append((score, reg_cnt, word))
+        scored_word_infos.append((score, reg_cnt, word))
 
     # --- 3) Sort: LCS desc, registered_count desc, len asc, word asc ---
-    scored.sort(key=lambda t: (-t[0], -t[1], len(t[2]), t[2]))
+    scored_word_infos.sort(key=lambda t: (-t[0], -t[1], len(t[2]), t[2]))
 
-    # --- 4) Build response (adjust to your schema) ---
-    # 例: SuggestWordsResponse = { suggestions: List[SuggestedItem] }
-    # SuggestedItem は { word: str, score: float, registered_count: int } を想定
-    suggestions = [
-        word_schemas.SuggestedItem(word=w, score=float(s), registered_count=rc)
-        for s, rc, w in scored[:limit]
+    # --- 4) Build response ---
+    res_items = [
+        # TODO: word_schemas.Itemをインスタンス化
+        word_schemas.Item()
+        for s, rc, w in scored_word_infos[:limit]
     ]
-    return word_schemas.SuggestWordsResponse(suggestions=suggestions)
+    return word_schemas.SuggestWordsResponse(items=res_items)
 
 @router.post(
     "/generate_new_word_entry", 

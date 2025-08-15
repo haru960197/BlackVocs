@@ -25,8 +25,7 @@ class GetUserWordListResponse(BaseModel):
     userid: str
 
 class SuggestWordsRequest(BaseModel): 
-    query: str
-    q: str = Query(..., description="prefix / exact-first query"),
+    input_word: str
 
 class SuggestWordsResponse(BaseModel):
     items: List[Item]
