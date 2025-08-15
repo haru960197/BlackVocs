@@ -10,10 +10,10 @@ class Entry(BaseModel):
     example_sentence_translation: str
 
 class Item(BaseModel):
-    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    id: ObjectId = Field(alias = "_id", default=None)
     entry: Entry 
-    fingerprint: str = Field(..., description="deterministic fingerprint for enties")
-    registered_count: int = Field(0, ge = 0, description="Number of users who registered this word")
+    fingerprint: str = Field(..., description = "deterministic fingerprint for enties")
+    registered_count: int = Field(default = 0, ge = 0, description = "Number of users who registered this word")
 
     class Config:
         populate_by_name = True 

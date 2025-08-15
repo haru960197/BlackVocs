@@ -1,5 +1,4 @@
 import requests
-from typing import Dict
 import core.config as config
 
 DEEPSEEK_API_KEY = config.DEEPSEEK_API_KEY
@@ -10,7 +9,7 @@ class GenerativeAIClient:
         self.api_key = api_key or DEEPSEEK_API_KEY
         self.timeout = timeout
 
-    def generate_entry(self, word: str) -> Dict[str, str]:
+    def generate_entry(self, word: str) -> dict[str, str] | None:
         """Return dict(word, meaning, example_sentence, example_sentence_translation)."""
         prompt = f"""
         単語: {word}

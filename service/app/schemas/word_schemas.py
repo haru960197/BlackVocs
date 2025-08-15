@@ -21,7 +21,7 @@ class AddNewWordResponse(CustomBaseModel):
     user_word_id: str
 
 class GetUserWordListResponse(BaseModel):
-    wordlist: List[Item]
+    items: List[Item]
     userid: str
 
 class SuggestWordsResponse(BaseModel):
@@ -32,4 +32,10 @@ class GenerateNewWordEntryRequest(BaseModel):
 
 class GenerateNewWordEntryResponse(BaseModel): 
     item: Item 
+
+class RegisterWordRequest(BaseModel): 
+    item: Item
+
+class RegisterWordResponse(BaseModel): 
+    item: Item
 
