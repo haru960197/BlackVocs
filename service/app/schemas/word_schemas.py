@@ -26,6 +26,7 @@ class GetUserWordListResponse(BaseModel):
 
 class SuggestWordsRequest(BaseModel): 
     input_word: str
+    limit: int = 10 
 
 class SuggestWordsResponse(BaseModel):
     items: List[Item]

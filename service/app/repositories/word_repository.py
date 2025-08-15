@@ -62,8 +62,7 @@ class WordRepository:
         """
         Find candidate words by applying a MongoDB regex filter to 'entry.word'.
         """
-        projection = {"entry.word": 1, "registered_count": 1}
-        cursor = self.col.find({"entry.word": regex_filter}, projection).limit(int(limit))
+        cursor = self.col.find({"entry.word": regex_filter}).limit(int(limit))
         return [Item.model_validate(doc) for doc in cursor]
 
     def find_candidates_by_entry_word_subsequence(

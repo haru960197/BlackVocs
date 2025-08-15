@@ -36,7 +36,7 @@ async def get_user_word_list(
     except Exception:
         raise HTTPException(status_code=500, detail="Internal error while getting items")
 
-@router.get(
+@router.post(
     "/suggest_words", 
     response_model=word_schemas.SuggestWordsResponse, 
     operation_id="suggest_words",
@@ -44,12 +44,11 @@ async def get_user_word_list(
 )
 async def suggest_words(
     request: word_schemas.SuggestWordsRequest,
-    limit: int = Query(10, ge=1, le=50),
     db: Database = Depends(get_db),
 ):
     svc = WordService(db)
-
     input_word = request.input_word
+    limit = request.limit
     if not input_word:
         raise HTTPException(status_code=400, detail="input_word is required.")
     CANDIDATE_CAP = 100
