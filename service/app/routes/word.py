@@ -35,21 +35,60 @@ async def get_user_word_list(
     except Exception:
         raise HTTPException(status_code=500, detail="Internal error while getting items")
 
-# @router.get(
-#     "/suggest_words", 
-#     response_model=word_schemas.SuggestWordsResponse, 
-#     operation_id="suggest_words"
-# )
-# async def suggest_words(
-#     q: str = Query(..., description="prefix / exact-first query"),
-#     limit: int = Query(10, ge=1, le=50),
-#     db: Database = Depends(get_db),
-# ):
-#     """Return suggestions (exact-first then prefix)."""
-#     svc = WordService(db)
-#     docs = svc.suggest_words(q=q, limit=limit)
-#     items = [word_schemas.Item(**d) for d in docs]
-#     return word_schemas.SuggestWordsResponse(items=items)
+@router.get(
+    "/suggest_words", 
+    response_model=word_schemas.SuggestWordsResponse, 
+    operation_id="suggest_words"
+    responses=common_schemas.common_schemas.COMMON_ERROR_RESPONSES
+)
+async def suggest_words(
+    limit: int = Query(10, ge=1, le=50),
+    db: Database = Depends(get_db),
+):
+    svc = WordService(db)
+    query = q.strip()
+    if not query:
+        raise HTTPException(status_code=400, detail="Query 'q' must be non-empty.")
+
+    subseq = svc.make_subsequence_regex(query)
+    regex = {"$regex": subseq, "$options": "i"}  # case-insensitive
+
+    # Tune this cap based on your data size & latency budget.
+    CANDIDATE_CAP = 300
+
+    # Project minimal fields to reduce payload.
+    cursor = db["items"].find(
+        {"entry.word": regex},
+        {"entry.word": 1, "registered_count": 1}
+    ).limit(CANDIDATE_CAP)
+
+    candidates = list(cursor)
+
+    if not candidates:
+        return word_schemas.SuggestWordsResponse(suggestions=[])
+
+    # --- 2) Score by true LCS ---
+    scored: List[Tuple[float, int, str]] = []  # (score, registered_count, word)
+    q_lower = query.lower()
+    for doc in candidates:
+        word = str(doc.get("entry", {}).get("word", ""))
+        if not word:
+            continue
+        score = lcs_score(q_lower, word.lower())
+        reg_cnt = int(doc.get("registered_count", 0))
+        scored.append((score, reg_cnt, word))
+
+    # --- 3) Sort: LCS desc, registered_count desc, len asc, word asc ---
+    scored.sort(key=lambda t: (-t[0], -t[1], len(t[2]), t[2]))
+
+    # --- 4) Build response (adjust to your schema) ---
+    # 例: SuggestWordsResponse = { suggestions: List[SuggestedItem] }
+    # SuggestedItem は { word: str, score: float, registered_count: int } を想定
+    suggestions = [
+        word_schemas.SuggestedItem(word=w, score=float(s), registered_count=rc)
+        for s, rc, w in scored[:limit]
+    ]
+    return word_schemas.SuggestWordsResponse(suggestions=suggestions)
 
 @router.post(
     "/generate_new_word_entry", 

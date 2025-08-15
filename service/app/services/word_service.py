@@ -1,4 +1,5 @@
-from typing import List, Tuple
+from typing import List
+import re
 from pymongo.database import Database
 from bson import ObjectId #type: ignore
 from repositories.word_repository import WordRepository
@@ -24,7 +25,7 @@ class WordService:
         items: List[Item] = self.words.find_by_ids(word_ids)
         entries = [item.entry for item in items]
         return entries
-    
+
     # --- register --- 
     def register_word(self, entry: Entry, user_id: str) -> str: 
         """
@@ -43,4 +44,31 @@ class WordService:
             word_id = self.words.upsert_and_inc_entry(entry)
 
         return self.user_words.create_link(user_id, word_id)
-        
+
+    # --- search ---
+    def lcs_len(self, a: str, b: str) -> int:
+        """Return LCS length using O(len(a)*len(b)) DP."""
+        n, m = len(a), len(b)
+        # Small optimization: keep a rolling 1D DP array
+        prev = [0] * (m + 1)
+        for i in range(1, n + 1):
+            cur = [0]
+            ai = a[i - 1]
+            for j in range(1, m + 1):
+                if ai == b[j - 1]:
+                    cur.append(prev[j - 1] + 1)
+                else:
+                    cur.append(max(prev[j], cur[-1]))
+            prev = cur
+        return prev[-1]
+
+    def lcs_score(self, query: str, candidate: str) -> float:
+        """Normalize LCS length by max length to get [0,1]."""
+        if not query or not candidate:
+            return 0.0
+        return self.lcs_len(query, candidate) / max(len(query), len(candidate))
+
+    def make_subsequence_regex(self, q: str) -> str:
+        """Build a regex like 'a.*b.*c' to quickly prefilter subsequence-like matches."""
+        parts = [re.escape(ch) for ch in q]
+        return ".*".join(parts)
