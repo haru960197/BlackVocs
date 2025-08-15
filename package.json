@@ -1,0 +1,34 @@
+{
+  "name": "blackvocs",
+  "version": "1.0.0",
+  "description": "BlackVocs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/haru960197/BlackVocs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/haru960197/BlackVocs/issues"
+  },
+  "homepage": "https://github.com/haru960197/BlackVocs#readme",
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.5"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "npx prettier --write --ignore-path .gitignore",
+      "cd web && next lint --fix"
+    ],
+    "*.{json,css}": [
+      "npx prettier --write --ignore-path .gitignore"
+    ]
+  }
+}
