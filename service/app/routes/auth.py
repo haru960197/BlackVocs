@@ -56,16 +56,12 @@ async def signup(payload: auth_schemas.SignupRequest, db: Database = Depends(get
     """
     svc = AuthService(db)
     try:
-        inserted_id, user_doc = svc.signup(payload.username, payload.email, payload.password)
+        inserted_id, _ = svc.signup(payload.username, payload.email, payload.password)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
     return auth_schemas.SignupResponse(
-        _id=str(inserted_id),
-        username=user_doc["username"],
-        email=user_doc["email"],
-        full_name=user_doc.get("full_name"),
-        disabled=user_doc.get("disabled", False),
+        id=str(inserted_id)
     )
 
 
