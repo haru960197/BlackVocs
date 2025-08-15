@@ -17,13 +17,13 @@ class SigninResponse(BaseModel):
     token_type: str
 
 # sign up -------------------------------------
-class SignupRequest(User):
+class SignupRequest(BaseModel):
+    username: str
+    email: EmailStr
     password: str
 
-class SignupResponse(User):
-    id: str = Field(..., alias="_id")
-    class Config:
-        allow_population_by_field_name = True
+class SignupResponse(BaseModel):
+    id: str
 
 class SignedInCheckResponse(BaseModel):
     signed_in: bool
