@@ -1,9 +1,8 @@
 'use server'
 
+import { ACCESS_TOKEN_KEY } from "@/constant/auth";
 import { signedInCheck, SignedInCheckResponse, signin, SigninError, SigninResponse, signout } from "@/lib/api";
 import { cookies } from "next/headers";
-
-const ACCESS_TOKEN_KEY = "access_token";
 
 export const handleLogin = async (userName: string, password: string): Promise<{
   success: boolean;

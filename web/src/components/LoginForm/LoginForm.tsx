@@ -2,12 +2,13 @@
 
 import { useToast } from '@/context/ToastContext';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 
 export const LoginForm = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { showToast } = useToast();
   const { isLoading, login } = useAuth();
 
@@ -24,9 +25,10 @@ export const LoginForm = () => {
     const result = await login(userName, password);
 
     if (result) {
-      // ログインに成功したので，単語一覧ページにリダイレクトする
       showToast('ログインに成功しました', 'success');
-      router.push('/word-list');
+
+      const redirectUrl = searchParams.get('next') ?? '/register-word';
+      router.push(redirectUrl);
     } else {
       // ログインに失敗
       showToast('ログインに失敗しました', 'error');

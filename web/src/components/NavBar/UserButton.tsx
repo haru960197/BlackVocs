@@ -2,7 +2,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BiSolidUser } from "react-icons/bi";
+import { BiSolidUserCheck, BiSolidUserX } from "react-icons/bi";
 
 export const UserButton = () => {
   const router = useRouter();
@@ -27,20 +27,30 @@ export const UserButton = () => {
       showToast('ログアウトに失敗しました', 'error');
     }
   }
+
+  const UserIcon = ({ isLoggedIn }: { isLoggedIn: boolean }) => (
+    isLoggedIn
+      ? <BiSolidUserCheck className="w-6 h-6" />
+      : <BiSolidUserX className="w-6 h-6" />
+  );
   
   return (
     <div className="dropdown">
       <div tabIndex={0} role="button" className="btn btn-ghost p-2">
         {isLoading
           ? <span className="loading loading-spinner" />
-          : <BiSolidUser className="w-6 h-6" />
+          : <UserIcon isLoggedIn={isLoggedIn} />
         }
       </div>
       <ul tabIndex={0} className="dropdown-content menu bg-base-300 rounded-box z-1 w-28 p-2 shadow-sm">
-        <li className="btn btn-ghost">
-          <Link href={"/login"} className="bg-transparent">Login</Link>
-        </li>
-        <li className="btn btn-ghost" onClick={handleLogoutClick}>Log out</li>
+        {!isLoggedIn
+          ? (
+              <li className="btn btn-ghost">
+                <Link href={"/login"} className="bg-transparent">Login</Link>
+              </li>
+          )
+          : <li className="btn btn-ghost" onClick={handleLogoutClick}>Log out</li>
+        }
       </ul>
     </div> 
   );
