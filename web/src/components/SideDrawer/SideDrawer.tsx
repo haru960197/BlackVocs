@@ -23,16 +23,16 @@ export const SideDrawer = () => {
       <div className="drawer-content">
         <div
           className={!isLoggedIn ? 'tooltip tooltip-bottom tooltip-warning' : undefined}
-          data-tip={!isLoggedIn && "Login!"}
+          data-tip={!isLoggedIn && 'Login!'}
         >
           <label
-            htmlFor='side-drawer'
+            htmlFor="side-drawer"
             className={clsx(
-              "btn btn-square btn-ghost drawer-button p-2",
-              !isLoggedIn && "btn-disabled"
+              'btn btn-square btn-ghost drawer-button p-2',
+              !isLoggedIn && 'btn-disabled'
             )}
           >
-            <BiMenu className='w-6 h-6' />
+            <BiMenu className="w-6 h-6" />
           </label>
         </div>
       </div>

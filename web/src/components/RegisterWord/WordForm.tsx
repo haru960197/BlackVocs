@@ -14,7 +14,7 @@ export const WordForm = () => {
 
     const res = await registerNewWord(input);
 
-    if (res.success) {  
+    if (res.success) {
       showToast('登録に成功しました', 'success');
     } else {
       showToast('登録に失敗しました', 'error');

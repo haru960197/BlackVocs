@@ -1,13 +1,15 @@
 'use server';
 
-import { addNewWord, AddNewWordError, AddNewWordResponse } from "@/lib/api";
-import { cookies } from "next/headers";
+import { addNewWord, AddNewWordError, AddNewWordResponse } from '@/lib/api';
+import { cookies } from 'next/headers';
 
 /**
  * 英単語を登録する
  * @param word 登録したい英単語
  */
-export const registerNewWord = async (word: string): Promise<{
+export const registerNewWord = async (
+  word: string
+): Promise<{
   success: boolean;
   error?: AddNewWordError;
   data?: AddNewWordResponse;
@@ -34,4 +36,3 @@ export const registerNewWord = async (word: string): Promise<{
 
   return { success: true, data: res.data };
 };
-
