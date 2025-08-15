@@ -8,7 +8,7 @@ from services.word_service import WordService
 import schemas.word_schemas as word_schemas
 from utils.auth_utils import get_user_id_from_cookie
 from utils.generative_AI_client import GenerativeAIClient
-from models.word import Entry as word_entry
+from models.word import Entry as word_entry, Item
 
 router = APIRouter(prefix="/word", tags=["word"])
 
@@ -55,32 +55,26 @@ async def suggest_words(
     CANDIDATE_CAP = 100
 
     # 正規表現を用いてDBから候補となる単語のリストを取得
-    candidates = svc.make_candidates_from_word(input_word, CANDIDATE_CAP)
+    candidate_items = svc.make_candidates_from_word(input_word, CANDIDATE_CAP)
 
-    if not candidates:
+    if not candidate_items:
         return word_schemas.SuggestWordsResponse(items=[])
 
     # LCS(最長共通部分裂)の長さで候補の単語をスコアリングする
-    # TODO: この配列には，models.Itemも持たせる(レスポンスに必要なため）
-    scored_word_infos: List[Tuple[float, int, str]] = []  # (score, registered_count, word)
+    score_items: List[Tuple[float, Item]] = []  # (score, Item)
     input_word = input_word.lower()
-    for doc in candidates:
-        word = str(doc.get("entry", {}).get("word", ""))
+    for item in candidate_items:
+        word = item.entry.word
         if not word:
             continue
         score = svc.lcs_score(input_word, word.lower())
-        reg_cnt = int(doc.get("registered_count", 0))
-        scored_word_infos.append((score, reg_cnt, word))
+        score_items.append((score, item))
 
     # 独自の優先度(score > registered_count > len(word) > wordの辞書順)で降順にソート
-    scored_word_infos.sort(key=lambda t: (-t[0], -t[1], len(t[2]), t[2]))
+    score_items.sort(key=lambda t: (-t[0], -t[1].registered_count, len(t[1].entry.word), t[1].entry.word))
 
-    res_items = [
-        # TODO: word_schemas.Itemをインスタンス化
-        word_schemas.Item()
-        for s, rc, w in scored_word_infos[:limit]
-    ]
-    return word_schemas.SuggestWordsResponse(items=res_items)
+    items = [word_schemas.Item(**word_info[1].entry.dict()) for word_info in score_items[:limit]]
+    return word_schemas.SuggestWordsResponse(items=items)
 
 @router.post(
     "/generate_new_word_entry", 
