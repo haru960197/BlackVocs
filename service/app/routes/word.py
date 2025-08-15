@@ -57,7 +57,7 @@ async def suggest_words(
 
     CANDIDATE_CAP = 100
 
-    # --- 1) 正規表現を用いてDBから候補となる単語のリストを取得 ---
+    # 正規表現を用いてDBから候補となる単語のリストを取得
     # TODO: この処理はword.repositoryに移す
     cursor = db["items"].find(
         {"entry.word": regex},
@@ -69,7 +69,7 @@ async def suggest_words(
     if not candidates:
         return word_schemas.SuggestWordsResponse(items=[])
 
-    # --- 2) Score by true LCS ---
+    # LCS(最長共通部分裂)の長さで候補の単語をスコアリングする
     # TODO: この配列には，models.Itemも持たせる(レスポンスに必要なため）
     scored_word_infos: List[Tuple[float, int, str]] = []  # (score, registered_count, word)
     input_word = input_word.lower()
@@ -81,10 +81,9 @@ async def suggest_words(
         reg_cnt = int(doc.get("registered_count", 0))
         scored_word_infos.append((score, reg_cnt, word))
 
-    # --- 3) Sort: LCS desc, registered_count desc, len asc, word asc ---
+    # 独自の優先度(score > registered_count > len(word) > wordの辞書順)で降順にソート
     scored_word_infos.sort(key=lambda t: (-t[0], -t[1], len(t[2]), t[2]))
 
-    # --- 4) Build response ---
     res_items = [
         # TODO: word_schemas.Itemをインスタンス化
         word_schemas.Item()
