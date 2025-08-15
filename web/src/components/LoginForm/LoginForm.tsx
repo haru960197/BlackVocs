@@ -25,7 +25,6 @@ export const LoginForm = () => {
     const result = await login(userName, password);
 
     if (result) {
-      // ログインに成功したので，単語一覧ページにリダイレクトする
       showToast('ログインに成功しました', 'success');
 
       const redirectUrl = searchParams.get('next') ?? '/register-word';

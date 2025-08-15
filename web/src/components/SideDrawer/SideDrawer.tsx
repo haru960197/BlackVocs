@@ -18,7 +18,7 @@ export const SideDrawer = () => {
 
   return (
     <div className="drawer">
-      {/* ハンバーガーメニューボタン（ログイン状態での展開） */}
+      {/* ハンバーガーメニューボタン（ログイン状態でのみ展開） */}
       <input id="side-drawer" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content">
         <div
