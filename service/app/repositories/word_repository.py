@@ -55,34 +55,4 @@ class WordRepository:
         )
         return str(updated["_id"])
 
-    def add_new_entry(self, entry: Entry) -> str | None:
-        """Insert a new Item built from Entry and return its _id as string."""
-
-        fpr = entry2fingerprint(entry)
-        item = Item(entry=entry, fingerprint=fpr)  
-
-        doc = item.model_dump(by_alias=True)
-
-        try: 
-            result = self.col.insert_one(doc)
-            return str(result.inserted_id)
-        except DuplicateKeyError: 
-            existing = self.col.find_one({"fingerprint": fpr}, {"_id": 1})
-            if existing:
-                return str(existing["_id"])
-            raise
-
-    def inc_registered_count(self, oid: str, amount: int = 1) -> str:
-        """Increment registered_count for a given _id."""
-        updated = self.col.find_one_and_update(
-            {"_id": ObjectId(oid)},
-            {"$inc": {"registered_count": amount}},
-            return_document=ReturnDocument.AFTER,
-            projection={"_id": 1},
-        )
-        if not updated:
-            raise ValueError(f"No document found with _id={oid}")
-        return str(updated["_id"])
-
-
 

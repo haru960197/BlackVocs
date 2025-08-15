@@ -30,18 +30,11 @@ async def get_user_word_list(
     svc = WordService(db)
     try: 
         entries = svc.get_word_entries_for_user(user_id)
-    except Exception:
-        raise HTTPException(status_code=500, detail="Internal error while getting entries")
-
-    try: 
         items = [word_schemas.Item(**entry.dict()) for entry in entries]
+        return word_schemas.GetUserWordListResponse(items=items, userid=user_id)
     except Exception:
         raise HTTPException(status_code=500, detail="Internal error while getting items")
 
-    try: 
-        return word_schemas.GetUserWordListResponse(items=items, userid=user_id)
-    except Exception:
-        raise HTTPException(status_code=500, detail="Internal error while return")
 # @router.get(
 #     "/suggest_words", 
 #     response_model=word_schemas.SuggestWordsResponse, 
@@ -98,11 +91,11 @@ async def register_word(
     try:
         entry = word_entry(**payload.item.dict())  
         svc.register_word(entry, user_id)  
+        item = word_schemas.Item.model_validate(entry, from_attributes=True)
+        return word_schemas.RegisterWordResponse(item=item)
     except Exception:
         raise HTTPException(status_code=500, detail="Internal error during register_word")
 
-    item = word_schemas.Item.model_validate(entry, from_attributes=True)
-    return word_schemas.RegisterWordResponse(item=item)
 
 
     

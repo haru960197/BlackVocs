@@ -16,9 +16,6 @@ class WordService:
         self.user_words = UserWordRepository(db)
         self.ai = ai_client or GenerativeAIClient()
 
-    def _generate_item_via_AI(self, word: str) -> dict[str, str] | None:
-        self.ai.generate_entry(word)
-    
     def get_word_entries_for_user(self, user_id: str) -> List[Entry]:
         """Return the word entries linked to the given user."""
         word_ids = self.user_words.list_word_ids_by_user(user_id)
