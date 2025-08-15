@@ -2,7 +2,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BiSolidUser, BiSolidUserCheck } from "react-icons/bi";
+import { BiSolidUserCheck, BiSolidUserX } from "react-icons/bi";
 
 export const UserButton = () => {
   const router = useRouter();
@@ -31,7 +31,7 @@ export const UserButton = () => {
   const UserIcon = ({ isLoggedIn }: { isLoggedIn: boolean }) => (
     isLoggedIn
       ? <BiSolidUserCheck className="w-6 h-6" />
-      : <BiSolidUser className="w-6 h-6" />
+      : <BiSolidUserX className="w-6 h-6" />
   );
   
   return (
