@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict, Any
 import re
 from pymongo.database import Database
 from bson import ObjectId #type: ignore
@@ -72,3 +72,11 @@ class WordService:
         """Build a regex like 'a.*b.*c' to quickly prefilter subsequence-like matches."""
         parts = [re.escape(ch) for ch in q]
         return ".*".join(parts)
+
+    def make_candidates_from_word(self, input_word: str, limit: int) -> List[Item]:
+        """
+        Build a subsequence regex from input_word and fetch candidate words from DB.
+        """
+        subseq = self.make_subsequence_regex(input_word)
+        return self.words.find_candidates_by_entry_word_subsequence(subseq, limit)
+

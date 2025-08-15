@@ -40,7 +40,7 @@ async def get_user_word_list(
     "/suggest_words", 
     response_model=word_schemas.SuggestWordsResponse, 
     operation_id="suggest_words",
-    responses=common_schemas.common_schemas.COMMON_ERROR_RESPONSES
+    responses=common_schemas.COMMON_ERROR_RESPONSES
 )
 async def suggest_words(
     request: word_schemas.SuggestWordsRequest,
@@ -48,23 +48,14 @@ async def suggest_words(
     db: Database = Depends(get_db),
 ):
     svc = WordService(db)
+
     input_word = request.input_word
     if not input_word:
         raise HTTPException(status_code=400, detail="input_word is required.")
-
-    subseq = svc.make_subsequence_regex(input_word)
-    regex = {"$regex": subseq, "$options": "i"}  # case-insensitive
-
     CANDIDATE_CAP = 100
 
     # 正規表現を用いてDBから候補となる単語のリストを取得
-    # TODO: この処理はword.repositoryに移す
-    cursor = db["items"].find(
-        {"entry.word": regex},
-        {"entry.word": 1, "registered_count": 1}
-    ).limit(CANDIDATE_CAP)
-
-    candidates = list(cursor)
+    candidates = svc.make_candidates_from_word(input_word, CANDIDATE_CAP)
 
     if not candidates:
         return word_schemas.SuggestWordsResponse(items=[])

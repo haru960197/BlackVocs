@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import List, Dict, Any
 from pymongo.database import Database
 from pymongo.collection import Collection
 from pymongo import ReturnDocument
@@ -6,7 +6,6 @@ from bson import ObjectId # type: ignore
 import core.config as config 
 from models.word import Item, Entry 
 from utils.fingerprint import entry2fingerprint
-from pymongo.errors import DuplicateKeyError
 
 WORD_COL = config.WORD_COLLECTION_NAME
 
@@ -55,4 +54,27 @@ class WordRepository:
         )
         return str(updated["_id"])
 
+    def find_candidates_by_entry_word_regex(
+        self,
+        regex_filter: Dict[str, Any],
+        limit: int
+    ) -> List[Item]:
+        """
+        Find candidate words by applying a MongoDB regex filter to 'entry.word'.
+        """
+        projection = {"entry.word": 1, "registered_count": 1}
+        cursor = self.col.find({"entry.word": regex_filter}, projection).limit(int(limit))
+        return [Item.model_validate(doc) for doc in cursor]
 
+    def find_candidates_by_entry_word_subsequence(
+        self,
+        subseq_pattern: str,
+        limit: int,
+        case_insensitive: bool = True
+    ) -> List[Item]:
+        """
+        Build a MongoDB regex filter from a subsequence pattern and delegate to regex finder.
+        """
+        options = "i" if case_insensitive else ""
+        regex = {"$regex": subseq_pattern, "$options": options}
+        return self.find_candidates_by_entry_word_regex(regex, limit)
