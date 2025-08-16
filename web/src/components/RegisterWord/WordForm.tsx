@@ -74,7 +74,7 @@ export const WordForm = () => {
 
   return (
     <form
-      className="flex flex-col border-1 bg-base-200 border-base-300 rounded-lg p-4 gap-2"
+      className="flex flex-col border-1 bg-base-200 border-base-300 rounded-lg w-full max-w-[450px] mx-4 p-4 gap-2"
       onSubmit={handleSubmit(onSubmit)}
     >
       <fieldset className="fieldset">
@@ -97,18 +97,16 @@ export const WordForm = () => {
         {errors.meaning && <p className="text-error text-sm mt-1">{errors.meaning.message}</p>}
 
         <legend className="fieldset-legend text-xl">例文</legend>
-        <input
-          type="text"
-          className={clsx("input text-xl", errors.example && 'input-error')}
+        <textarea
+          className={clsx("textarea text-lg w-full", errors.example && 'textarea-error')}
           placeholder="This is a pen."
           {...register('example', { required: true })}
         />
         {errors.example && <p className="text-error text-sm mt-1">{errors.example.message}</p>}
 
         <legend className="fieldset-legend text-xl">例文（日本語訳）</legend>
-        <input
-          type="text"
-          className={clsx("input text-xl", errors.exampleTranslation && 'input-error')}
+        <textarea
+          className={clsx("textarea text-lg w-full", errors.exampleTranslation && 'textarea-error')}
           placeholder="これはペンです。"
           {...register('exampleTranslation', { required: true })}
         />
