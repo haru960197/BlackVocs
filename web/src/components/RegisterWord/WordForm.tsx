@@ -12,9 +12,13 @@ export const WordForm = () => {
   const handleClick = async () => {
     setIsLoading(true);
 
-    await registerNewWord(input);
+    const res = await registerNewWord(input);
 
-    showToast('登録に成功しました', 'success');
+    if (res.success) {  
+      showToast('登録に成功しました', 'success');
+    } else {
+      showToast('登録に失敗しました', 'error');
+    }
 
     setIsLoading(false);
   };

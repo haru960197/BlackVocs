@@ -1,97 +1,125 @@
-from fastapi import APIRouter, Depends, Request, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from typing import Tuple, List
 from pymongo.database import Database
-from db.session import get_db
-import utils.word as word_utils
-import utils.user as auth_utils
-import utils.user_word as user_word_utils
+import utils.auth_utils as auth_utils
 import schemas.common_schemas as common_schemas
-import schemas.word as schemas
-import models.word as word_models
+from repositories.session import get_db
+from services.word_service import WordService
+import schemas.word_schemas as word_schemas
+from utils.auth_utils import get_user_id_from_cookie
+from utils.generative_AI_client import GenerativeAIClient
+from models.word import Entry as word_entry, Item
 
-router = APIRouter()
+router = APIRouter(prefix="/word", tags=["word"])
 
-
-@router.post("/word/add_new_word", response_model=schemas.AddNewWordResponse, responses=common_schemas.COMMON_ERROR_RESPONSES)
-async def add_new_word(      
-    request: Request,
-    word_request: schemas.AddNewWordRequest,
-    db: Database = Depends(get_db)
-):
-    """
-    input: an English word
-
-    1. 単語入力からアイテムを生成
-    2. ItemをDBに登録
-    3. cookieからuser_id取得
-    4. user_wordテーブルにuser_id, word_idを保存
-
-    return: itemのid, user_wordテーブルid
-    """
-    word = word_request.word
-
-    # 1. アイテム生成
-    try:
-        new_item: word_models.Item = word_utils.word2item_with_API(word)
-    except Exception as e:
-        print("Error occurred in item generation:", e)
-        raise e  
-    
-    # 2. ItemをDBに登録
-    try: 
-        word_id: str = word_utils.insert_word_item(new_item, db)
-    except Exception as e:
-        print("Error occurred in item insertion:", e)
-        raise e  
-
-    # 3. cookieからuser_id取得
-    try: 
-        user_id: str = await auth_utils.get_user_id_from_cookie(request)
-    except Exception as e:
-        print("Error occurred in user ID retrieval:", e)
-        raise e   
-
-    # 4. user_wordテーブルに保存
-    try: 
-        user_word_id = user_word_utils.insert_user_word(user_id, word_id, db)
-    except Exception as e: 
-        print("Error occured in user_word_item insertion:", e)
-        raise HTTPException(status_code=500, detail="Failed to insert user-word item") 
-
-    return schemas.AddNewWordResponse(
-        item=word_utils.model_to_schema(new_item),
-        user_word_id=user_word_id
-    )
-
-@router.get("/word/get_user_word_list", response_model=schemas.GetUserWordListResponse, responses=common_schemas.COMMON_ERROR_RESPONSES)
+@router.get(
+    "/get_user_word_list", 
+    operation_id="get_user_word_list", 
+    response_model=word_schemas.GetUserWordListResponse, 
+    responses=common_schemas.COMMON_ERROR_RESPONSES
+)
 async def get_user_word_list(
     request: Request,
     db: Database = Depends(get_db)
 ):
-    """
-    Get the list of words saved by the current user.
-    """
-    # 1. get user_id 
+    """Return the current user's saved word list."""
     try:
-        user_id: str = await auth_utils.get_user_id_from_cookie(request)
-    except Exception as e:
-        print("Error occurred in user ID retrieval:", e)
+        user_id = await auth_utils.get_user_id_from_cookie(request)
+    except Exception:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
-    # 2. get word_id list from user_word_db
-    try:
-        word_ids: list[str] = user_word_utils.get_user_word_ids(user_id, db)
-    except Exception as e:
-        print("Error retrieving user word list:", e)
-        raise HTTPException(status_code=500, detail="Failed to retrieve word list")
+    svc = WordService(db)
+    try: 
+        entries = svc.get_word_entries_for_user(user_id)
+        items = [word_schemas.Item(**entry.dict()) for entry in entries]
+        return word_schemas.GetUserWordListResponse(items=items, userid=user_id)
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal error while getting items")
 
-    # 3. word item list from word_db
-    try:
-        items: list[word_models.Item] = word_utils.get_items_by_ids(word_ids, db)
-    except Exception as e:
-        print("Error retrieving items from word IDs:", e)
-        raise HTTPException(status_code=500, detail="Failed to retrieve word details")
+@router.post(
+    "/suggest_words", 
+    response_model=word_schemas.SuggestWordsResponse, 
+    operation_id="suggest_words",
+    responses=common_schemas.COMMON_ERROR_RESPONSES
+)
+async def suggest_words(
+    request: word_schemas.SuggestWordsRequest,
+    db: Database = Depends(get_db),
+):
+    svc = WordService(db)
+    input_word = request.input_word
+    limit = request.limit
+    if not input_word:
+        raise HTTPException(status_code=400, detail="input_word is required.")
+    CANDIDATE_CAP = 100
 
-    return schemas.GetUserWordListResponse(
-        wordlist=[word_utils.model_to_schema(item) for item in items],
-        userid=user_id
-    )
+    # 正規表現を用いてDBから候補となる単語のリストを取得
+    candidate_items = svc.make_candidates_from_word(input_word, CANDIDATE_CAP)
+
+    if not candidate_items:
+        return word_schemas.SuggestWordsResponse(items=[])
+
+    # LCS(最長共通部分裂)の長さで候補の単語をスコアリングする
+    score_items: List[Tuple[float, Item]] = []  # (score, Item)
+    input_word = input_word.lower()
+    for item in candidate_items:
+        word = item.entry.word
+        if not word:
+            continue
+        score = svc.lcs_score(input_word, word.lower())
+        score_items.append((score, item))
+
+    # 独自の優先度(score > registered_count > len(word) > wordの辞書順)で降順にソート
+    score_items.sort(key=lambda t: (-t[0], -t[1].registered_count, len(t[1].entry.word), t[1].entry.word))
+
+    items = [word_schemas.Item(**word_info[1].entry.dict()) for word_info in score_items[:limit]]
+    return word_schemas.SuggestWordsResponse(items=items)
+
+@router.post(
+    "/generate_new_word_entry", 
+    operation_id="generate_new_word_entry", 
+    response_model=word_schemas.GenerateNewWordEntryResponse, 
+    responses=common_schemas.COMMON_ERROR_RESPONSES, 
+    description="generate new word entry with AI", 
+)
+async def generate_new_word_entry( 
+    request: word_schemas.GenerateNewWordEntryRequest, 
+):
+    client = GenerativeAIClient()
+    try:
+        result: dict[str, str] | None = client.generate_entry(request.word)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return {"item": result}
+
+@router.post(
+    "/register_word", 
+    operation_id="register_word", 
+    response_model=word_schemas.RegisterWordResponse, 
+    status_code=status.HTTP_201_CREATED,
+    responses=common_schemas.COMMON_ERROR_RESPONSES
+)
+async def register_word(
+    payload: word_schemas.RegisterWordRequest,
+    request: Request,
+    db: Database = Depends(get_db),
+):
+
+    try:
+        user_id = await get_user_id_from_cookie(request)
+    except Exception:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    svc = WordService(db)
+    try:
+        entry = word_entry(**payload.item.dict())  
+        svc.register_word(entry, user_id)  
+        item = word_schemas.Item.model_validate(entry, from_attributes=True)
+        return word_schemas.RegisterWordResponse(item=item)
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal error during register_word")
+
+
+
+    

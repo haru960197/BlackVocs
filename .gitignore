@@ -1,6 +1,9 @@
 /drawio/**
+/node_modules/**
 **/__pycache__/**
 .env
 venv
 # mac
 .DS_Store
+
+/web/src/lib/api/

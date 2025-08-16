@@ -9,7 +9,7 @@ class User(BaseModel):
 
 # sign in -------------------------------------
 class SigninRequest(BaseModel):
-    username: str
+    username_or_email: str
     password: str
 
 class SigninResponse(BaseModel):
@@ -23,4 +23,8 @@ class SignupRequest(User):
 class SignupResponse(User):
     id: str = Field(..., alias="_id")
     class Config:
-        populate_by_name = True
+        allow_population_by_field_name = True
+
+class SignedInCheckResponse(BaseModel):
+    signed_in: bool
+    user_id: str | None = None

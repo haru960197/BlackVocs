@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict 
 from pydantic.alias_generators import to_camel
 from typing import List
 
@@ -21,5 +21,25 @@ class AddNewWordResponse(CustomBaseModel):
     user_word_id: str
 
 class GetUserWordListResponse(BaseModel):
-    wordlist: List[Item]
+    items: List[Item]
     userid: str
+
+class SuggestWordsRequest(BaseModel): 
+    input_word: str
+    limit: int = 10 
+
+class SuggestWordsResponse(BaseModel):
+    items: List[Item]
+
+class GenerateNewWordEntryRequest(BaseModel): 
+    word: str
+
+class GenerateNewWordEntryResponse(BaseModel): 
+    item: Item 
+
+class RegisterWordRequest(BaseModel): 
+    item: Item
+
+class RegisterWordResponse(BaseModel): 
+    item: Item
+

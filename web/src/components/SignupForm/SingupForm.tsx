@@ -1,10 +1,10 @@
 'use client';
 
-import { useToast } from '@/context/ToastContext';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { signupUser } from './actions';
+import { handleSignupUser } from './action';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/context/ToastContext';
 
 export const SignupForm = () => {
   const router = useRouter();
@@ -25,7 +25,7 @@ export const SignupForm = () => {
 
     setIsLoading(true);
 
-    const response = await signupUser(userName, email, password);
+    const response = await handleSignupUser(userName, email, password);
 
     if (response.success) {
       // 登録に成功したので，ログインページにリダイレクトする

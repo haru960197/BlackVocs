@@ -1,10 +1,20 @@
 'use server';
 
-import * as client from '@/lib/api';
+import { getUserWordList } from '@/lib/api';
 import { WordListItem } from './WordListItem';
+import { cookies } from 'next/headers';
 
 export const WordList = async () => {
-  const wordInfoList = await client.getAllWordInfo();
+  const cookieStore = await cookies();
+  const tokenCookie = cookieStore.get('access_token');
+
+  const res = await getUserWordList({
+    headers: {
+      Cookie: `${tokenCookie?.name}=${tokenCookie?.value}`,
+    },
+  });
+
+  const wordInfoList = res.data ? res.data.wordlist : [];
 
   return (
     <ul className="list bg-base-100 rounded-box shadow-md w-full mx-4">
@@ -15,3 +25,4 @@ export const WordList = async () => {
     </ul>
   );
 };
+
