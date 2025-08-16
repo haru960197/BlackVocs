@@ -15,6 +15,7 @@ export const RegisterWordForm = () => {
 
   const [suggestions, setSuggestions] = useState<WordInfo[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [isWordInputFocused, setIsWordInputFocused] = useState(false);
 
   const {
     register,
@@ -39,6 +40,18 @@ export const RegisterWordForm = () => {
 
   // 'word'フィールドの値を監視
   const watchedWord = watch("word");
+
+  const { onBlur: rhfOnBlur, ...wordRegisterRest } = register('word', { required: true });
+
+  const handleWordInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    // まず、react-hook-formのonBlurを実行してバリデーションをトリガー
+    rhfOnBlur(e);
+    
+    // 次に、候補リストを非表示にするためのロジックを実行
+    setTimeout(() => {
+      setIsWordInputFocused(false);
+    }, 150);
+  };
 
   useEffect(() => {
     // 入力が開始されたらローディング状態にする
@@ -147,14 +160,16 @@ export const RegisterWordForm = () => {
         <input
           type="text"
           className={clsx('input text-xl', errors.word && 'input-error')}
+          onFocus={() => setIsWordInputFocused(true)}
           placeholder="Pen"
-          {...register('word', { required: true })}
+          onBlur={handleWordInputBlur}
+          {...wordRegisterRest}
         />
         {errors.word && <p className="text-error text-sm mt-1">{errors.word.message}</p>}
 
         <div>
         {/* ローディング表示と候補リスト */}
-          {(isLoadingSuggestions || suggestions.length > 0) &&
+          {isWordInputFocused && (isLoadingSuggestions || suggestions.length > 0) &&
           <ul className="list absolute z-10 mt-1 bg-base-300 border rounded-lg shadow-lg max-h-60 overflow-auto">
             {isLoadingSuggestions &&
               <li className="list-row px-3 py-2 text-lg">
@@ -162,17 +177,18 @@ export const RegisterWordForm = () => {
               </li>
             }
 
-            {!isLoadingSuggestions && suggestions.length > 0 && suggestions.map((suggestion, index) => (
-              <li
-                key={index}
-                className="list-row px-3 py-2 text-lg cursor-pointer hover:bg-accent"
-                onClick={() => handleSuggestionClick(suggestion)}
-              >
-                {`${suggestion.word} | ${suggestion.meaning}`}
-              </li>
-            ))}
-          </ul>
-          }
+            {!isLoadingSuggestions && suggestions.length > 0
+              && suggestions.map((suggestion, index) => (
+                <li
+                  key={index}
+                  className="list-row px-3 py-2 text-lg cursor-pointer hover:bg-accent"
+                  onClick={() => handleSuggestionClick(suggestion)}
+                >
+                  {`${suggestion.word} | ${suggestion.meaning}`}
+                </li>
+              ))}
+            </ul>
+            }
         </div>
 
         <legend className="fieldset-legend text-xl">意味</legend>
