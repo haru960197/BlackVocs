@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 from bson import ObjectId 
 
 if TYPE_CHECKING:
-    from schemas.word_schemas import Item as SchemaItem
+    from schemas.word_schemas import Item as SchemaItem, ItemCreate as SchemaItemCreate
 
 class Entry(BaseModel):
     word: str
@@ -11,12 +11,12 @@ class Entry(BaseModel):
     example_sentence: str
     example_sentence_translation: str
 
-    def to_schema_item(self) -> "SchemaItem":
-        from schemas.word_schemas import Item as SchemaItem
-        return SchemaItem(
-            word=self.word,
-            meaning=self.meaning,
-            example_sentence=self.example_sentence,
+    def to_schema_item(self) -> "SchemaItemCreate":
+        from schemas.word_schemas import ItemCreate as SchemaItemCreate
+        return SchemaItemCreate(
+            word=self.word, 
+            meaning=self.meaning, 
+            example_sentence=self.example_sentence, 
             example_sentence_translation=self.example_sentence_translation,
         )
 
@@ -35,7 +35,7 @@ class Item(BaseModel):
     def to_schema_item(self) -> "SchemaItem":
         from schemas.word_schemas import Item as SchemaItem
         return SchemaItem(
-            id=str(self.id) if self.id is not None else None,
+            id=str(self.id),
             word=self.entry.word,
             meaning=self.entry.meaning,
             example_sentence=self.entry.example_sentence,

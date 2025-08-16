@@ -93,7 +93,7 @@ async def generate_new_word_entry(
 
     client = GenerativeAIClient()
     try:
-        generated_entry: Entry = client.generate_entry(request.word)
+        generated_entry: Entry = client.generate_entry(payload.word)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -120,7 +120,6 @@ async def register_word(
     svc = WordService(db)
     try:
         entry = Entry(**payload.item.dict())  
-        print(entry)
         registered_id = svc.register_word(entry, user_id)  
         return word_schemas.RegisterWordResponse(user_word_id=registered_id)
     except Exception:
