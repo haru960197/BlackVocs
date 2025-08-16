@@ -31,7 +31,7 @@ class AuthService:
         inserted_id = self.users.create(user_doc)
 
         sanitized = {k: v for k, v in user_doc.items() if k != "hashed_password"}
-        sanitized["_id"] = inserted_id
+        sanitized["id"] = inserted_id
         return inserted_id, sanitized
 
     def signin(self, identifier: str, password: str) -> dict[str, Any]:

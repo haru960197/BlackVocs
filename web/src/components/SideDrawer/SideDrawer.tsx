@@ -1,9 +1,10 @@
 'use client';
 
+import { useAuth } from '@/context/AuthContext';
 import clsx from 'clsx';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BiBookOpen, BiPencil } from 'react-icons/bi';
+import { BiBookOpen, BiPencil, BiMenu } from 'react-icons/bi';
 
 const links = [
   { name: 'Register Word', href: '/register-word', icon: BiPencil },
@@ -13,27 +14,30 @@ const links = [
 export const SideDrawer = () => {
   const pathName = usePathname();
 
+  const { isLoggedIn } = useAuth();
+
   return (
     <div className="drawer">
+      {/* ハンバーガーメニューボタン（ログイン状態でのみ展開） */}
       <input id="side-drawer" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content">
-        <label htmlFor="side-drawer" className="btn btn-square btn-ghost drawer-button">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            className="inline-block h-5 w-5 stroke-current"
+        <div
+          className={!isLoggedIn ? 'tooltip tooltip-bottom tooltip-warning' : undefined}
+          data-tip={!isLoggedIn && "Login!"}
+        >
+          <label
+            htmlFor='side-drawer'
+            className={clsx(
+              "btn btn-square btn-ghost drawer-button p-2",
+              !isLoggedIn && "btn-disabled"
+            )}
           >
-            {' '}
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M4 6h16M4 12h16M4 18h16"
-            ></path>{' '}
-          </svg>
-        </label>
+            <BiMenu className='w-6 h-6' />
+          </label>
+        </div>
       </div>
+
+      {/* ドロワー本体 */}
       <div className="drawer-side z-50">
         <label htmlFor="side-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
         <div className="menu bg-base-200 text-base-content min-h-full w-80 p-4 flex flex-col gap-2">
