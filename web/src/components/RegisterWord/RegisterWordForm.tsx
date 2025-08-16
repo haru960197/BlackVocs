@@ -8,7 +8,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { handleGenerateWordData, handleRegisterWord } from './actions';
 import { WordFormInput, wordFormSchema } from './schema';
 
-export const WordForm = () => {
+export const RegisterWordForm = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const { showToast } = useToast();
 
