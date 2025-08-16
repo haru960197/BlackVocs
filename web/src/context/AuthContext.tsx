@@ -1,7 +1,7 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from "react";
-import { handleLogin, handleLogout, loggedInCheck } from "./actions";
+import { createContext, useContext, useEffect, useState } from 'react';
+import { handleLogin, handleLogout, loggedInCheck } from './actions';
 
 type AuthContextType = {
   isLoggedIn: boolean;
@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
       }
 
       setIsLoading(false);
-    }
+    };
 
     initialCheck();
   }, []);
@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
 
     setIsLoggedIn(true);
     return true;
-  }
+  };
 
   const logout = async () => {
     setIsLoading(true);
@@ -58,14 +58,14 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
 
     setIsLoggedIn(false);
     return true;
-  }
+  };
 
   return (
     <AuthContext.Provider value={{ isLoggedIn, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
@@ -73,5 +73,4 @@ export const useAuth = (): AuthContextType => {
     throw new Error('useAuth must be used within a AuthProvider');
   }
   return context;
-}
-
+};

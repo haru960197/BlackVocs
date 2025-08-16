@@ -25,4 +25,3 @@ export const WordList = async () => {
     </ul>
   );
 };
-

@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { ACCESS_TOKEN_KEY } from "./constant/auth";
+import { NextRequest, NextResponse } from 'next/server';
+import { ACCESS_TOKEN_KEY } from './constant/auth';
 
 export function middleware(request: NextRequest) {
   const tokenCookie = request.cookies.get(ACCESS_TOKEN_KEY);
@@ -18,9 +18,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    '/word-list/:path*',
-    '/register-word/:path*',
-  ],
-}
-
+  matcher: ['/word-list/:path*', '/register-word/:path*'],
+};
