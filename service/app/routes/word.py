@@ -8,7 +8,7 @@ from services.word_service import WordService
 import schemas.word_schemas as word_schemas
 from utils.auth_utils import get_user_id_from_cookie
 from utils.generative_AI_client import GenerativeAIClient
-from models.word import Entry as word_entry, Item
+from models.word import Entry, Item
 
 router = APIRouter(prefix="/word", tags=["word"])
 
@@ -30,9 +30,9 @@ async def get_user_word_list(
 
     svc = WordService(db)
     try: 
-        entries = svc.get_word_entries_for_user(user_id)
-        items = [word_schemas.Item(**entry.dict()) for entry in entries]
-        return word_schemas.GetUserWordListResponse(items=items, userid=user_id)
+        model_items = svc.get_word_items_for_user(user_id)
+        schema_items = [model_item.to_schema_item() for model_item in model_items]
+        return word_schemas.GetUserWordListResponse(items=schema_items, userid=user_id)
     except Exception:
         raise HTTPException(status_code=500, detail="Internal error while getting items")
 
@@ -72,7 +72,7 @@ async def suggest_words(
     # 独自の優先度(score > registered_count > len(word) > wordの辞書順)で降順にソート
     score_items.sort(key=lambda t: (-t[0], -t[1].registered_count, len(t[1].entry.word), t[1].entry.word))
 
-    items = [word_schemas.Item(**word_info[1].entry.dict()) for word_info in score_items[:limit]]
+    items = [word_info[1].to_schema_item() for word_info in score_items[:limit]]
     return word_schemas.SuggestWordsResponse(items=items)
 
 @router.post(
@@ -93,11 +93,11 @@ async def generate_new_word_entry(
 
     client = GenerativeAIClient()
     try:
-        result: dict[str, str] | None = client.generate_entry(payload.word)
+        generated_entry: Entry = client.generate_entry(request.word)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    return {"item": result}
+    return word_schemas.GenerateNewWordEntryResponse(item=generated_entry.to_schema_item())
 
 @router.post(
     "/register_word", 
@@ -119,10 +119,10 @@ async def register_word(
 
     svc = WordService(db)
     try:
-        entry = word_entry(**payload.item.dict())  
-        svc.register_word(entry, user_id)  
-        item = word_schemas.Item.model_validate(entry, from_attributes=True)
-        return word_schemas.RegisterWordResponse(item=item)
+        entry = Entry(**payload.item.dict())  
+        print(entry)
+        registered_id = svc.register_word(entry, user_id)  
+        return word_schemas.RegisterWordResponse(user_word_id=registered_id)
     except Exception:
         raise HTTPException(status_code=500, detail="Internal error during register_word")
 
