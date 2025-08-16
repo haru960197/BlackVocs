@@ -3,16 +3,20 @@
 import { useToast } from '@/context/ToastContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { clsx } from 'clsx';
+import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { handleRegisterWord } from './actions';
+import { handleGenerateWordData, handleRegisterWord } from './actions';
 import { WordFormInput, wordFormSchema } from './schema';
 
 export const WordForm = () => {
+  const [isGenerating, setIsGenerating] = useState(false);
   const { showToast } = useToast();
 
   const {
     register,
     handleSubmit,
+    getValues,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<WordFormInput>({
     resolver: zodResolver(wordFormSchema),
@@ -20,6 +24,38 @@ export const WordForm = () => {
   });
 
   const isDisabled = !!errors.word || !!errors.meaning || !!errors.example || !!errors.exampleTranslation;
+  const isGeneratingDisabled = !!errors.word;
+
+  const handleGenerateClick = async () => {
+    if (isGeneratingDisabled) {
+      return;
+    }
+
+    setIsGenerating(true);
+
+    const word = getValues('word');
+
+    const res = await handleGenerateWordData(word)
+
+    if (res.success) {
+      const data = res.data;
+      if (data?.item) {
+        // フォームに生成されたデータをセットする
+        setValue("word", data.item.word);
+        setValue('meaning', data.item.meaning);
+        setValue('example', data.item.exampleSentence);
+        setValue('exampleTranslation', data.item.exampleSentenceTranslation);
+
+        showToast('単語情報を生成しました', 'success');
+      } else {
+        showToast('単語情報の生成に失敗しました', 'error');
+      }
+    } else {
+      showToast('単語情報の生成に失敗しました', 'error');
+    }
+
+    setIsGenerating(false);
+  }
 
   const onSubmit: SubmitHandler<WordFormInput> = async (data) => {
     if (isDisabled) {
@@ -79,6 +115,13 @@ export const WordForm = () => {
       </fieldset>
 
       <div className="flex justify-end">
+        <button
+          className='btn btn-secondary btn-sm lg:btn-lg text-lg lg:text-xl mr-2'
+          disabled={isGeneratingDisabled || isGenerating}
+          onClick={handleGenerateClick}
+        >
+          {isGenerating ? <span className="loading loading-spinner" /> : 'AIで生成'}
+        </button>
         <button
           type="submit"
           className="btn btn-primary btn-sm lg:btn-lg text-lg lg:text-xl"
