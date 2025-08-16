@@ -116,6 +116,7 @@ export const WordForm = () => {
         <div className='flex flex-col items-end gap-2'>
           <div className='flex justify-end gap-2'>
         <button
+          type="button"
           className="btn btn-accent btn-sm lg:btn-lg text-lg lg:text-xl"
           onClick={() => reset()}
         >
