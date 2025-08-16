@@ -13,13 +13,6 @@ class Item(CustomBaseModel):
     example_sentence: str
     example_sentence_translation: str 
 
-class AddNewWordRequest(CustomBaseModel):
-    word: str
-
-class AddNewWordResponse(CustomBaseModel):
-    item: Item
-    user_word_id: str
-
 class GetUserWordListResponse(BaseModel):
     items: List[Item]
     userid: str

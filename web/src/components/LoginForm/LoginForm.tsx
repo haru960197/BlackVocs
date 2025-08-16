@@ -2,72 +2,82 @@
 
 import { useToast } from '@/context/ToastContext';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { handleSignUp } from './actions';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { LoginFormInput, loginSchema } from './schema';
 
 export const LoginForm = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { showToast } = useToast();
+  const { login } = useAuth();
 
-  const [userName, setUserName] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormInput>({
+    resolver: zodResolver(loginSchema),
+    mode: 'onChange',
+  });
 
-  const isDisabled = !userName || !password;
+  const isDisabled = !!errors.userName || !!errors.password;
 
-  const handleClick = async () => {
+  const onSubmit: SubmitHandler<LoginFormInput> = async (data) => {
     if (isDisabled) {
       return;
     }
 
-    setIsLoading(true);
+    const result = await login(data.userName, data.password);
 
-    const res = await handleSignUp(userName, password);
-
-    if (!res.error) {
-      // ログインに成功したので，単語一覧ページにリダイレクトする
+    if (result) {
       showToast('ログインに成功しました', 'success');
-      router.push('/word-list');
+
+      const redirectUrl = searchParams.get('next') ?? '/register-word';
+      router.push(redirectUrl);
     } else {
       // ログインに失敗
       showToast('ログインに失敗しました', 'error');
     }
-
-    setIsLoading(false);
   };
 
   return (
     <div className="flex flex-col border-1 bg-base-200 border-base-300 rounded-lg p-4 gap-2">
-      <fieldset className="fieldset">
-        <label className="label text-lg">User name</label>
-        <input
-          type="text"
-          className="input text-xl"
-          placeholder="User name"
-          value={userName}
-          onChange={(e) => setUserName(e.target.value)}
-        />
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <fieldset className="fieldset">
+          <label className="label text-lg">User name</label>
+          <input
+            type="text"
+            className="input text-xl"
+            placeholder="User name"
+            autoComplete="username"
+            {...register('userName')}
+          />
+          {errors.userName && <p className="text-error text-sm mt-1">{errors.userName.message}</p>}
 
-        <label className="label text-lg">Password</label>
-        <input
-          type="password"
-          className="input text-xl"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-      </fieldset>
+          <label className="label text-lg">Password</label>
+          <input
+            type="password"
+            className="input text-xl"
+            placeholder="Password"
+            autoComplete="current-password"
+            {...register('password')}
+          />
+          {errors.password && <p className="text-error text-sm mt-1">{errors.password.message}</p>}
+        </fieldset>
 
-      <div className="flex justify-end">
-        <button
-          className="btn btn-primary btn-sm lg:btn-lg text-lg lg:text-xl"
-          disabled={isDisabled}
-          onClick={handleClick}
-        >
-          {isLoading ? <span className="loading loading-spinner" /> : 'ログイン'}
-        </button>
-      </div>
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            className="btn btn-primary btn-sm lg:btn-lg text-lg lg:text-xl"
+            disabled={isDisabled || isSubmitting}
+          >
+            {isSubmitting ? <span className="loading loading-spinner" /> : 'ログイン'}
+          </button>
+        </div>
+      </form>
 
       <p>
         アカウントをお持ちでない方：
