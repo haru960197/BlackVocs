@@ -1,7 +1,14 @@
 'use server';
 
-import { generateNewWordEntry, GenerateNewWordEntryError, GenerateNewWordEntryResponse, registerWord, RegisterWordError, RegisterWordResponse } from "@/lib/api";
-import { cookies } from "next/headers";
+import {
+  generateNewWordEntry,
+  GenerateNewWordEntryError,
+  GenerateNewWordEntryResponse,
+  registerWord,
+  RegisterWordError,
+  RegisterWordResponse,
+} from '@/lib/api';
+import { cookies } from 'next/headers';
 
 /**
  * 英単語を登録する
@@ -44,11 +51,12 @@ export const handleRegisterWord = async (
   return { success: true, data: res.data };
 };
 
-
 /**
  * 生成AIを使って新しい単語情報を生成する
  */
-export const handleGenerateWordData = async (word: string): Promise<{
+export const handleGenerateWordData = async (
+  word: string
+): Promise<{
   success: boolean;
   error?: GenerateNewWordEntryError;
   data?: GenerateNewWordEntryResponse;
@@ -74,4 +82,4 @@ export const handleGenerateWordData = async (word: string): Promise<{
   }
 
   return { success: true, data: res.data };
-} 
+};
