@@ -24,8 +24,8 @@ export const WordForm = () => {
     mode: 'onChange',
   });
 
-  const isDisabled = !!errors.word || !!errors.meaning || !!errors.example || !!errors.exampleTranslation;
-  const isGeneratingDisabled = !!errors.word;
+  const isDisabled = !getValues("word") || !!errors.word || !!errors.meaning || !!errors.example || !!errors.exampleTranslation;
+  const isGeneratingDisabled = !getValues("word") || !!errors.word;
 
   const handleGenerateClick = async () => {
     if (isGeneratingDisabled) {
