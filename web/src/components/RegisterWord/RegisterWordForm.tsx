@@ -76,12 +76,7 @@ export const RegisterWordForm = () => {
           return;
         }
 
-        setSuggestions(
-          response.data.items.map((item) => ({
-            id: item.word,
-            ...item,
-          }))
-        );
+        setSuggestions(response.data.items);
         setIsLoadingSuggestions(false);
       };
 
