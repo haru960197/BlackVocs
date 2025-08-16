@@ -1,10 +1,20 @@
-'use server'
+'use server';
 
-import { ACCESS_TOKEN_KEY } from "@/constant/auth";
-import { signedInCheck, SignedInCheckResponse, signin, SigninError, SigninResponse, signout } from "@/lib/api";
-import { cookies } from "next/headers";
+import { ACCESS_TOKEN_KEY } from '@/constant/auth';
+import {
+  signedInCheck,
+  SignedInCheckResponse,
+  signin,
+  SigninError,
+  SigninResponse,
+  signout,
+} from '@/lib/api';
+import { cookies } from 'next/headers';
 
-export const handleLogin = async (userName: string, password: string): Promise<{
+export const handleLogin = async (
+  userName: string,
+  password: string
+): Promise<{
   success: boolean;
   error?: SigninError;
   data?: SigninResponse;
@@ -25,13 +35,13 @@ export const handleLogin = async (userName: string, password: string): Promise<{
   cookieStore.set(ACCESS_TOKEN_KEY, res.data.access_token, {
     httpOnly: true,
     maxAge: 60 * 60,
-    sameSite: "none",
+    sameSite: 'none',
     secure: true,
   });
 
   return { success: true, data: res.data };
 };
- 
+
 export const handleLogout = async (): Promise<{
   success: boolean;
 }> => {
@@ -46,7 +56,7 @@ export const handleLogout = async (): Promise<{
   cookieStore.delete(ACCESS_TOKEN_KEY);
 
   return { success: true };
-}
+};
 
 export const loggedInCheck = async (): Promise<{
   success: boolean;
@@ -66,6 +76,4 @@ export const loggedInCheck = async (): Promise<{
   }
 
   return { success: true, data: res.data };
-}
-
-
+};
