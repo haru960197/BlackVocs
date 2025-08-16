@@ -7,12 +7,17 @@ class CustomBaseModel(BaseModel):
         alias_generator=to_camel,
         populate_by_name=True)
 
-class Item(CustomBaseModel):
-    id: str | None = None
+class ItemBase(CustomBaseModel):
     word: str
     meaning: str
     example_sentence: str
     example_sentence_translation: str 
+
+class ItemCreate(ItemBase): 
+    pass
+
+class Item(ItemBase): 
+    id: str
 
 class GetUserWordListResponse(BaseModel):
     items: List[Item]
@@ -29,10 +34,10 @@ class GenerateNewWordEntryRequest(BaseModel):
     word: str
 
 class GenerateNewWordEntryResponse(BaseModel): 
-    item: Item 
+    item: ItemCreate 
 
 class RegisterWordRequest(BaseModel): 
-    item: Item
+    item: ItemCreate
 
 class RegisterWordResponse(BaseModel):  
     user_word_id: str

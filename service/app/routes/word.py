@@ -93,7 +93,7 @@ async def generate_new_word_entry(
 
     client = GenerativeAIClient()
     try:
-        generated_entry: Entry = client.generate_entry(request.word)
+        generated_entry: Entry = client.generate_entry(payload.word)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
