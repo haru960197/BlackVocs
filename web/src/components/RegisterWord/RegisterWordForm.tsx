@@ -41,14 +41,18 @@ export const RegisterWordForm = () => {
   const watchedWord = watch("word");
 
   useEffect(() => {
+    // 入力が開始されたらローディング状態にする
+    setIsLoadingSuggestions(true);
+
     const timerId = setTimeout(() => {
       if (watchedWord.trim() === "") {
         setSuggestions([]);
+        // 入力が空になったらローディングは停止
+        setIsLoadingSuggestions(false);
         return;
       }
 
       const fetchSuggestions = async () => {
-        setIsLoadingSuggestions(true);
 
         const response = await getSuggestWords(watchedWord);
 
@@ -150,7 +154,7 @@ export const RegisterWordForm = () => {
 
         <div>
         {/* ローディング表示と候補リスト */}
-          {isLoadingSuggestions || suggestions.length > 0 &&
+          {(isLoadingSuggestions || suggestions.length > 0) &&
           <ul className="list absolute z-10 mt-1 bg-base-300 border rounded-lg shadow-lg max-h-60 overflow-auto">
             {isLoadingSuggestions &&
               <li className="list-row px-3 py-2 text-lg">
