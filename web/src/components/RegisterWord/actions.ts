@@ -7,6 +7,9 @@ import {
   registerWord,
   RegisterWordError,
   RegisterWordResponse,
+  suggestWords,
+  SuggestWordsError,
+  SuggestWordsResponse,
 } from '@/lib/api';
 import { cookies } from 'next/headers';
 
@@ -83,3 +86,35 @@ export const handleGenerateWordData = async (
 
   return { success: true, data: res.data };
 };
+
+export const getSuggestWords = async (
+  wordInput: string
+): Promise<{
+  success: boolean;
+  error?: SuggestWordsError;
+  data?: SuggestWordsResponse;
+}> => {
+  const cookieStore = await cookies();
+  const tokenCookie = cookieStore.get('access_token');
+
+  if (!tokenCookie) {
+    return { success: false };
+  }
+
+  const res = await suggestWords({
+    body: {
+      input_word: wordInput,
+    },
+    headers: {
+      Cookie: `${tokenCookie.name}=${tokenCookie.value}`,
+    },
+  });
+
+  if (res.error) {
+    return { success: false, error: res.error };
+  }
+
+  return { success: true, data: res.data };
+}
+
+

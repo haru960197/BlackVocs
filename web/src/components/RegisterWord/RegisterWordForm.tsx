@@ -3,18 +3,23 @@
 import { useToast } from '@/context/ToastContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { clsx } from 'clsx';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { handleGenerateWordData, handleRegisterWord } from './actions';
+import { getSuggestWords, handleGenerateWordData, handleRegisterWord } from './actions';
 import { WordFormInput, wordFormSchema } from './schema';
+import { WordInfo } from '@/types/word';
 
 export const RegisterWordForm = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const { showToast } = useToast();
 
+  const [suggestions, setSuggestions] = useState<WordInfo[]>([]);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+
   const {
     register,
     handleSubmit,
+    watch,
     getValues,
     setValue,
     reset,
@@ -31,6 +36,52 @@ export const RegisterWordForm = () => {
     !!errors.example ||
     !!errors.exampleTranslation;
   const isGeneratingDisabled = !getValues('word') || !!errors.word;
+
+  // 'word'フィールドの値を監視
+  const watchedWord = watch("word");
+
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      if (watchedWord.trim() === "") {
+        setSuggestions([]);
+        return;
+      }
+
+      const fetchSuggestions = async () => {
+        setIsLoadingSuggestions(true);
+
+        const response = await getSuggestWords(watchedWord);
+
+        if (!response.success || !response.data) {
+          setSuggestions([]);
+          setIsLoadingSuggestions(false);
+          return;
+        }
+
+        setSuggestions(response.data.items.map((item) => ({
+          id: item.word,
+          ...item
+        })));
+        setIsLoadingSuggestions(false);
+      }
+
+      fetchSuggestions();
+    }, 1000);
+
+    return () => {
+      clearTimeout(timerId);
+    }
+  }, [watchedWord]);
+
+  const handleSuggestionClick = (suggestion: WordInfo) => {
+    setValue('word', suggestion.word, { shouldValidate: true });
+    setValue('meaning', suggestion.meaning, { shouldValidate: true });
+    setValue('example', suggestion.exampleSentence ?? "", { shouldValidate: true });
+    setValue('exampleTranslation', suggestion.exampleSentenceTranslation ?? "", { shouldValidate: true });
+
+    setSuggestions([]);
+  };
+
 
   const handleGenerateClick = async () => {
     if (isGeneratingDisabled) {
@@ -96,6 +147,29 @@ export const RegisterWordForm = () => {
           {...register('word', { required: true })}
         />
         {errors.word && <p className="text-error text-sm mt-1">{errors.word.message}</p>}
+
+        <div>
+        {/* ローディング表示と候補リスト */}
+          {isLoadingSuggestions || suggestions.length > 0 &&
+          <ul className="list absolute z-10 mt-1 bg-base-300 border rounded-lg shadow-lg max-h-60 overflow-auto">
+            {isLoadingSuggestions &&
+              <li className="list-row px-3 py-2 text-lg">
+                検索中
+              </li>
+            }
+
+            {!isLoadingSuggestions && suggestions.length > 0 && suggestions.map((suggestion, index) => (
+              <li
+                key={index}
+                className="list-row px-3 py-2 text-lg cursor-pointer hover:bg-accent"
+                onClick={() => handleSuggestionClick(suggestion)}
+              >
+                {`${suggestion.word} | ${suggestion.meaning}`}
+              </li>
+            ))}
+          </ul>
+          }
+        </div>
 
         <legend className="fieldset-legend text-xl">意味</legend>
         <input
