@@ -172,8 +172,8 @@ export const RegisterWordForm = () => {
           {isWordInputFocused && (isLoadingSuggestions || suggestions.length > 0) &&
           <ul className="list absolute z-10 mt-1 bg-base-300 border rounded-lg shadow-lg max-h-60 overflow-auto">
             {isLoadingSuggestions &&
-              <li className="list-row px-3 py-2 text-lg">
-                検索中
+              <li className="list-row flex justify-center px-3 py-2 text-lg">
+                <span className="loading loading-spinner" /> 
               </li>
             }
 
