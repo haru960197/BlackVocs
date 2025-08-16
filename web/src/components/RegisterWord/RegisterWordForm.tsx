@@ -58,7 +58,7 @@ export const RegisterWordForm = () => {
     !!watchedWord && setIsLoadingSuggestions(true);
 
     const timerId = setTimeout(() => {
-      if (watchedWord.trim() === "") {
+      if (watchedWord !== undefined && watchedWord.trim() === "") {
         setSuggestions([]);
         // 入力が空になったらローディングは停止
         setIsLoadingSuggestions(false);
