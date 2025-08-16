@@ -83,11 +83,17 @@ async def suggest_words(
     description="generate new word entry with AI", 
 )
 async def generate_new_word_entry( 
-    request: word_schemas.GenerateNewWordEntryRequest, 
+    request: Request,
+    payload: word_schemas.GenerateNewWordEntryRequest, 
 ):
+    try: 
+        user_id = await get_user_id_from_cookie(request)
+    except Exception:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
     client = GenerativeAIClient()
     try:
-        result: dict[str, str] | None = client.generate_entry(request.word)
+        result: dict[str, str] | None = client.generate_entry(payload.word)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
