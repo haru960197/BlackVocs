@@ -120,7 +120,6 @@ async def register_word(
     svc = WordService(db)
     try:
         entry = Entry(**payload.item.dict())  
-        print(entry)
         registered_id = svc.register_word(entry, user_id)  
         return word_schemas.RegisterWordResponse(user_word_id=registered_id)
     except Exception:
