@@ -1,16 +1,20 @@
 'use server';
 
-import { addNewWord, AddNewWordError, AddNewWordResponse } from "@/lib/api";
+import { registerWord, RegisterWordError, RegisterWordResponse } from "@/lib/api";
 import { cookies } from "next/headers";
 
 /**
  * 英単語を登録する
- * @param word 登録したい英単語
  */
-export const registerNewWord = async (word: string): Promise<{
+export const handleRegisterWord = async (
+  word: string,
+  meaning: string,
+  example: string,
+  exampleTranslation: string
+): Promise<{
   success: boolean;
-  error?: AddNewWordError;
-  data?: AddNewWordResponse;
+  error?: RegisterWordError;
+  data?: RegisterWordResponse;
 }> => {
   const cookieStore = await cookies();
   const tokenCookie = cookieStore.get('access_token');
@@ -19,9 +23,14 @@ export const registerNewWord = async (word: string): Promise<{
     return { success: false };
   }
 
-  const res = await addNewWord({
+  const res = await registerWord({
     body: {
-      word,
+      item: {
+        word,
+        meaning,
+        exampleSentence: example,
+        exampleSentenceTranslation: exampleTranslation,
+      },
     },
     headers: {
       Cookie: `${tokenCookie.name}=${tokenCookie.value}`,

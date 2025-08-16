@@ -3,7 +3,8 @@
 import { useToast } from '@/context/ToastContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { clsx } from 'clsx';
-import { useForm } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { handleRegisterWord } from './actions';
 import { WordFormInput, wordFormSchema } from './schema';
 
 export const WordForm = () => {
@@ -20,19 +21,25 @@ export const WordForm = () => {
 
   const isDisabled = !!errors.word || !!errors.meaning || !!errors.example || !!errors.exampleTranslation;
 
-  const handleClick = async () => {
-    // TODO: 単語登録APIを呼ぶ
-    // const res = await registerNewWord();
+  const onSubmit: SubmitHandler<WordFormInput> = async (data) => {
+    if (isDisabled) {
+      return;
+    }
 
-    // if (res.success) {  
-    //   showToast('登録に成功しました', 'success');
-    // } else {
-    //   showToast('登録に失敗しました', 'error');
-    // }
+    const res = await handleRegisterWord(data.word, data.meaning, data.example, data.exampleTranslation);
+
+    if (res.success) {  
+      showToast('登録に成功しました', 'success');
+    } else {
+      showToast('登録に失敗しました', 'error');
+    }
   };
 
   return (
-    <form className="flex flex-col border-1 bg-base-200 border-base-300 rounded-lg p-4 gap-2">
+    <form
+      className="flex flex-col border-1 bg-base-200 border-base-300 rounded-lg p-4 gap-2"
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <fieldset className="fieldset">
         <legend className="fieldset-legend text-xl">英単語</legend>
         <input
