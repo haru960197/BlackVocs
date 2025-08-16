@@ -1,1 +1,1 @@
-export * from './WordForm';
+export * from './RegisterWordForm';

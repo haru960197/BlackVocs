@@ -14,7 +14,7 @@ export const WordList = async () => {
     },
   });
 
-  const wordInfoList = res.data ? res.data.wordlist : [];
+  const wordInfoList = res.data ? res.data.items : [];
 
   return (
     <ul className="list bg-base-100 rounded-box shadow-md w-full mx-4">
