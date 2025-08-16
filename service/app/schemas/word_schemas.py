@@ -8,6 +8,7 @@ class CustomBaseModel(BaseModel):
         populate_by_name=True)
 
 class Item(CustomBaseModel):
+    id: str | None = None
     word: str
     meaning: str
     example_sentence: str
@@ -33,6 +34,6 @@ class GenerateNewWordEntryResponse(BaseModel):
 class RegisterWordRequest(BaseModel): 
     item: Item
 
-class RegisterWordResponse(BaseModel): 
-    item: Item
+class RegisterWordResponse(BaseModel):  
+    user_word_id: str
 

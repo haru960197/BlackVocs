@@ -1,5 +1,6 @@
 import requests
 import core.config as config
+from models.word import Entry
 
 DEEPSEEK_API_KEY = config.DEEPSEEK_API_KEY
 DEEPSEEK_URL = config.DEEPSEEK_URL
@@ -9,7 +10,7 @@ class GenerativeAIClient:
         self.api_key = api_key or DEEPSEEK_API_KEY
         self.timeout = timeout
 
-    def generate_entry(self, word: str) -> dict[str, str] | None:
+    def generate_entry(self, word: str) -> Entry:
         """Return dict(word, meaning, example_sentence, example_sentence_translation)."""
         prompt = f"""
         単語: {word}
@@ -52,9 +53,9 @@ class GenerativeAIClient:
         if not (meaning and example_sentence and example_sentence_translation):
             raise ValueError("Failed to parse DeepSeek response correctly")
 
-        return {
-            "word": word,
-            "meaning": meaning,
-            "example_sentence": example_sentence,
-            "example_sentence_translation": example_sentence_translation,
-        }
+        return Entry(
+            word=word,
+            meaning=meaning,
+            example_sentence=example_sentence,
+            example_sentence_translation=example_sentence_translation,
+        )

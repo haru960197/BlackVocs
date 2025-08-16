@@ -19,12 +19,17 @@ class WordService:
 
     def get_word_entries_for_user(self, user_id: str) -> List[Entry]:
         """Return the word entries linked to the given user."""
-        word_ids = self.user_words.list_word_ids_by_user(user_id)
-        if not word_ids:
-            return []
-        items: List[Item] = self.words.find_by_ids(word_ids)
+        items = self.get_word_items_for_user(user_id)
         entries = [item.entry for item in items]
         return entries
+
+    def get_word_items_for_user(self, user_id: str) -> List[Item]: 
+        """ Return the word items linked to the given user. """
+        word_ids = self.user_words.list_word_ids_by_user(user_id)
+        if not word_ids: 
+            return []
+        items: List[Item] = self.words.find_by_ids(word_ids)
+        return items
 
     # --- register --- 
     def register_word(self, entry: Entry, user_id: str) -> str: 
