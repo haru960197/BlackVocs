@@ -39,14 +39,14 @@ export const RegisterWordForm = () => {
   const isGeneratingDisabled = !getValues('word') || !!errors.word;
 
   // 'word'フィールドの値を監視
-  const watchedWord = watch("word");
+  const watchedWord = watch('word');
 
   const { onBlur: rhfOnBlur, ...wordRegisterRest } = register('word', { required: true });
 
   const handleWordInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     // まず、react-hook-formのonBlurを実行してバリデーションをトリガー
     rhfOnBlur(e);
-    
+
     // 次に、候補リストを非表示にするためのロジックを実行
     setTimeout(() => {
       setIsWordInputFocused(false);
@@ -55,12 +55,12 @@ export const RegisterWordForm = () => {
 
   useEffect(() => {
     // 入力が開始されたらローディング状態にする
-    if (watchedWord !== "") {
+    if (watchedWord !== '') {
       setIsLoadingSuggestions(true);
     }
 
     const timerId = setTimeout(() => {
-      if (watchedWord !== undefined && watchedWord.trim() === "") {
+      if (watchedWord !== undefined && watchedWord.trim() === '') {
         setSuggestions([]);
         // 入力が空になったらローディングは停止
         setIsLoadingSuggestions(false);
@@ -68,7 +68,6 @@ export const RegisterWordForm = () => {
       }
 
       const fetchSuggestions = async () => {
-
         const response = await getSuggestWords(watchedWord);
 
         if (!response.success || !response.data) {
@@ -77,30 +76,33 @@ export const RegisterWordForm = () => {
           return;
         }
 
-        setSuggestions(response.data.items.map((item) => ({
-          id: item.word,
-          ...item
-        })));
+        setSuggestions(
+          response.data.items.map((item) => ({
+            id: item.word,
+            ...item,
+          }))
+        );
         setIsLoadingSuggestions(false);
-      }
+      };
 
       fetchSuggestions();
     }, 1000);
 
     return () => {
       clearTimeout(timerId);
-    }
+    };
   }, [watchedWord]);
 
   const handleSuggestionClick = (suggestion: WordInfo) => {
     setValue('word', suggestion.word, { shouldValidate: true });
     setValue('meaning', suggestion.meaning, { shouldValidate: true });
-    setValue('example', suggestion.exampleSentence ?? "", { shouldValidate: true });
-    setValue('exampleTranslation', suggestion.exampleSentenceTranslation ?? "", { shouldValidate: true });
+    setValue('example', suggestion.exampleSentence ?? '', { shouldValidate: true });
+    setValue('exampleTranslation', suggestion.exampleSentenceTranslation ?? '', {
+      shouldValidate: true,
+    });
 
     setSuggestions([]);
   };
-
 
   const handleGenerateClick = async () => {
     if (isGeneratingDisabled) {
@@ -170,27 +172,28 @@ export const RegisterWordForm = () => {
         {errors.word && <p className="text-error text-sm mt-1">{errors.word.message}</p>}
 
         <div>
-        {/* ローディング表示と候補リスト */}
-          {isWordInputFocused && (isLoadingSuggestions || suggestions.length > 0) &&
-          <ul className="list absolute z-10 mt-1 bg-base-300 border rounded-lg shadow-lg max-h-60 overflow-auto">
-            {isLoadingSuggestions &&
-              <li className="list-row flex justify-center px-3 py-2 text-lg">
-                <span className="loading loading-spinner" /> 
-              </li>
-            }
-
-            {!isLoadingSuggestions && suggestions.length > 0
-              && suggestions.map((suggestion, index) => (
-                <li
-                  key={index}
-                  className="list-row px-3 py-2 text-lg cursor-pointer hover:bg-accent"
-                  onClick={() => handleSuggestionClick(suggestion)}
-                >
-                  {`${suggestion.word} | ${suggestion.meaning}`}
+          {/* ローディング表示と候補リスト */}
+          {isWordInputFocused && (isLoadingSuggestions || suggestions.length > 0) && (
+            <ul className="list absolute z-10 mt-1 bg-base-300 border rounded-lg shadow-lg max-h-60 overflow-auto">
+              {isLoadingSuggestions && (
+                <li className="list-row flex justify-center px-3 py-2 text-lg">
+                  <span className="loading loading-spinner" />
                 </li>
-              ))}
+              )}
+
+              {!isLoadingSuggestions &&
+                suggestions.length > 0 &&
+                suggestions.map((suggestion, index) => (
+                  <li
+                    key={index}
+                    className="list-row px-3 py-2 text-lg cursor-pointer hover:bg-accent"
+                    onClick={() => handleSuggestionClick(suggestion)}
+                  >
+                    {`${suggestion.word} | ${suggestion.meaning}`}
+                  </li>
+                ))}
             </ul>
-            }
+          )}
         </div>
 
         <legend className="fieldset-legend text-xl">意味</legend>

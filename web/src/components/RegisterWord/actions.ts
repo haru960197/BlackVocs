@@ -115,6 +115,4 @@ export const getSuggestWords = async (
   }
 
   return { success: true, data: res.data };
-}
-
-
+};
