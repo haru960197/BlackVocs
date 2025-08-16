@@ -17,6 +17,7 @@ export const WordForm = () => {
     handleSubmit,
     getValues,
     setValue,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<WordFormInput>({
     resolver: zodResolver(wordFormSchema),
@@ -114,22 +115,32 @@ export const WordForm = () => {
         {errors.exampleTranslation && <p className="text-error text-sm mt-1">{errors.exampleTranslation.message}</p>}
       </fieldset>
 
-      <div className="flex justify-end">
+        <div className='flex flex-col items-end gap-2'>
+          <div className='flex justify-end gap-2'>
         <button
-          className='btn btn-secondary btn-sm lg:btn-lg text-lg lg:text-xl mr-2'
+          className="btn btn-accent btn-sm lg:btn-lg text-lg lg:text-xl"
+          onClick={() => reset()}
+        >
+          リセット
+        </button>
+        <button
+          className='btn btn-secondary btn-sm lg:btn-lg text-lg lg:text-xl'
           disabled={isGeneratingDisabled || isGenerating}
           onClick={handleGenerateClick}
         >
           {isGenerating ? <span className="loading loading-spinner" /> : 'AIで生成'}
         </button>
+        </div>
+        <div className='flex justify-end'>
         <button
           type="submit"
-          className="btn btn-primary btn-sm lg:btn-lg text-lg lg:text-xl"
+          className="btn btn-primary btn-sm lg:btn-lg text-lg lg:text-xl w-[94px]"
           disabled={isDisabled || isSubmitting}
         >
           {isSubmitting ? <span className="loading loading-spinner" /> : '登録'}
         </button>
-      </div>
+        </div>
+        </div>
     </form>
   );
 };
