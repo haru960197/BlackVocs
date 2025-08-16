@@ -55,7 +55,9 @@ export const RegisterWordForm = () => {
 
   useEffect(() => {
     // 入力が開始されたらローディング状態にする
-    !!watchedWord && setIsLoadingSuggestions(true);
+    if (watchedWord !== "") {
+      setIsLoadingSuggestions(true);
+    }
 
     const timerId = setTimeout(() => {
       if (watchedWord !== undefined && watchedWord.trim() === "") {
