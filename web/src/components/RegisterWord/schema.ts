@@ -11,11 +11,11 @@ export const wordFormSchema = z.object({
     .min(1, { message: '意味は必須です' }),
   example: z
     .string()
-    .max(100, { message: '100文字以内で入力してください' })
+    .max(150, { message: '150文字以内で入力してください' })
     .min(1, { message: '例文は必須です' }),
   exampleTranslation: z
     .string()
-    .max(100, { message: '100文字以内で入力してください' })
+    .max(150, { message: '150文字以内で入力してください' })
     .min(1, { message: '例文の日本語訳は必須です' }),
 });
 
