@@ -1,10 +1,14 @@
 import { z } from 'zod';
 
 export const signupSchema = z.object({
-  userName: z.string().min(3, { message: 'ユーザー名は3文字以上で入力してください' }),
+  userName: z
+    .string()
+    .max(25, { message: 'ユーザー名は25文字以下で入力してください' })
+    .min(3, { message: 'ユーザー名は3文字以上で入力してください' }),
   email: z.string().email({ message: '有効なメールアドレスを入力してください' }),
   password: z
     .string()
+    .max(25, { message: 'パスワードは25文字以下で入力してください' })
     .min(8, { message: 'パスワードは8文字以上で入力してください' })
     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/, {
       message: 'パスワードは、大文字、小文字、数字をそれぞれ1つ以上含んでください。',
