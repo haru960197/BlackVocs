@@ -13,7 +13,7 @@ JWT_KEY = os.getenv("JWT_KEY")
 
 # API
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
-DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
+DEEPSEEK_URL = os.getenv("DEEPSEEK_URL")
 
 # Service port 
 SERVICE_PORT = os.getenv("SERVICE_PORT", "8000")
