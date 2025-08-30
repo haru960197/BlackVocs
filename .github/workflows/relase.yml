@@ -1,0 +1,32 @@
+# .github/workflows/release.yml
+
+name: Create Release on Tag
+
+# トリガー: v*.*.* (例: v1.0.0, v1.2.3) という形式のタグがプッシュされた時
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. リポジトリのコードをチェックアウトする
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. タグを元にリリースを作成する
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          # GitHubが自動で提供するトークンを使用する
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # プッシュされたタグ名 (例: v1.2.0) を取得
+          tag_name: ${{ github.ref_name }}
+          # リリースのタイトル (例: Release v1.2.0)
+          release_name: "Release ${{ github.ref_name }}"
+          # trueにすると、GitHubが自動でリリースノートを生成してくれる
+          # この時、.github/release.yml の設定が使われる
+          generate_release_notes: true
