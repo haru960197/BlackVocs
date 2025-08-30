@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from repositories.session import client
 from routes.auth import router as auth_router
 from routes.word import router as word_router
+from core.exception_handler import register_exception_handlers
 
 app = FastAPI()
 
@@ -18,6 +19,8 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(word_router)
+
+register_exception_handlers(app)
 
 @app.on_event("shutdown")
 def shutdown_event():
