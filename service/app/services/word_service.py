@@ -1,12 +1,12 @@
-from typing import List, Dict, Any
+from typing import List, Tuple 
 import re
 from pymongo.database import Database
-from bson import ObjectId #type: ignore
 from repositories.word_repository import WordRepository
 from repositories.user_word_repository import UserWordRepository
 import core.config as config
 from utils.generative_AI_client import GenerativeAIClient
 from models.word import Entry, Item 
+from core.errors import BadRequestError
 
 DEEPSEEK_API_KEY = config.DEEPSEEK_API_KEY
 
@@ -85,3 +85,24 @@ class WordService:
         subseq = self.make_subsequence_regex(input_word)
         return self.words.find_candidates_by_entry_word_subsequence(subseq, limit)
 
+    def suggest_items(self, input_word: str, limit: int, cap: int = 100) -> List[Item]: 
+        if not input_word:
+            raise BadRequestError("input_word is required")
+
+        candidate_items = self.make_candidates_from_word(input_word, cap)
+
+        if not candidate_items: 
+            return [] 
+
+        scored: List[Tuple[float, Item]] = []  # (score, Item)
+        lw = input_word.lower()
+        for it in candidate_items:
+            w = it.entry.word
+            if not w:
+                continue
+            score = self.lcs_score(lw, w.lower())
+            scored.append((score, it))
+
+        scored.sort(key=lambda t: (-t[0], -t[1].registered_count, len(t[1].entry.word), t[1].entry.word))
+
+        return [pair[1] for pair in scored[:limit]]
