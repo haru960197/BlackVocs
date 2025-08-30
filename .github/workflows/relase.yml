@@ -10,6 +10,9 @@ on:
 
 jobs:
   create-release:
+    permissions:
+      contents: write
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       # 1. リポジトリのコードをチェックアウトする
@@ -18,7 +21,7 @@ jobs:
 
       # 2. タグを元にリリースを作成する
       - name: Create Release
-        uses: actions/create-release@v1
+        uses: actions/create-release@v1.1.4
         env:
           # GitHubが自動で提供するトークンを使用する
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
