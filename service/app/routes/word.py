@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from typing import Tuple, List
 from pymongo.database import Database
 import utils.auth_utils as auth_utils
