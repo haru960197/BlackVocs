@@ -1,35 +1,41 @@
-from typing import List, Tuple 
 import re
+from typing import List, Tuple 
 from pymongo.database import Database
+from pymongo import errors as mongo_errors
+from pydantic import ValidationError
+
 from repositories.word_repository import WordRepository
 from repositories.user_word_repository import UserWordRepository
 import core.config as config
-from utils.generative_AI_client import GenerativeAIClient
 from models.word import Entry, Item 
-from core.errors import BadRequestError
+
+from core.errors import ServiceError, BadRequestError, ConflictError
 
 DEEPSEEK_API_KEY = config.DEEPSEEK_API_KEY
 
 class WordService:
     """Business logic for word operations including DeepSeek integration."""
-    def __init__(self, db: Database, ai_client: GenerativeAIClient | None = None):
+    def __init__(self, db: Database):
         self.words = WordRepository(db)
         self.user_words = UserWordRepository(db)
-        self.ai = ai_client or GenerativeAIClient()
 
     def get_word_entries_for_user(self, user_id: str) -> List[Entry]:
         """Return the word entries linked to the given user."""
         items = self.get_word_items_for_user(user_id)
-        entries = [item.entry for item in items]
-        return entries
+        return [item.entry for item in items]
 
     def get_word_items_for_user(self, user_id: str) -> List[Item]: 
         """ Return the word items linked to the given user. """
-        word_ids = self.user_words.list_word_ids_by_user(user_id)
-        if not word_ids: 
-            return []
-        items: List[Item] = self.words.find_by_ids(word_ids)
-        return items
+        try: 
+            word_ids = self.user_words.list_word_ids_by_user(user_id)
+            if not word_ids: 
+                return []
+            return self.words.find_by_ids(word_ids)
+
+        except ValidationError: 
+            raise ServiceError("Corrupted word data in DB")
+        except mongo_errors.PyMongoError:
+            raise ServiceError("Database error while fetching words")
 
     # --- register --- 
     def register_word(self, entry: Entry, user_id: str) -> str: 
@@ -38,19 +44,25 @@ class WordService:
             Itemのregistered_countをインクリメント
             user_wordテーブルに加える
         """
-        word_id = self.words.find_by_entry(entry)
+        self._validate_entry(entry)
 
-        if word_id: 
-            if self.user_words.exists_link(user_id, word_id):
-                raise ValueError(f"Word '{entry.word}' is already registered by this user.")
-            else:
-                word_id = self.words.upsert_and_inc_entry(entry)
-        else:
+        try: 
             word_id = self.words.upsert_and_inc_entry(entry)
+        except mongo_errors.PyMongoError as e:
+            raise ServiceError("Failed to upsert word entry") from e
 
-        return self.user_words.create_link(user_id, word_id)
+        try: 
+            if self.user_words.exists_link(user_id, word_id): 
+                raise ConflictError(f"Word '{entry.word}' is already registered by this user.")
+        except mongo_errors.PyMongoError as e: 
+            raise ServiceError("Failed to check user-word links") from e
 
-    # --- search ---
+        try: 
+            return self.user_words.create_link(user_id, word_id)
+        except mongo_errors.PyMongoError as e: 
+            raise ServiceError("Failed to create user-word link") from e
+
+    # --- search and suggestion ---
     def lcs_len(self, a: str, b: str) -> int:
         """Return LCS length using O(len(a)*len(b)) DP."""
         n, m = len(a), len(b)
@@ -89,7 +101,10 @@ class WordService:
         if not input_word:
             raise BadRequestError("input_word is required")
 
-        candidate_items = self.make_candidates_from_word(input_word, cap)
+        try: 
+            candidate_items = self.make_candidates_from_word(input_word, cap)
+        except mongo_errors.PyMongoError as e: 
+            raise ServiceError("Failed to make suggest candidates") from e
 
         if not candidate_items: 
             return [] 
@@ -106,3 +121,15 @@ class WordService:
         scored.sort(key=lambda t: (-t[0], -t[1].registered_count, len(t[1].entry.word), t[1].entry.word))
 
         return [pair[1] for pair in scored[:limit]]
+
+
+    # --- internal validation ---
+    def _validate_entry(self, entry: Entry) -> None:
+        """Validate Entry payload for business rules."""
+        if not entry or not (entry.word and entry.meaning):
+            raise BadRequestError("Entry must contain 'word' and 'meaning'")
+        # Keep lengths reasonable (example thresholds)
+        if len(entry.word) > 64:
+            raise BadRequestError("word is too long")
+        if len(entry.meaning) > 2048:
+            raise BadRequestError("meaning is too long")

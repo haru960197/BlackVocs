@@ -3,6 +3,7 @@ from pymongo.database import Database
 import schemas.common_schemas as common_schemas
 from repositories.session import get_db
 from services.word_service import WordService
+from services.generativeAI_service import GenerativeAIService
 import schemas.word_schemas as word_schemas
 from utils.auth_utils import get_user_id_from_cookie
 from models.word import Entry
@@ -51,18 +52,16 @@ async def suggest_words(
 )
 async def generate_new_word_entry( 
     payload: word_schemas.GenerateNewWordEntryRequest, 
-    user_id: str = Depends(get_user_id_from_cookie),
+    user_id: str = Depends(get_user_id_from_cookie), # only for auth check
 ):
-    from utils.generative_AI_client import GenerativeAIClient
-    client = GenerativeAIClient()
-    generated_entry: Entry = client.generate_entry(payload.word)
+    svc = GenerativeAIService()
+    generated_entry: Entry = svc.generate_entry(payload.word)
     return word_schemas.GenerateNewWordEntryResponse(item=generated_entry.to_schema_item())
 
 @router.post(
     "/register_word", 
     operation_id="register_word", 
     response_model=word_schemas.RegisterWordResponse, 
-    status_code=status.HTTP_201_CREATED,
     responses=common_schemas.COMMON_ERROR_RESPONSES
 )
 async def register_word(
