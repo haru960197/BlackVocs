@@ -1,8 +1,16 @@
-from fastapi import Request, HTTPException
+from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
+from core.errors import UnauthorizedError
 
 def register_exception_handlers(app):
+    @app.exception_handler(UnauthorizedError)
+    async def _unauth_handler(request: Request, exc: UnauthorizedError): 
+        return JSONResponse(
+            status_code=401,
+            content={"error": {"type": exc.__class__.__name__, "detail": str(exc) or "Unauthorized"}},
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
     @app.exception_handler(HTTPException)
     async def http_exception_handler(request: Request, exc: HTTPException):
         return JSONResponse(
@@ -15,26 +23,3 @@ def register_exception_handlers(app):
             },
         )
 
-    @app.exception_handler(RequestValidationError)
-    async def validation_exception_handler(request: Request, exc: RequestValidationError):
-        return JSONResponse(
-            status_code=422,
-            content={
-                "error": {
-                    "type": "ValidationError",
-                    "detail": exc.errors(),
-                }
-            },
-        )
-
-    @app.exception_handler(Exception)
-    async def global_exception_handler(request: Request, exc: Exception):
-        return JSONResponse(
-            status_code=500,
-            content={
-                "error": {
-                    "type": "ServerError",
-                    "detail": str(exc),
-                }
-            },
-        )
