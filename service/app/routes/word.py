@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends
 from pymongo.database import Database
 import schemas.common_schemas as common_schemas
 from repositories.session import get_db

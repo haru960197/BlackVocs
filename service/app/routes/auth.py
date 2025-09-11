@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
-from fastapi.responses import RedirectResponse
 from pymongo.database import Database
 from repositories.session import get_db
 import schemas.auth_schemas as auth_schemas
