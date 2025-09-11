@@ -8,21 +8,21 @@ class User(BaseModel):
     disabled: bool = False
 
 # sign in -------------------------------------
-class SigninRequest(BaseModel):
+class SignInRequest(BaseModel):
     username_or_email: str
     password: str
 
-class SigninResponse(BaseModel):
+class SignInResponse(BaseModel):
     access_token: str
     token_type: str
 
 # sign up -------------------------------------
-class SignupRequest(BaseModel):
+class SignUpRequest(BaseModel):
     username: str
     email: EmailStr
     password: str
 
-class SignupResponse(BaseModel):
+class SignUpResponse(BaseModel):
     id: str
 
 class SignedInCheckResponse(BaseModel):
