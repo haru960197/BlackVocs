@@ -24,8 +24,7 @@ async def sign_in(
     Sign in and set JWT cookie.
     """
     svc = AuthService(db)
-
-    user = svc.signin(payload.username_or_email, payload.password)
+    user = svc.sign_in(payload.username_or_email, payload.password)
     token = create_access_token(str(user["_id"]))
 
     response.set_cookie(
@@ -52,7 +51,7 @@ async def signup(
     """
 
     svc = AuthService(db)
-    inserted_id, _ = svc.signup(payload.username, payload.email, payload.password)
+    inserted_id = svc.signup(payload.username, payload.email, payload.password)
     return auth_schemas.SignUpResponse(id=inserted_id)
 
 

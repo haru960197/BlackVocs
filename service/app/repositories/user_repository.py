@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any
+from typing import Any
 from pymongo.database import Database
 from pymongo.collection import Collection
 from bson import ObjectId
@@ -11,7 +11,6 @@ class UserRepository:
     def __init__(self, db: Database, collection_name: str = USER_COL):
         self.col: Collection = db[collection_name]
 
-    # --- Basic CRUD ---
     def create(self, doc: dict) -> str:
         """Insert and return string id."""
         res = self.col.insert_one(doc)

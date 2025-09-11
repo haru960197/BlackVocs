@@ -5,8 +5,10 @@ from fastapi.exceptions import RequestValidationError
 from pymongo import errors as mongo_errors
 
 from core.errors import (
+    AppError, 
     UnauthorizedError, TokenExpiredError, InvalidTokenError,
-    BadRequestError, ConflictError, ServiceError
+    BadRequestError, ConflictError, ServiceError, 
+    InvalidCredentialsError, AuthenticationBackendError
 )
 
 def register_exception_handlers(app):
@@ -48,6 +50,19 @@ def register_exception_handlers(app):
             content={"error": {"type": "ServiceError", "detail": str(exc) or "Internal server error"}},
         )
 
+    @app.exception_handler(InvalidCredentialsError)
+    async def invalid_credentials_handler(request: Request, exc: InvalidCredentialsError):
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"error": {"type": "Invalid Credential Error", "detail": str(exc) or "credenals are invalid"}},
+        )
+
+    @app.exception_handler(AuthenticationBackendError)
+    async def auth_backend_error_handler(request: Request, exc: AuthenticationBackendError):
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"error": {"type": "Authentication backend failure", "detail": str(exc) or "Authentication backend failure"}},
+        )
     # ---------- Framework-level ----------
     @app.exception_handler(RequestValidationError)
     async def validation_handler(request: Request, exc: RequestValidationError):

@@ -19,3 +19,9 @@ class BadRequestError(AppError):
 class ConflictError(AppError): 
     """Conflict or deplicate registration"""
 
+class InvalidCredentialsError(AppError):
+    """Raised when identifier or password is incorrect."""
+
+class AuthenticationBackendError(AppError): 
+    """Raised when underlying auth datastore / hashing / jwt fails."""
+
