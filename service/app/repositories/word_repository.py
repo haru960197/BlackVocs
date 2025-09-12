@@ -38,7 +38,12 @@ class WordRepository:
             raise BadRequestError("Invalid ObjectId format") from e
 
         docs = list(self.col.find({"_id": {"$in": object_ids}}))
+<<<<<<< Updated upstream
         return [Item.model_validate(doc) for doc in docs]
+=======
+        ret = [Item.model_validate(doc) for doc in docs]
+        return ret
+>>>>>>> Stashed changes
 
     # --- add ---
     def upsert_and_inc_entry(self, entry: Entry) -> str:
