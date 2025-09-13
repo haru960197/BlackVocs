@@ -2,7 +2,7 @@ from typing import List, Dict, Any
 from pymongo.database import Database
 from pymongo.collection import Collection
 from pymongo import ReturnDocument
-from bson import ObjectId # type: ignore
+from bson import ObjectId 
 import core.config as config 
 from models.word import Item, Entry 
 from utils.fingerprint import entry2fingerprint
@@ -31,14 +31,16 @@ class WordRepository:
 
         object_ids = [ObjectId(wid) for wid in word_ids]
         docs = list(self.col.find({"_id": {"$in": object_ids}}))
-        ret = [Item.model_validate(doc) for doc in docs]
-        print(ret)
-        return ret
+        return [Item.model_validate(doc) for doc in docs]
 
     # --- add ---
     def upsert_and_inc_entry(self, entry: Entry) -> str:
+        """
+        upsert(update or insert) an entry 
+        inclement registered_counter
+        """
+
         fpr = entry2fingerprint(entry)
-        
         updated = self.col.find_one_and_update(
             {"fingerprint": fpr},
             {
