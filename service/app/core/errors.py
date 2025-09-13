@@ -5,10 +5,10 @@ class UnauthorizedError(AppError):
     """Authentication/authorization failed."""
 
 class TokenExpiredError(UnauthorizedError): 
-    "jwt is expired"
+    """jwt is expired"""
 
 class InvalidTokenError(UnauthorizedError): 
-    "jwt is invalid"
+    """jwt is invalid"""
 
 class ServiceError(AppError):
     """Unexpected failure in repositories or external services."""
