@@ -1,11 +1,9 @@
 from fastapi import Request, HTTPException, status
 from fastapi.responses import JSONResponse
+
 from fastapi.exceptions import RequestValidationError
-
 from pymongo import errors as mongo_errors
-
 from core.errors import (
-    AppError, 
     UnauthorizedError, TokenExpiredError, InvalidTokenError,
     BadRequestError, ConflictError, ServiceError, 
     InvalidCredentialsError, AuthenticationBackendError

@@ -1,5 +1,4 @@
-from typing import Tuple, Any
-from datetime import timedelta
+from typing import Any
 from pymongo.database import Database
 from pymongo import errors as mongo_errors
 from repositories.user_repository import UserRepository

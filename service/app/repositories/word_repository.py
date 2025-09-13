@@ -2,13 +2,10 @@ from typing import List, Dict, Any
 from pymongo.database import Database
 from pymongo.collection import Collection
 from pymongo import ReturnDocument
-from pymongo.errors import PyMongoError
 from bson import ObjectId 
-from bson.errors import InvalidId
 import core.config as config 
 from models.word import Item, Entry 
 from utils.fingerprint import entry2fingerprint
-from core.errors import BadRequestError
 
 WORD_COL = config.WORD_COLLECTION_NAME
 
@@ -32,18 +29,9 @@ class WordRepository:
         if not word_ids:
             return []
 
-        try: 
-            object_ids = [ObjectId(wid) for wid in word_ids]
-        except InvalidId as e: 
-            raise BadRequestError("Invalid ObjectId format") from e
-
+        object_ids = [ObjectId(wid) for wid in word_ids]
         docs = list(self.col.find({"_id": {"$in": object_ids}}))
-<<<<<<< Updated upstream
         return [Item.model_validate(doc) for doc in docs]
-=======
-        ret = [Item.model_validate(doc) for doc in docs]
-        return ret
->>>>>>> Stashed changes
 
     # --- add ---
     def upsert_and_inc_entry(self, entry: Entry) -> str:

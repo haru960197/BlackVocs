@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Response, Request
 from pymongo.database import Database
 from repositories.session import get_db
 
@@ -6,13 +6,13 @@ import schemas.auth_schemas as auth_schemas
 import schemas.common_schemas as common_schemas
 
 from services.auth_service import AuthService
-from utils.auth_utils import create_access_token
+from utils.auth_utils import create_access_token, get_user_id_from_cookie
 
 router = APIRouter(prefix="/user", tags=["auth"], responses=common_schemas.COMMON_ERROR_RESPONSES)
 
 @router.post(
     "/sign_in",
-    operation_id="sign_in",
+    operation_id="signin",
     response_model=auth_schemas.SignInResponse,
 )
 async def sign_in(
@@ -38,7 +38,7 @@ async def sign_in(
 
 @router.post(
     "/sign_up",
-    operation_id="sign_up",
+    operation_id="signup",
     response_description="sign up new user",
     response_model=auth_schemas.SignUpResponse,
 )
@@ -57,7 +57,7 @@ async def signup(
 
 @router.post(
     "/sign_out",
-    operation_id="sign_out", 
+    operation_id="signout", 
     response_description="sign out of the user account",
 )
 async def signout(response: Response):
@@ -72,3 +72,12 @@ async def signout(response: Response):
         secure=True,
     )
     return { "message": "Successfully signed out" }
+
+@router.get(
+    "/signed_in_check", 
+    operation_id="signed_in_check", 
+    response_model=auth_schemas.SignedInCheckResponse,
+) 
+async def signed_in_check(request: Request): 
+    user_id = await get_user_id_from_cookie(request)
+    return auth_schemas.SignedInCheckResponse(signed_in=True, user_id=user_id)

@@ -25,8 +25,16 @@ COMMON_ERROR_RESPONSES: Dict[int | str, Dict[str, Any]] = {
         "description": "コンフリクト発生",
         "model": GeneralErrorResponse,
     },
+    status.HTTP_422_UNPROCESSABLE_ENTITY: {
+        "description": "バリデーションエラー",
+        "model": GeneralErrorResponse,
+    },
     status.HTTP_500_INTERNAL_SERVER_ERROR: {
         "description": "サーバー内部エラー",
+        "model": GeneralErrorResponse,
+    },
+    status.HTTP_503_SERVICE_UNAVAILABLE: {
+        "description": "サービス利用不可",
         "model": GeneralErrorResponse,
     },
 }
