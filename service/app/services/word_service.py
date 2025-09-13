@@ -98,6 +98,10 @@ class WordService:
         return self.words.find_candidates_by_entry_word_subsequence(subseq, limit)
 
     def suggest_items(self, input_word: str, limit: int, cap: int = 100) -> List[Item]: 
+        """
+        1. lcsの長さが大きいものから順番に取る（最大100個）
+        2. itemをregistered_countが大きいものの順に並べる
+        """ 
         if not input_word:
             raise BadRequestError("input_word is required")
 
