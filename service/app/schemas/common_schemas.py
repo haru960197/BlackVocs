@@ -17,6 +17,10 @@ COMMON_ERROR_RESPONSES: Dict[int | str, Dict[str, Any]] = {
         "description": "認証失敗",
         "model": GeneralErrorResponse,
     },
+    status.HTTP_403_FORBIDDEN: {
+        "description": "権限なし",
+        "model": GeneralErrorResponse,
+    },
     status.HTTP_404_NOT_FOUND: {
         "description": "リソースが存在しない",
         "model": GeneralErrorResponse,
