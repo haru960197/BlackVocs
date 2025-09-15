@@ -14,6 +14,21 @@ class WordRepository:
     def __init__(self, db: Database, collection_name: str = WORD_COL):
         self.col: Collection = db[collection_name]
 
+    # --- general ---
+    def registered_count_by_word_id(self, word_id: str) -> int:
+        """
+        Return the registered_count for a word item by word_id.
+        Returns -1 if not found.
+        """
+        doc = self.col.find_one(
+            {"_id": ObjectId(word_id)},
+            {"registered_count": 1}
+        )
+        if not doc:
+            return -1 
+
+        return int(doc.get("registered_count", 0))
+
     # --- find by ---
     def find_by_fingerprint(self, fpr: str) -> str | None: 
         doc = self.col.find_one({"fingerprint": fpr}, {"_id": 1})
@@ -79,3 +94,16 @@ class WordRepository:
         options = "i" if case_insensitive else ""
         regex = {"$regex": subseq_pattern, "$options": options}
         return self.find_candidates_by_entry_word_regex(regex, limit)
+
+    # --- declement registered_count ---
+    def decrement_registered_count(self, word_id: str) -> None:
+        """
+        Decrement registered_count of a word document by word_id
+        regisited_count must be greater than 0
+        """
+        self.col.find_one_and_update(
+            {"_id": ObjectId(word_id)},
+            {"$inc": {"registered_count": -1}},
+            return_document=ReturnDocument.AFTER,
+            projection={"_id": 1},
+        )

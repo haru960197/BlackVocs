@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 from pymongo.database import Database
 from pymongo.collection import Collection
 from bson import ObjectId #type: ignore
@@ -15,11 +15,31 @@ class UserWordRepository:
         res = self.col.insert_one({"user_id": ObjectId(user_id), "word_id": ObjectId(word_id)})
         return str(res.inserted_id)
 
-    def exists_link(self, user_id: str, word_id: str) -> bool:
-        return self.col.find_one({
-            "user_id": ObjectId(user_id),
-            "word_id": ObjectId(word_id)
-        }) is not None
+    def delete_link(self, user_id: str, word_id: str) -> str | None: 
+        doc = self.col.find_one_and_delete(
+            {
+                "user_id": ObjectId(user_id),
+                "word_id": ObjectId(word_id),
+            },
+            projection={"_id": 1},  
+        )
+
+        return str(doc["_id"]) if doc else None
+
+    def exist_link(self, user_id: str, word_id: str) -> str | None:
+        """ 
+        check if (user_id, word_id) is in the user_word_collection 
+        if exist: return id 
+        else: return None
+        """
+        doc = self.col.find_one(
+            {
+                "user_id": ObjectId(user_id),
+                "word_id": ObjectId(word_id),
+            },
+            {"_id": 1}  
+        )
+        return str(doc["_id"]) if doc else None
 
     def list_word_ids_by_user(self, user_id: str) -> List[str]:
         """Return word_id list for a given user."""

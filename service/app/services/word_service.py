@@ -52,7 +52,7 @@ class WordService:
             raise ServiceError("Failed to upsert word entry") from e
 
         try: 
-            if self.user_words.exists_link(user_id, word_id): 
+            if self.user_words.exist_link(user_id, word_id):
                 raise ConflictError(f"Word '{entry.word}' is already registered by this user.")
         except mongo_errors.PyMongoError as e: 
             raise ServiceError("Failed to check user-word links") from e
@@ -124,6 +124,45 @@ class WordService:
 
         return [pair[1] for pair in scored[:limit]]
 
+    # --- delete a word item from user_word collection ---
+    def delete_user_item(self, entry: Entry, user_id: str) -> str: 
+        """
+        delete a word item from user_word collection if the item exists in it
+
+        Args: 
+            entry(Entry): word entry to delete from user collection 
+            user_id(str): current user id 
+
+        Returns: 
+            user_word_id(str): deleted item id (no longer exist in the user_word collection
+        """
+        
+        try: 
+            # 1. check if the item is in the collection 
+            word_id = self.words.find_by_entry(entry)
+            if not word_id: 
+                raise BadRequestError("Word item does not exist in the dictionary")
+            
+            # 2. check if user_word link exists
+            user_word_id = self.user_words.exist_link(user_id, word_id)
+            if not user_word_id: 
+                raise BadRequestError("Word item have not been registered by the current user")
+
+            # 3. declement register_word_count
+            registered_count = self.words.registered_count_by_word_id(word_id)
+            if registered_count <= 0: 
+                raise BadRequestError("Registered count must be greater than 0")
+            self.words.decrement_registered_count(word_id)
+
+            # 4. delete the link
+            result = self.user_words.delete_link(user_id, word_id)
+            if not result:
+                raise ServiceError("Failed to delete user_word item")
+
+            return result 
+        
+        except mongo_errors.PyMongoError as e:
+            raise ServiceError(f"Database error during deletion: {e}")
 
     # --- internal validation ---
     def _validate_entry(self, entry: Entry) -> None:
@@ -135,3 +174,4 @@ class WordService:
             raise BadRequestError("word is too long")
         if len(entry.meaning) > 2048:
             raise BadRequestError("meaning is too long")
+

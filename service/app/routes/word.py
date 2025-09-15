@@ -62,7 +62,6 @@ async def generate_new_word_entry(
     "/register_word", 
     operation_id="register_word", 
     response_model=word_schemas.RegisterWordResponse, 
-    responses=common_schemas.COMMON_ERROR_RESPONSES
 )
 async def register_word(
     payload: word_schemas.RegisterWordRequest,
@@ -73,3 +72,18 @@ async def register_word(
     entry = Entry(**payload.item.dict())  
     registered_id = svc.register_word(entry, user_id)  
     return word_schemas.RegisterWordResponse(user_word_id=registered_id)
+
+@router.post(
+    "/delete_word", 
+    operation_id="delete_word", 
+    response_model=word_schemas.DeleteWordResponse, 
+)
+async def delete_word(
+    payload: word_schemas.DeleteWordRequest, 
+    user_id: str = Depends(get_user_id_from_cookie), 
+    db: Database = Depends(get_db), 
+): 
+    svc = WordService(db)
+    entry = Entry(**payload.item.dict())
+    deleted_id = svc.delete_user_item(entry, user_id)
+    return word_schemas.DeleteWordResponse(user_word_id=deleted_id)
