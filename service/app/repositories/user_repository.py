@@ -3,6 +3,7 @@ from pymongo.database import Database
 from pymongo.collection import Collection
 from bson import ObjectId
 import core.config as config
+from models.user import UserInDB
 
 USER_COL = config.USER_COLLECTION_NAME 
 
@@ -11,22 +12,25 @@ class UserRepository:
     def __init__(self, db: Database, collection_name: str = USER_COL):
         self.col: Collection = db[collection_name]
 
-    def create(self, doc: dict) -> str:
-        """Insert and return string id."""
+    # --- create ---
+    def create(self, user: UserInDB) -> str:
+        """Insert a new user item"""
+        doc = user.model_dump(by_alias=True, exclude_none=True)
         res = self.col.insert_one(doc)
         return str(res.inserted_id)
 
-    def find_by_id(self, _id: str | ObjectId) -> dict[str, Any] | None:
-        """Find user by _id."""
-        oid = ObjectId(_id) if isinstance(_id, str) else _id
-        return self.col.find_one({"_id": oid})
+    # --- read ---
+    def get_user_id_by_username(self, username: str) -> str | None: 
+        """find user by username, return user_id(exists) or None(not exist)""" 
+        doc = self.col.find_one({"username": username}, {"_id": 1})
+        return str(doc["_id"]) if doc else None
 
-    def find_by_username_or_email(self, identifier: str) -> dict[str, Any] | None:
-        """Find user by username or email."""
-        return self.col.find_one(
-            {"$or": [{"username": identifier}, {"email": identifier}]}
-        )
+    def get_hashed_pw_by_user_id(self, user_id: str) -> str | None: 
+        """find user's hashed password, return it or None(exist)"""
+        obj_id = ObjectId(user_id)
+        doc = self.col.find_one({"_id": obj_id}, {"hashed_password": 1})
+        return doc["hashed_password"] if doc else None
 
-    def exists_username_or_email(self, identifier: str) -> bool: 
-        """Check if username or email exists."""
-        return self.find_by_username_or_email(identifier) is not None
+    # --- update ---
+    # --- delete ---
+

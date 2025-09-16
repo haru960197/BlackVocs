@@ -3,9 +3,9 @@ from pymongo.database import Database
 import schemas.common_schemas as common_schemas
 from repositories.session import get_db
 from services.word_service import WordService
+from services.auth_service import AuthService 
 from services.generativeAI_service import GenerativeAIService
 import schemas.word_schemas as word_schemas
-from utils.auth_utils import get_user_id_from_cookie
 from models.word import Entry
 
 router = APIRouter(prefix="/word", tags=["word"], responses=common_schemas.COMMON_ERROR_RESPONSES)
@@ -16,7 +16,7 @@ router = APIRouter(prefix="/word", tags=["word"], responses=common_schemas.COMMO
     response_model=word_schemas.GetUserWordListResponse, 
 )
 async def get_user_word_list(
-    user_id: str = Depends(get_user_id_from_cookie),
+    user_id: str = Depends(AuthService.get_user_id_from_cookie),
     db: Database = Depends(get_db)
 ):
     """Return the current user's saved word list."""
@@ -52,7 +52,7 @@ async def suggest_words(
 )
 async def generate_new_word_entry( 
     payload: word_schemas.GenerateNewWordEntryRequest, 
-    user_id: str = Depends(get_user_id_from_cookie), # only for auth check
+    user_id: str = Depends(AuthService.get_user_id_from_cookie), # only for auth check
 ):
     svc = GenerativeAIService()
     generated_entry: Entry = svc.generate_entry(payload.word)
@@ -65,7 +65,7 @@ async def generate_new_word_entry(
 )
 async def register_word(
     payload: word_schemas.RegisterWordRequest,
-    user_id: str = Depends(get_user_id_from_cookie),
+    user_id: str = Depends(AuthService.get_user_id_from_cookie),
     db: Database = Depends(get_db),
 ):
     svc = WordService(db)
@@ -80,7 +80,7 @@ async def register_word(
 )
 async def delete_word(
     payload: word_schemas.DeleteWordRequest, 
-    user_id: str = Depends(get_user_id_from_cookie), 
+    user_id: str = Depends(AuthService.get_user_id_from_cookie), 
     db: Database = Depends(get_db), 
 ): 
     svc = WordService(db)
