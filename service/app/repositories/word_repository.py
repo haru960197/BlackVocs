@@ -75,6 +75,43 @@ class WordRepository:
         )
         return str(updated["_id"])
 
+    # --- Read ---
+    def registered_count_by_word_id(self, word_id: str) -> int:
+        """
+        Return the registered_count for a word item by word_id.
+        Returns -1 if not found.
+        """
+        doc = self.col.find_one(
+            {"_id": ObjectId(word_id)},
+            {"registered_count": 1}
+        )
+        if not doc:
+            return -1 
+
+        return int(doc.get("registered_count", 0))
+
+    # --- Update 
+
+    # --- find by ---
+    def find_by_fingerprint(self, fpr: str) -> str | None: 
+        doc = self.col.find_one({"fingerprint": fpr}, {"_id": 1})
+        return str(doc["_id"]) if doc else None
+
+    def find_by_entry(self, entry: Entry) -> str | None: 
+        """ if an Entry is in DB, return ID, else return None """
+        fpr = entry2fingerprint(entry)
+        return self.find_by_fingerprint(fpr)
+
+    def find_by_ids(self, word_ids: List[str]) -> List[Item]:
+        """Find words by their IDs and return them as Item list (not Entry). """
+        if not word_ids:
+            return []
+
+        object_ids = [ObjectId(wid) for wid in word_ids]
+        docs = list(self.col.find({"_id": {"$in": object_ids}}))
+        return [Item.model_validate(doc) for doc in docs]
+
+
     def find_candidates_by_entry_word_regex(
         self,
         regex_filter: Dict[str, Any],

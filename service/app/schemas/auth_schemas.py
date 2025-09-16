@@ -1,30 +1,29 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr
 
-# user --------------------------------------
+# --- General ---
 class User(BaseModel):
     username: str
-    email: EmailStr
-    full_name: str | None = None
     disabled: bool = False
 
-# sign in -------------------------------------
-class SignInRequest(BaseModel):
-    username_or_email: str
+# --- sign in ---
+class SignInRequest(User):
     password: str
 
 class SignInResponse(BaseModel):
     access_token: str
     token_type: str
 
-# sign up -------------------------------------
-class SignUpRequest(BaseModel):
-    username: str
-    email: EmailStr
+# --- sign up ---
+class SignUpRequest(User):
     password: str
 
 class SignUpResponse(BaseModel):
     id: str
 
+# --- sign out ---
+class SignOutResponse(BaseModel): 
+    msg: str
+
+# --- check if signed in ---
 class SignedInCheckResponse(BaseModel):
-    signed_in: bool
-    user_id: str | None = None
+    user_id: str 

@@ -1,12 +1,9 @@
-from fastapi import APIRouter, Depends, Response, Request
+from fastapi import APIRouter, Depends, Response
 from pymongo.database import Database
 from repositories.session import get_db
-
+from services.auth_service import AuthService
 import schemas.auth_schemas as auth_schemas
 import schemas.common_schemas as common_schemas
-
-from services.auth_service import AuthService
-from utils.auth_utils import create_access_token, get_user_id_from_cookie
 
 router = APIRouter(prefix="/user", tags=["auth"], responses=common_schemas.COMMON_ERROR_RESPONSES)
 
@@ -20,12 +17,8 @@ async def sign_in(
     response: Response,
     db: Database = Depends(get_db),
 ):
-    """
-    Sign in and set JWT cookie.
-    """
     svc = AuthService(db)
-    user = svc.sign_in(payload.username_or_email, payload.password)
-    token = create_access_token(str(user["_id"]))
+    token = svc.sign_in(payload.username, payload.password)
 
     response.set_cookie(
         key="access_token",
@@ -42,17 +35,16 @@ async def sign_in(
     response_description="sign up new user",
     response_model=auth_schemas.SignUpResponse,
 )
-async def signup(
+async def sign_up(
     payload: auth_schemas.SignUpRequest, 
     db: Database = Depends(get_db)
 ):
     """
     Create a new user.
     """
-
     svc = AuthService(db)
-    inserted_id = svc.signup(payload.username, payload.email, payload.password)
-    return auth_schemas.SignUpResponse(id=inserted_id)
+    user_id = svc.sign_up(payload.username, payload.password)
+    return auth_schemas.SignUpResponse(id=user_id)
 
 
 @router.post(
@@ -60,24 +52,25 @@ async def signup(
     operation_id="sign_out", 
     response_description="sign out of the user account",
 )
-async def signout(response: Response):
+async def sign_out(response: Response):
     """
     Delete JWT cookie and redirect.
     """
-
     response.delete_cookie(
         key="access_token",
         httponly=True,
         samesite="none",
         secure=True,
     )
-    return { "message": "Successfully signed out" }
+    return auth_schemas.SignOutResponse(msg="Successfully signed out")
 
 @router.get(
     "/signed_in_check", 
     operation_id="signed_in_check", 
     response_model=auth_schemas.SignedInCheckResponse,
 ) 
-async def signed_in_check(request: Request): 
-    user_id = await get_user_id_from_cookie(request)
-    return auth_schemas.SignedInCheckResponse(signed_in=True, user_id=user_id)
+async def signed_in_check(user_id: str = Depends(AuthService.get_user_id_from_cookie)): 
+    """
+    return user_id if signed in, else raise TokenInvalidError or TokenInvalidError
+    """
+    return auth_schemas.SignedInCheckResponse(user_id=user_id)
