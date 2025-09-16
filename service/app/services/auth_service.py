@@ -58,11 +58,11 @@ class AuthService:
         Create a new user and return user_id
 
         Args: 
-            username(str) : new user's username
-            password(str) : plaintext password
+            username (str) : new user's username
+            password (str) : plaintext password
 
         Returns: 
-            user_id(str) : 
+            user_id (str) : 
         """
         try: 
             # 1) check if username is not taken 

@@ -10,7 +10,7 @@ class UserWordRepository:
     def __init__(self, db: Database, collection_name: str = USER_WORD_COL):
         self.col: Collection = db[collection_name]
 
-    # --- create ---
+    # --- add ---
     def create_link(self, user_id: str, word_id: str) -> str:
         """Create (user_id, word_id) link and return string id."""
         res = self.col.insert_one({"user_id": ObjectId(user_id), "word_id": ObjectId(word_id)})
