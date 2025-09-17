@@ -125,23 +125,22 @@ class WordService:
         return [pair[1] for pair in scored[:limit]]
 
     # --- delete a word item from user_word collection ---
-    def delete_user_item(self, entry: Entry, user_id: str) -> str: 
+    def delete_user_item(self, word_id: str, user_id: str) -> str: 
         """
         delete a word item from user_word collection if the item exists in it
 
         Args: 
-            entry(Entry): word entry to delete from user collection 
-            user_id(str): current user id 
+            word_id (str): word_id to delete from user collection 
+            user_id (str): current user id 
 
         Returns: 
-            user_word_id(str): deleted item id (no longer exist in the user_word collection
+            user_word_id (str): deleted item id (no longer exist in the user_word collection
         """
         
         try: 
-            # 1. check if the item is in the collection 
-            word_id = self.words.find_by_entry(entry)
-            if not word_id: 
-                raise BadRequestError("Word item does not exist in the dictionary")
+            # 1. check if the word_id is in the collection 
+            if not self.words.exists_by_id(word_id):
+                raise BadRequestError("word_id does not exist in the dictionary")
             
             # 2. check if user_word link exists
             user_word_id = self.user_words.exist_link(user_id, word_id)

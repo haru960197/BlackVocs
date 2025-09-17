@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response, status
 from pymongo.database import Database
 import schemas.common_schemas as common_schemas
 from repositories.session import get_db
@@ -76,7 +76,6 @@ async def register_word(
 @router.post(
     "/delete_word", 
     operation_id="delete_word", 
-    response_model=word_schemas.DeleteWordResponse, 
 )
 async def delete_word(
     payload: word_schemas.DeleteWordRequest, 
@@ -84,6 +83,5 @@ async def delete_word(
     db: Database = Depends(get_db), 
 ): 
     svc = WordService(db)
-    entry = Entry(**payload.item.dict())
-    deleted_id = svc.delete_user_item(entry, user_id)
-    return word_schemas.DeleteWordResponse(user_word_id=deleted_id)
+    deleted_id = svc.delete_user_item(payload.word_id, user_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

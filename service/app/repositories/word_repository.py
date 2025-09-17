@@ -30,6 +30,10 @@ class WordRepository:
         return int(doc.get("registered_count", 0))
 
     # --- find by ---
+    def exists_by_id(self, word_id: str) -> bool: 
+        oid = ObjectId(word_id)
+        return self.col.find_one({"_id": oid}, {"_id": 1}) is not None
+
     def find_by_fingerprint(self, fpr: str) -> str | None: 
         doc = self.col.find_one({"fingerprint": fpr}, {"_id": 1})
         return str(doc["_id"]) if doc else None
