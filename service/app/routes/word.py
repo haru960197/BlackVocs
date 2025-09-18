@@ -13,6 +13,7 @@ router = APIRouter(prefix="/word", tags=["word"], responses=common_schemas.COMMO
 @router.get(
     "/get_user_word_list", 
     operation_id="get_user_word_list", 
+    response_description="get word item list that the current user has registered", 
     response_model=word_schemas.GetUserWordListResponse, 
 )
 async def get_user_word_list(
@@ -28,6 +29,7 @@ async def get_user_word_list(
 @router.post(
     "/suggest_words", 
     response_model=word_schemas.SuggestWordsResponse, 
+    response_description="suggest words according to the input", 
     operation_id="suggest_words",
 )
 async def suggest_words(
@@ -47,8 +49,8 @@ async def suggest_words(
 @router.post(
     "/generate_new_word_entry", 
     operation_id="generate_new_word_entry", 
+    response_description="generate new word entry with AI", 
     response_model=word_schemas.GenerateNewWordEntryResponse, 
-    description="generate new word entry with AI", 
 )
 async def generate_new_word_entry( 
     payload: word_schemas.GenerateNewWordEntryRequest, 
@@ -61,6 +63,7 @@ async def generate_new_word_entry(
 @router.post(
     "/register_word", 
     operation_id="register_word", 
+    response_description="register a new item for the current user", 
     response_model=word_schemas.RegisterWordResponse, 
 )
 async def register_word(
