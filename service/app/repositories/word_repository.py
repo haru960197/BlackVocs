@@ -69,7 +69,7 @@ class WordRepository:
         return int(doc.get("registered_count", 0))
 
     # --- update ---
-    def inclement_registered_count(self, word_id: str) -> None: 
+    def increment_registered_count(self, word_id: str) -> None: 
         self.col.find_one_and_update(
             {"_id": ObjectId(word_id)},
             {"$inc": {"registered_count": 1}},

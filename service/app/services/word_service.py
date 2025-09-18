@@ -140,8 +140,8 @@ class WordService:
             if self.user_words.get_link(user_id, word_id):
                 raise ConflictError("Word item is already registered by this user.")
 
-            # 3) inclement registered_count 
-            self.words.inclement_registered_count(word_id)
+            # 3) increment registered_count 
+            self.words.increment_registered_count(word_id)
 
             # 4) create link and return 
             return self.user_words.create_link(user_id, word_id)
