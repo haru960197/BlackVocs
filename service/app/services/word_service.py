@@ -21,11 +21,6 @@ class WordService:
         self.words = WordRepository(db)
         self.user_words = UserWordRepository(db)
 
-    def get_word_entries_for_user(self, user_id: str) -> List[Entry]:
-        """Return the word entries linked to the given user."""
-        items = self.get_word_items_for_user(user_id)
-        return [item.entry for item in items]
-
     # --- get user word list --- 
     def get_word_items_by_user_id(self, user_id: str) -> List[Item]: 
         """ 
@@ -166,18 +161,10 @@ class WordService:
             user_word_id (str): deleted item id (no longer exist in the user_word collection
         """
         
-        fpr = self.entry2fingerprint(entry)
         try: 
-<<<<<<< Updated upstream
-            # 1. check if the word_id is in the collection 
-            if not self.words.exists_by_id(word_id):
-                raise BadRequestError("word_id does not exist in the dictionary")
-=======
             # 1) check if the item is in the collection 
-            word_id = self.words.get_id_by_fpr(fpr)
-            if not word_id: 
+            if self.words.exists_word_id(word_id): 
                 raise BadRequestError("Word item does not exist in the dictionary")
->>>>>>> Stashed changes
             
             # 2. check if user_word link exists
             user_word_id = self.user_words.get_link(user_id, word_id)

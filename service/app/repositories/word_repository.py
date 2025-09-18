@@ -25,6 +25,10 @@ class WordRepository:
         return str(res.inserted_id)
 
     # --- read ---
+    def exists_word_id(self, word_id: str) -> bool: 
+        doc = self.col.find_one({"word_id": ObjectId(word_id)}, {"_id": 1})
+        return doc is not None
+
     def get_items_by_word_ids(self, word_ids: List[str]) -> List[Item]:
         """Find words by their IDs and return them as Item list. """
         object_ids = [ObjectId(wid) for wid in word_ids]
