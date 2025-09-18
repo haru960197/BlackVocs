@@ -1,15 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { handleSignupUser } from './action';
+import { handleSignUpUser } from './action';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/context/ToastContext';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { SignupFormInput, signupSchema } from './schema';
+import { SignUpFormInput, signUpSchema } from './schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import clsx from 'clsx';
 
-export const SignupForm = () => {
+export const SignUpForm = () => {
   const router = useRouter();
 
   const { showToast } = useToast();
@@ -18,19 +18,19 @@ export const SignupForm = () => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<SignupFormInput>({
-    resolver: zodResolver(signupSchema),
+  } = useForm<SignUpFormInput>({
+    resolver: zodResolver(signUpSchema),
     mode: 'onChange',
   });
 
   const isDisabled = !!errors.email || !!errors.userName || !!errors.password;
 
-  const onSubmit: SubmitHandler<SignupFormInput> = async (data) => {
+  const onSubmit: SubmitHandler<SignUpFormInput> = async (data) => {
     if (isDisabled) {
       return;
     }
 
-    const response = await handleSignupUser(data.userName, data.email, data.password);
+    const response = await handleSignUpUser(data.userName, data.email, data.password);
 
     if (response.success) {
       // 登録に成功したので，ログインページにリダイレクトする

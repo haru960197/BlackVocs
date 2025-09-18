@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const signupSchema = z.object({
+export const signUpSchema = z.object({
   userName: z
     .string()
     .max(25, { message: 'ユーザー名は25文字以下で入力してください' })
@@ -15,4 +15,4 @@ export const signupSchema = z.object({
     }),
 });
 
-export type SignupFormInput = z.infer<typeof signupSchema>;
+export type SignUpFormInput = z.infer<typeof signUpSchema>;
