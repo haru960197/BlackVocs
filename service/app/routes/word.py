@@ -76,7 +76,7 @@ async def register_word(
 @router.post(
     "/delete_word", 
     operation_id="delete_word", 
-    response_model=Response,
+    status_code=204,
 )
 async def delete_word(
     payload: word_schemas.DeleteWordRequest, 
