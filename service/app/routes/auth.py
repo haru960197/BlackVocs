@@ -12,7 +12,7 @@ router = APIRouter(prefix="/user", tags=["auth"], responses=common_schemas.COMMO
 
 @router.post(
     "/sign_in",
-    operation_id="signin",
+    operation_id="sign_in",
     response_model=auth_schemas.SignInResponse,
 )
 async def sign_in(
@@ -38,7 +38,7 @@ async def sign_in(
 
 @router.post(
     "/sign_up",
-    operation_id="signup",
+    operation_id="sign_up",
     response_description="sign up new user",
     response_model=auth_schemas.SignUpResponse,
 )
@@ -57,7 +57,7 @@ async def signup(
 
 @router.post(
     "/sign_out",
-    operation_id="signout", 
+    operation_id="sign_out", 
     response_description="sign out of the user account",
 )
 async def signout(response: Response):
