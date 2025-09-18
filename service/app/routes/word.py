@@ -22,15 +22,16 @@ async def get_user_word_list(
 ):
     """Return the current user's saved word list."""
     svc = WordService(db)
-    model_items = svc.get_word_items_for_user(user_id)
-    schema_items = [model_item.to_schema_item() for model_item in model_items]
-    return word_schemas.GetUserWordListResponse(items=schema_items, userid=user_id)
+    items = svc.get_word_items_by_user_id(user_id)
+    return word_schemas.GetUserWordListResponse(
+        items=[item.to_schema_item() for item in items]
+    )
 
 @router.post(
     "/suggest_words", 
-    response_model=word_schemas.SuggestWordsResponse, 
-    response_description="suggest words according to the input", 
     operation_id="suggest_words",
+    response_description="suggest words according to the input", 
+    response_model=word_schemas.SuggestWordsResponse, 
 )
 async def suggest_words(
     request: word_schemas.SuggestWordsRequest,
@@ -57,7 +58,7 @@ async def generate_new_word_entry(
     user_id: str = Depends(AuthService.get_user_id_from_cookie), # only for auth check
 ):
     svc = GenerativeAIService()
-    generated_entry: Entry = svc.generate_entry(payload.word)
+    generated_entry = svc.generate_entry(payload.word)
     return word_schemas.GenerateNewWordEntryResponse(item=generated_entry.to_schema_item())
 
 @router.post(
@@ -72,7 +73,7 @@ async def register_word(
     db: Database = Depends(get_db),
 ):
     svc = WordService(db)
-    entry = Entry(**payload.item.dict())  
+    entry = Entry(**payload.dict())  
     registered_id = svc.register_word(entry, user_id)  
     return word_schemas.RegisterWordResponse(user_word_id=registered_id)
 

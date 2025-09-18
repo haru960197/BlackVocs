@@ -21,7 +21,6 @@ class Item(ItemBase):
 
 class GetUserWordListResponse(BaseModel):
     items: List[Item]
-    userid: str
 
 class SuggestWordsRequest(BaseModel): 
     input_word: str
@@ -36,8 +35,8 @@ class GenerateNewWordEntryRequest(BaseModel):
 class GenerateNewWordEntryResponse(BaseModel): 
     item: ItemCreate 
 
-class RegisterWordRequest(BaseModel): 
-    item: ItemCreate
+class RegisterWordRequest(ItemBase): 
+    pass
 
 class RegisterWordResponse(BaseModel):  
     user_word_id: str

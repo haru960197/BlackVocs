@@ -4,7 +4,7 @@ import core.config as config
 from models.word import Entry
 
 from requests import RequestException
-from core.errors import BadRequestError, ServiceError
+from core.errors import ServiceError
 
 DEEPSEEK_API_KEY = config.DEEPSEEK_API_KEY
 DEEPSEEK_URL = config.DEEPSEEK_URL or ""
@@ -29,9 +29,15 @@ class GenerativeAIService:
         self.timeout = timeout
 
     def generate_entry(self, word: str) -> Entry:
-        """Return dict(word, meaning, example_sentence, example_sentence_translation)."""
-        if not word: 
-            raise BadRequestError("word is required")
+        """
+        Return dict(word, meaning, example_sentence, example_sentence_translation).
+
+        Args: 
+            word(str) : word which current user writes     
+        
+        Returns: 
+            Entry : generated entry
+        """
 
         prompt = (
             f"単語: {word}\n\n"
@@ -55,50 +61,50 @@ class GenerativeAIService:
         }
 
         try: 
+            # 1) post prompt
             resp = requests.post(DEEPSEEK_URL, headers=headers, json=payload, timeout=self.timeout)
-        except RequestException as e: 
-            raise ServiceError("Failed to call DeepSeek API") from e
+            if resp.status_code != 200:
+                raise ServiceError(f"DeepSeek API error: {resp.status_code} {resp.text[:200]}")
 
-        if resp.status_code != 200:
-            raise ServiceError(f"DeepSeek API error: {resp.status_code} {resp.text[:200]}")
-
-        try: 
-            data = resp.json()
-            choices = data.get("choices") or []
+            # 2) get contents
+            choices = resp.json().get("choices") or []
             content = ""
             if choices: 
                 msg = choices[0].get("message") or {}
                 content = (msg.get("content") or "").strip()
+            if not content:
+                raise ServiceError("DeepSeek returned empty content")
+
+            # 3) extract each components
+            meaning = example_sentence = example_sentence_translation = ""
+            for raw_line in content.splitlines():
+                s = raw_line.strip()
+                if not s:
+                    continue
+                m = LABEL_RX["meaning"].match(s)
+                if m:
+                    meaning = m.group(1).strip()
+                    continue
+                m = LABEL_RX["en"].match(s)
+                if m:
+                    example_sentence = m.group(1).strip()
+                    continue
+                m = LABEL_RX["ja"].match(s)
+                if m:
+                    example_sentence_translation = m.group(1).strip()
+                    continue
+            if not (meaning and example_sentence and example_sentence_translation):
+                raise ServiceError("DS response missing required fields")
+
+            return Entry(
+                word=word,
+                meaning=meaning,
+                example_sentence=example_sentence,
+                example_sentence_translation=example_sentence_translation,
+            )
+        except RequestException as e: 
+            raise ServiceError("Failed to call DeepSeek API") from e
         except Exception as e:
             raise ServiceError("Failed to parse DeepSeek JSON response") from e
 
-        if not content:
-            raise ServiceError("DeepSeek returned empty content")
 
-        meaning = example_sentence = example_sentence_translation = ""
-        for raw_line in content.splitlines():
-            s = raw_line.strip()
-            if not s:
-                continue
-            m = LABEL_RX["meaning"].match(s)
-            if m:
-                meaning = m.group(1).strip()
-                continue
-            m = LABEL_RX["en"].match(s)
-            if m:
-                example_sentence = m.group(1).strip()
-                continue
-            m = LABEL_RX["ja"].match(s)
-            if m:
-                example_sentence_translation = m.group(1).strip()
-                continue
-
-        if not (meaning and example_sentence and example_sentence_translation):
-            raise ServiceError("DS response missing required fields")
-
-        return Entry(
-            word=word,
-            meaning=meaning,
-            example_sentence=example_sentence,
-            example_sentence_translation=example_sentence_translation,
-        )

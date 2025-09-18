@@ -27,8 +27,7 @@ class UserRepository:
 
     def get_hashed_pw_by_user_id(self, user_id: str) -> str | None: 
         """find user's hashed password, return it or None(exist)"""
-        obj_id = ObjectId(user_id)
-        doc = self.col.find_one({"_id": obj_id}, {"hashed_password": 1})
+        doc = self.col.find_one({"_id": ObjectId(user_id)}, {"hashed_password": 1})
         return doc["hashed_password"] if doc else None
 
     # --- update ---
