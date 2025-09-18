@@ -124,7 +124,6 @@ class WordService:
             registered_id(str) : new user_word_id
             
         """
-
         self._validate_entry(entry)
 
         try: 
