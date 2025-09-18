@@ -163,7 +163,7 @@ class WordService:
         
         try: 
             # 1) check if the item is in the collection 
-            if self.words.exists_word_id(word_id): 
+            if not self.words.exists_word_id(word_id): 
                 raise BadRequestError("Word item does not exist in the dictionary")
             
             # 2. check if user_word link exists
