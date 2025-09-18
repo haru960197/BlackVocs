@@ -42,3 +42,6 @@ class RegisterWordRequest(BaseModel):
 class RegisterWordResponse(BaseModel):  
     user_word_id: str
 
+class DeleteWordRequest(BaseModel): 
+    word_id: str
+
