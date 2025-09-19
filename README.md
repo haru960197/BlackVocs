@@ -1,3 +1,23 @@
+## How to develop
+
+1. `$ git clone https://github.com/haru960197/BlackVocs.git`
+2. `$ git config commit.template .commit_template` 
+3. `.env.example`ファイルをコピーして`.env`ファイルを作成
+4. `$ git checkout develop`;
+5. `$ git pull` (もしdevelopブランチが更新されない場合，`$ git reset --hard origin/develop`を実行)
+6. `$ git checkout -b branch_name`
+7. serviceを起動
+    1. `$ cd ./service`
+    2. `$ docker compose up`
+8. webを起動
+    1. `$ cd ../web/`
+    2. `$ npm install`
+    3. `$ npm run dev` (失敗する場合は，`$ npm run openapi-ts`を実行)
+
+### 注意点
+
+- serviceを先に起動しないと，`localhost:4000/openapi.json`へのフェッチが失敗し，openapiによるクライアント生成ができないことに注意．
+
 ## SERVICE
 - `.env`を書き換えた場合、docker-imagesを再buildする必要あり
   - `$ docker compose down -v && docker compose build --no-cache && docker-compose up`を`service/`直下で実行
