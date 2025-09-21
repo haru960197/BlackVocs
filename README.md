@@ -8,7 +8,7 @@
 6. `$ git checkout -b branch_name`
 7. serviceを起動
     1. `$ cd ./service`
-    2. `$ docker compose up`
+    2. `$ docker compose up` (docker-desktopを立ち上げた状態で行う) 
 8. webを起動
     1. `$ cd ../web/`
     2. `$ npm install`
