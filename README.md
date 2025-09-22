@@ -19,8 +19,12 @@
 - serviceを先に起動しないと，`localhost:4000/openapi.json`へのフェッチが失敗し，openapiによるクライアント生成ができないことに注意．
 
 ## SERVICE
+### General 
 - `.env`を書き換えた場合、docker-imagesを再buildする必要あり
-  - `$ docker compose down -v && docker compose build --no-cache && docker-compose up`を`service/`直下で実行
+-> `$ docker compose down -v && docker compose build --no-cache && docker-compose up`を`service/`直下で実行
+
+### Database 
+
 
 ## WEB
 

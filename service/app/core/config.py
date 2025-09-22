@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 ## user DB
+DB_NAME = os.getenv("DB_NAME", "")
 USER_COLLECTION_NAME = os.getenv("USER_COLLECTION_NAME", "")
 WORD_COLLECTION_NAME = os.getenv("WORD_COLLECTION_NAME", "")
 USER_WORD_COLLECTION_NAME=os.getenv("USER_WORD_COLLECTION_NAME", "")
