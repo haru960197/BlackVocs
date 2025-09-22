@@ -24,8 +24,7 @@
 -> `$ docker compose down -v && docker compose build --no-cache && docker-compose up`を`service/`直下で実行
 
 ### Database 
-
-
+- データベース名：`.env`に記載
 ## WEB
 
 - バックエンドのAPIを修正したときは，フロントエンド側のクライアントコードを修正する必要があるので，`web`直下で，`$npm run openapi-ts`を実行する
