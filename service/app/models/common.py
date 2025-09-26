@@ -1,7 +1,7 @@
 from bson import ObjectId
 from typing import Any
 from pydantic_core import core_schema
-from pydantic import GetJsonSchemaHandler
+from pydantic import GetJsonSchemaHandler, BaseModel
 from pydantic.json_schema import JsonSchemaValue
 
 class PyObjectId(ObjectId):
@@ -25,3 +25,13 @@ class PyObjectId(ObjectId):
         if not ObjectId.is_valid(v):
             raise ValueError("Invalid ObjectId")
         return ObjectId(v)
+
+# --- components for DB models ---
+class WordBase(BaseModel): 
+    word: str
+    meaning: str
+
+class ExampleBase(BaseModel): 
+    example_sentence: str
+    exmpale_sentence_translation: str
+

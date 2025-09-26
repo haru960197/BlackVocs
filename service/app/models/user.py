@@ -1,10 +1,13 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from models.common import PyObjectId
 
-class User(BaseModel):
-    id: PyObjectId | None = Field(alias="_id", default=None)
+class UserModel(BaseModel):
+    id: PyObjectId | None = Field(default=None, alias="_id")
     username: str
+    hashed_password: str
     disabled: bool = False
 
-class UserInDB(User):
-    hashed_password: str
+    model_config = ConfigDict(
+        populate_by_name=True,
+        json_encoders={PyObjectId: str},  
+    )
