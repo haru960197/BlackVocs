@@ -8,14 +8,14 @@
 
 ### main changes
 - Modelsは以下の通り
-    `word.py`: wordテーブルに保存するフィールドの指定
-    `user.py`: userテーブルに保存するフィールドの指定
-    `user_word.py`: wordテーブルに保存するフィールドの指定
-    `common.py`: これらにまたがって使われたり、service層で使うモデルの定義
+    - `word.py`: wordテーブルに保存するフィールドの指定
+    - `user.py`: userテーブルに保存するフィールドの指定
+    - `user_word.py`: wordテーブルに保存するフィールドの指定
+    - `common.py`: これらにまたがって使われたり、service層で使うモデルの定義
 
 - Idの管理について
-今までは`str`で層間でやりとりしていたけど、`PyObjectId`を使う
-`PyObjectId`は`ObjectId`<->`str`をやり取りするのに楽
+    今までは`str`で層間でやりとりしていたけど、`PyObjectId`を使う
+    `PyObjectId`は`ObjectId`<->`str`をやり取りするのに楽
 
 
 
