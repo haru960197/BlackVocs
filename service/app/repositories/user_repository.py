@@ -1,9 +1,8 @@
-from typing import Any
 from pymongo.database import Database
 from pymongo.collection import Collection
-from bson import ObjectId
 import core.config as config
-from models.user import UserInDB
+from models.user import UserModel 
+from models.common import PyObjectId
 
 USER_COL = config.USER_COLLECTION_NAME 
 
@@ -13,20 +12,24 @@ class UserRepository:
         self.col: Collection = db[collection_name]
 
     # --- create ---
-    def create(self, user: UserInDB) -> str:
+    def create(self, user: UserModel) -> PyObjectId:
         """Insert a new user item"""
         doc = user.model_dump(by_alias=True, exclude_none=True)
         res = self.col.insert_one(doc)
-        return str(res.inserted_id)
+        return res.inserted_id
 
     # --- read ---
-    def get_user_id_by_username(self, username: str) -> str | None: 
-        """find user by username, return user_id(exists) or None(not exist)""" 
-        doc = self.col.find_one({"username": username}, {"_id": 1})
-        return str(doc["_id"]) if doc else None
+    def find_user(
+        self,
+        user_id: PyObjectId | None = None,
+        username: str | None = None,
+        projection: dict | None = None,
+    ) -> UserModel | None:
 
-    def get_hashed_pw_by_user_id(self, user_id: str) -> str | None: 
-        """find user's hashed password, return it or None(exist)"""
-        doc = self.col.find_one({"_id": ObjectId(user_id)}, {"hashed_password": 1})
-        return doc["hashed_password"] if doc else None
+        if not user_id and not username:
+            raise ValueError("Either user_id or username must be provided")
 
+        query = {"_id": user_id} if user_id else {"username": username}
+
+        doc = self.col.find_one(query, projection)
+        return UserModel.model_validate(doc) if doc else None

@@ -4,6 +4,7 @@ from pymongo import errors as mongo_errors
 from repositories.user_repository import UserRepository
 from core.config import USER_COLLECTION_NAME
 from core.errors import (
+    NotFoundError,
     ServiceError,
     InvalidCredentialsError,
     ConflictError,
@@ -11,8 +12,9 @@ from core.errors import (
     InvalidTokenError, 
     TokenExpiredError, 
 )
-from models.user import UserInDB
 from core.jwt_auth import AuthJwtCsrt
+from models.common import PyObjectId
+from models.user import UserModel
 
 class AuthService:
     def __init__(self, db: Database, auth: AuthJwtCsrt | None = None):
@@ -20,7 +22,7 @@ class AuthService:
         self.auth = auth or AuthJwtCsrt()
 
     # --- sign in ---
-    def sign_in(self, username: str, password: str) -> str:
+    def sign_in(self, username: str, plaintext_password: str) -> str:
         """
         Authenticate a user with the given username and password
 
@@ -33,27 +35,24 @@ class AuthService:
         """
         try: 
             # check if user exists
-            user_id = self.users.get_user_id_by_username(username)
-            if not user_id: 
-                raise InvalidCredentialsError("Incorrect username or password")
-
-            # get hashed password
-            hashed_pw = self.users.get_hashed_pw_by_user_id(user_id)
-            if not hashed_pw: 
-                raise ServiceError("Password is not registered")
+            user = self.users.find_user(username=username)
+            if not user: 
+                raise NotFoundError("given username is not in DB")
 
             # check if the plaintext password is collect
-            if not self.auth.verify_pw(password, hashed_pw): 
-                raise InvalidCredentialsError("Incorrect username or password")
+            if not self.auth.verify_pw(plaintext_password, user.hashed_password): 
+                raise InvalidCredentialsError("Incorrect password")
 
             # create token 
-            return self.auth.create_access_token(user_id)
+            if user.id is None: 
+                raise ServiceError("failed to get user id")
+            return self.auth.create_access_token(user.id)
 
         except mongo_errors.PyMongoError as e:
             raise ServiceError(f"Database error during deletion: {e}")
 
     # --- Sign up ---
-    def sign_up(self, username: str, password: str) -> str:
+    def sign_up(self, username: str, plaintext_password: str) -> PyObjectId:
         """
         Create a new user and return user_id
 
@@ -62,17 +61,17 @@ class AuthService:
             password(str) : plaintext password
 
         Returns: 
-            user_id(str) : 
+            user_id(PyObjectId) : 
         """
         try: 
             # check if username is not taken 
-            if self.users.get_user_id_by_username(username): 
+            if self.users.find_user(username=username): 
                 raise ConflictError("Username is already taken")
 
-            # generate UserInDB model (manage the info in the model between layers(service -> repo))
-            user = UserInDB(
+            # generate usermodel
+            user = UserModel(
                 username=username,
-                hashed_password=self.auth.generate_hashed_pw(password), 
+                hashed_password=self.auth.generate_hashed_pw(plaintext_password), 
             )
 
             # register
@@ -87,7 +86,7 @@ class AuthService:
 
     # --- check if signed in ---
     @staticmethod
-    def get_user_id_from_cookie(request: Request) -> str: 
+    def get_user_id_from_cookie(request: Request) -> PyObjectId: 
         """get user_id from cookie, return user_id """
         try: 
             auth = AuthJwtCsrt()

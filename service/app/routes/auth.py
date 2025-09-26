@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Response, status
 from pymongo.database import Database
+from models.common import PyObjectId
 from repositories.session import get_db
 from services.auth_service import AuthService
 import schemas.auth_schemas as auth_schemas
@@ -44,7 +45,7 @@ async def sign_up(
     """
     svc = AuthService(db)
     user_id = svc.sign_up(payload.username, payload.password)
-    return auth_schemas.SignUpResponse(id=user_id)
+    return auth_schemas.SignUpResponse(id=str(user_id))
 
 
 @router.post(
@@ -69,8 +70,8 @@ async def sign_out(response: Response):
     operation_id="signed_in_check", 
     response_model=auth_schemas.SignedInCheckResponse,
 ) 
-async def signed_in_check(user_id: str = Depends(AuthService.get_user_id_from_cookie)): 
+async def signed_in_check(user_id: PyObjectId = Depends(AuthService.get_user_id_from_cookie)): 
     """
     return user_id if signed in, else raise TokenInvalidError or TokenInvalidError
     """
-    return auth_schemas.SignedInCheckResponse(user_id=user_id)
+    return auth_schemas.SignedInCheckResponse(user_id=str(user_id))
