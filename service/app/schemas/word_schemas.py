@@ -1,14 +1,7 @@
-from pydantic import BaseModel, ConfigDict 
-from pydantic.alias_generators import to_camel
+from pydantic import BaseModel 
 from typing import List
 
 from models.common import PyObjectId
-
-class CustomBaseModel(BaseModel):
-    model_config = ConfigDict(
-        alias_generator=to_camel,
-        populate_by_name=True
-    )
 
 class WordBase(BaseModel): 
     word: str 
