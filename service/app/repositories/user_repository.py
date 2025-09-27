@@ -30,6 +30,3 @@ class UserRepository:
         doc = self.col.find_one({"_id": ObjectId(user_id)}, {"hashed_password": 1})
         return doc["hashed_password"] if doc else None
 
-    # --- update ---
-    # --- delete ---
-
