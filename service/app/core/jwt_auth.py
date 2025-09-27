@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 import core.config as config
 import core.const as const
 from core.errors import TokenExpiredError, InvalidTokenError
+from models.common import PyObjectId
 
 JWT_KEY = config.JWT_KEY  
 ACCESS_TOKEN_EXPIRE_MINUTES = const.ACCESS_TOKEN_EXPIRE_MINUTES
@@ -30,7 +31,7 @@ class AuthJwtCsrt:
             raise RuntimeError("JWT secret key is missing. Set JWT_KEY in your config/env.")
 
     # --- Access token ---
-    def create_access_token(self, user_id: str) -> str:
+    def create_access_token(self, user_id: PyObjectId) -> str:
         """Create signed JWT for given user_id."""
         expire = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         return self.encode_jwt(user_id, expires_delta=expire)
@@ -47,7 +48,7 @@ class AuthJwtCsrt:
     # --- JWT helpers ---
     def encode_jwt(
         self, 
-        user_id: str, 
+        user_id: PyObjectId, 
         expires_delta: timedelta = timedelta(minutes=15)
     ) -> str:
         """
@@ -67,7 +68,7 @@ class AuthJwtCsrt:
         self, 
         token: str, 
         leeway_seconds: int = 0
-    ) -> str:
+    ) -> PyObjectId:
         """
         Decode JWT and return subject (user_id).
         """
