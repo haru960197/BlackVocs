@@ -5,11 +5,11 @@ import unicodedata
 import hashlib
 from pymongo import errors as mongo_errors
 from pydantic import ValidationError
-
+from models.common import PyObjectId
+from models.word import WordModel
 from repositories.word_repository import WordRepository
 from repositories.user_word_repository import UserWordRepository
 import core.config as config
-
 from core.errors import ServiceError, BadRequestError, ConflictError
 
 DEEPSEEK_API_KEY = config.DEEPSEEK_API_KEY
@@ -21,19 +21,19 @@ class WordService:
         self.user_words = UserWordRepository(db)
 
     # --- get user word list --- 
-    def get_word_items_by_user_id(self, user_id: str) -> List[Item]: 
+    def find_word_items_by_user_id(self, user_id: PyObjectId) -> List[WordModel]: 
         """ 
         Return the word items linked to the given user. 
 
         Args: 
-            user_id (str): current user's user_id
+            user_id (PyObjectId): current user's user_id
 
         Returns: 
-            items (List[Item]): user's word items
+            items (List[WordModel]): user's word items
         """
         try: 
-            word_ids = self.user_words.get_word_ids_by_user_id(user_id)
-            return self.words.get_items_by_word_ids(word_ids)
+            word_ids = self.user_words.find_word_ids_by_user_id(user_id)
+            return self.words.find_item_by_word_ids(word_ids)
 
         except ValidationError as e: 
             raise ServiceError(f"Data validation error: {e}")
@@ -68,14 +68,14 @@ class WordService:
         parts = [re.escape(ch) for ch in q]
         return ".*".join(parts)
 
-    def make_candidates_from_word(self, input_word: str, limit: int) -> List[Item]:
+    def make_candidates_from_word(self, input_word: str, limit: int) -> List[WordModel]:
         """
         Build a subsequence regex from input_word and fetch candidate words from DB.
         """
         subseq = self.make_subsequence_regex(input_word)
-        return self.words.get_items_by_word_subseq(subseq, limit)
+        return self.words.search_items_by_word_subseq(subseq, limit)
 
-    def suggest_items(self, input_word: str, limit: int, cap: int = 100) -> List[Item]: 
+    def suggest_items(self, input_word: str, limit: int, cap: int = 100) -> List[WordModel]: 
         """
         get input_word and return suggest word items which are collected using the algorithm
         
@@ -85,7 +85,7 @@ class WordService:
             cap(int) : maximum number of word items which are collected when sorted by lcs
 
         Returns: 
-            items(List[Item]) : suggest items 
+            items(List[WordModel]) : suggest items 
         """
         try: 
             # 1) lcsの長さが大きいものから順番に取る（最大N個）
