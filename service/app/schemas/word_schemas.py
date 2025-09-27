@@ -2,45 +2,52 @@ from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 from typing import List
 
+from models.common import PyObjectId
+
 class CustomBaseModel(BaseModel):
     model_config = ConfigDict(
         alias_generator=to_camel,
-        populate_by_name=True)
+        populate_by_name=True
+    )
 
-class ItemBase(CustomBaseModel):
-    word: str
+class WordBase(BaseModel): 
+    word: str 
     meaning: str
-    example_sentence: str
-    example_sentence_translation: str 
 
-class ItemCreate(ItemBase): 
-    pass
+class ExampleSentenceBase(BaseModel): 
+    example_sentence: str | None
+    example_sentence_translation: str | None
 
-class Item(ItemBase): 
-    id: str
+class WordResponseBase(WordBase, ExampleSentenceBase):
+    word_id: PyObjectId
 
+# --- get user word list ---
 class GetUserWordListResponse(BaseModel):
-    items: List[Item]
+    word_items: List[WordResponseBase]
 
+# --- suggest ---
 class SuggestWordsRequest(BaseModel): 
     input_word: str
-    limit: int = 10 
+    max_num: int = 10 
 
 class SuggestWordsResponse(BaseModel):
-    items: List[Item]
+    word_items: List[WordBase]
 
+# --- generate ---
 class GenerateNewWordEntryRequest(BaseModel): 
     word: str
 
-class GenerateNewWordEntryResponse(BaseModel): 
-    item: ItemCreate 
+class GenerateNewWordEntryResponse(WordBase, ExampleSentenceBase): 
+    pass
 
-class RegisterWordRequest(ItemBase): 
+# --- register word ---
+class RegisterWordRequest(WordBase, ExampleSentenceBase): 
     pass
 
 class RegisterWordResponse(BaseModel):  
-    user_word_id: str
+    user_word_id: PyObjectId 
 
+# --- delete ---
 class DeleteWordRequest(BaseModel): 
-    word_id: str
+    word_id: PyObjectId
 
