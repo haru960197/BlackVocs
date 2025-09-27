@@ -9,7 +9,6 @@ from pydantic import ValidationError
 from repositories.word_repository import WordRepository
 from repositories.user_word_repository import UserWordRepository
 import core.config as config
-from models.word import Entry, Item 
 
 from core.errors import ServiceError, BadRequestError, ConflictError
 
