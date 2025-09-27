@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, Response, status
 from pymongo.database import Database
+from models.common import PyObjectId
 import schemas.common_schemas as common_schemas
 from repositories.session import get_db
 from services.word_service import WordService
 from services.auth_service import AuthService 
 from services.generativeAI_service import GenerativeAIService
 import schemas.word_schemas as word_schemas
-from models.word import Entry
 
 router = APIRouter(prefix="/word", tags=["word"], responses=common_schemas.COMMON_ERROR_RESPONSES)
 
@@ -17,14 +17,14 @@ router = APIRouter(prefix="/word", tags=["word"], responses=common_schemas.COMMO
     response_model=word_schemas.GetUserWordListResponse, 
 )
 async def get_user_word_list(
-    user_id: str = Depends(AuthService.get_user_id_from_cookie),
+    user_id: PyObjectId = Depends(AuthService.get_user_id_from_cookie),
     db: Database = Depends(get_db)
 ):
     """Return the current user's saved word list."""
     svc = WordService(db)
-    items = svc.get_word_items_by_user_id(user_id)
+    word_items = svc.find_user_word_items_by_user_id(user_id)
     return word_schemas.GetUserWordListResponse(
-        items=[item.to_schema_item() for item in items]
+        word_items=[item.to_schema() for item in word_items]
     )
 
 @router.post(
@@ -42,10 +42,10 @@ async def suggest_words(
 
     items = svc.suggest_items(
         input_word=request.input_word, 
-        limit=request.limit, 
+        limit=request.max_num, 
         cap=CANDIDATE_CAP, 
     )
-    return word_schemas.SuggestWordsResponse(items=[it.to_schema_item() for it in items])
+    return word_schemas.SuggestWordsResponse(items=[it.to_schema for it in items])
 
 @router.post(
     "/generate_new_word_entry", 

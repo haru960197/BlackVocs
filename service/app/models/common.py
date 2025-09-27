@@ -27,17 +27,35 @@ class PyObjectId(ObjectId):
         return ObjectId(v)
 
 # --- components for DB models ---
-class WordBase(BaseModel): 
+class WordBaseModel(BaseModel): 
     word: str
     meaning: str
 
-class ExampleBase(BaseModel): 
+    def to_schema(self) -> "WordBase": 
+        from schemas.word_schemas import WordBase
+        return WordBase(
+            word=self.word, 
+            meaning=self.meaning,
+        )
+
+class ExampleBaseModel(BaseModel): 
     example_sentence: str
     exmpale_sentence_translation: str
 
 # --- common models ---
 class GetUserWordModel(BaseModel): 
     id: PyObjectId 
-    word_base: WordBase
-    example_base: ExampleBase
+    word_base: WordBaseModel
+    example_base: ExampleBaseModel
+
+    def to_schema(self) -> "WordResponseBase": 
+        from schemas.word_schemas import WordResponseBase
+        return WordResponseBase(
+            word_id=self.id, 
+            word=self.word_base.word,
+            meaning=self.word_base.meaning, 
+            example_sentence=self.example_base.example_sentence, 
+            example_sentence_translation=self.example_base.exmpale_sentence_translation,
+        )
+
 

@@ -5,7 +5,7 @@ import unicodedata
 import hashlib
 from pymongo import errors as mongo_errors
 from pydantic import ValidationError
-from models.common import GetUserWordModel, PyObjectId
+from models.common import GetUserWordModel, PyObjectId, WordBaseModel
 from models.word import WordModel
 from repositories.word_repository import WordRepository
 from repositories.user_word_repository import UserWordRepository
@@ -75,7 +75,7 @@ class WordService:
         subseq = self.make_subsequence_regex(input_word)
         return self.words.search_items_by_word_subseq(subseq, limit)
 
-    def suggest_items(self, input_word: str, limit: int, cap: int = 100) -> List[WordModel]: 
+    def suggest_items(self, input_word: str, limit: int, cap: int = 100) -> List[WordBaseModel]: 
         """
         get input_word and return suggest word items which are collected using the algorithm
         
