@@ -18,6 +18,18 @@
 
 - serviceを先に起動しないと，`localhost:4000/openapi.json`へのフェッチが失敗し，openapiによるクライアント生成ができないことに注意．
 
+### テスト
+
+developにマージする前は、DB, service, webをすべて立ち上げ以下を確認
+
+1. ログイン
+2. 意味生成
+3. 単語登録
+4. 単語リスト確認
+5. 画面リロードしてもログインされているか確認
+6. ログアウト
+7. 画面リロードしてもログアウトされているか
+
 ## SERVICE
 - `.env`を書き換えた場合、docker-imagesを再buildする必要あり
     - `$ docker compose down -v && docker compose build --no-cache && docker-compose up`を`service/`直下で実行
