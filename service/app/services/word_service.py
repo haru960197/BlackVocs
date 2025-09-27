@@ -5,7 +5,7 @@ import unicodedata
 import hashlib
 from pymongo import errors as mongo_errors
 from pydantic import ValidationError
-from models.common import PyObjectId
+from models.common import GetUserWordModel, PyObjectId
 from models.word import WordModel
 from repositories.word_repository import WordRepository
 from repositories.user_word_repository import UserWordRepository
@@ -21,7 +21,7 @@ class WordService:
         self.user_words = UserWordRepository(db)
 
     # --- get user word list --- 
-    def find_word_items_by_user_id(self, user_id: PyObjectId) -> List[WordModel]: 
+    def find_user_word_items_by_user_id(self, user_id: PyObjectId) -> List[GetUserWordModel]: 
         """ 
         Return the word items linked to the given user. 
 
@@ -29,7 +29,7 @@ class WordService:
             user_id (PyObjectId): current user's user_id
 
         Returns: 
-            items (List[WordModel]): user's word items
+            items (List[GetUserWordModel]): user's word items
         """
         try: 
             word_ids = self.user_words.find_word_ids_by_user_id(user_id)
@@ -94,7 +94,7 @@ class WordService:
                 return [] 
             
             # 2) (score, item)という形でsuggest itemsをlistにまとめる
-            scored: List[Tuple[float, Item]] = []  
+            scored: List[Tuple[float, WordModel]] = []  
             lw = input_word.lower()
             for it in candidate_items:
                 w = it.entry.word

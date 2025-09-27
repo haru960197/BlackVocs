@@ -35,3 +35,9 @@ class ExampleBase(BaseModel):
     example_sentence: str
     exmpale_sentence_translation: str
 
+# --- common models ---
+class GetUserWordModel(BaseModel): 
+    id: PyObjectId 
+    word_base: WordBase
+    example_base: ExampleBase
+
