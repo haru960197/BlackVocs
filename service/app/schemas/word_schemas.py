@@ -8,8 +8,8 @@ class WordBase(BaseModel):
     meaning: str
 
 class ExampleSentenceBase(BaseModel): 
-    example_sentence: str | None
-    example_sentence_translation: str | None
+    example_sentence: str
+    example_sentence_translation: str 
 
 class WordEntryBase(WordBase, ExampleSentenceBase): 
     pass
