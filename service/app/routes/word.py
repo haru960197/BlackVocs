@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Response, status
 from pymongo.database import Database
-from models.common import PyObjectId
+from models.common import ExampleBaseModel, PyObjectId, WordBaseModel, WordEntryModel
 import schemas.common_schemas as common_schemas
 from repositories.session import get_db
 from services.word_service import WordService
@@ -22,9 +22,9 @@ async def get_user_word_list(
 ):
     """Return the current user's saved word list."""
     svc = WordService(db)
-    word_items = svc.find_user_word_items_by_user_id(user_id)
+    word_models = svc.get_user_word_list_by_user_id(user_id)
     return word_schemas.GetUserWordListResponse(
-        word_items=[item.to_schema() for item in word_items]
+        word_items=[item.to_schema() for item in word_models]
     )
 
 @router.post(
@@ -40,12 +40,12 @@ async def suggest_words(
     svc = WordService(db)
     CANDIDATE_CAP = 100
 
-    items = svc.suggest_items(
+    models = svc.collect_suggest_models(
         input_word=request.input_word, 
         limit=request.max_num, 
         cap=CANDIDATE_CAP, 
     )
-    return word_schemas.SuggestWordsResponse(items=[it.to_schema for it in items])
+    return word_schemas.SuggestWordsResponse(word_items=[it.to_schema() for it in models])
 
 @router.post(
     "/generate_new_word_entry", 
@@ -59,7 +59,7 @@ async def generate_new_word_entry(
 ):
     svc = GenerativeAIService()
     generated_entry = svc.generate_entry(payload.word)
-    return word_schemas.GenerateNewWordEntryResponse(item=generated_entry.to_schema_item())
+    return generated_entry.to_schema()
 
 @router.post(
     "/register_word", 
@@ -69,12 +69,19 @@ async def generate_new_word_entry(
 )
 async def register_word(
     payload: word_schemas.RegisterWordRequest,
-    user_id: str = Depends(AuthService.get_user_id_from_cookie),
+    user_id: PyObjectId = Depends(AuthService.get_user_id_from_cookie),
     db: Database = Depends(get_db),
 ):
     svc = WordService(db)
-    entry = Entry(**payload.dict())  
-    registered_id = svc.register_word(entry, user_id)  
+    word_base_model = WordBaseModel(
+        word=payload.word, 
+        meaning=payload.meaning, 
+    )
+    exmple_base_model = ExampleBaseModel(
+        example_sentence=payload.example_sentence, 
+        example_sentence_translation=payload.example_sentence_translation
+    )
+    registered_id = svc.register_word(word_base_model, user_id)  
     return word_schemas.RegisterWordResponse(user_word_id=registered_id)
 
 @router.post(

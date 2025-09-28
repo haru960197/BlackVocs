@@ -1,7 +1,8 @@
 import re
 import requests
 import core.config as config
-from models.word import Entry
+from models.common import WordEntryModel
+
 
 from requests import RequestException
 from core.errors import ServiceError
@@ -28,7 +29,7 @@ class GenerativeAIService:
         self.url = url
         self.timeout = timeout
 
-    def generate_entry(self, word: str) -> Entry:
+    def generate_entry(self, word: str) -> WordEntryModel:
         """
         Return dict(word, meaning, example_sentence, example_sentence_translation).
 
@@ -36,7 +37,7 @@ class GenerativeAIService:
             word(str) : word which current user writes     
         
         Returns: 
-            Entry : generated entry
+            WordEntryModel : generated entry
         """
 
         prompt = (
@@ -96,11 +97,11 @@ class GenerativeAIService:
             if not (meaning and example_sentence and example_sentence_translation):
                 raise ServiceError("DS response missing required fields")
 
-            return Entry(
-                word=word,
-                meaning=meaning,
-                example_sentence=example_sentence,
-                example_sentence_translation=example_sentence_translation,
+            return WordEntryModel(
+                word=word, 
+                meaning=meaning, 
+                example_sentence=example_sentence, 
+                example_sentence_translation=example_sentence_translation, 
             )
         except RequestException as e: 
             raise ServiceError("Failed to call DeepSeek API") from e

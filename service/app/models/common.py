@@ -40,22 +40,32 @@ class WordBaseModel(BaseModel):
 
 class ExampleBaseModel(BaseModel): 
     example_sentence: str
-    exmpale_sentence_translation: str
+    example_sentence_translation: str
 
 # --- common models ---
 class GetUserWordModel(BaseModel): 
-    id: PyObjectId 
+    word_id: PyObjectId 
     word_base: WordBaseModel
     example_base: ExampleBaseModel
 
     def to_schema(self) -> "WordResponseBase": 
         from schemas.word_schemas import WordResponseBase
         return WordResponseBase(
-            word_id=self.id, 
+            word_id=self.word_id, 
             word=self.word_base.word,
             meaning=self.word_base.meaning, 
             example_sentence=self.example_base.example_sentence, 
-            example_sentence_translation=self.example_base.exmpale_sentence_translation,
+            example_sentence_translation=self.example_base.example_sentence_translation,
         )
 
-
+class WordEntryModel(BaseModel):
+    word_base: WordBaseModel
+    example_base: ExampleBaseModel
+    def to_schema(self) -> "WordEntryBase": 
+        from schemas.word_schemas import WordEntryBase
+        return WordEntryBase(
+            word=self.word_base.word, 
+            meaning=self.word_base.meaning, 
+            example_sentence=self.example_base.example_sentence, 
+            example_sentence_translation=self.example_base.example_sentence_translation, 
+        )

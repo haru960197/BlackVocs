@@ -21,7 +21,7 @@ class WordService:
         self.user_words = UserWordRepository(db)
 
     # --- get user word list --- 
-    def find_user_word_items_by_user_id(self, user_id: PyObjectId) -> List[GetUserWordModel]: 
+    def get_user_word_list_by_user_id(self, user_id: PyObjectId) -> List[GetUserWordModel]: 
         """ 
         Return the word items linked to the given user. 
 
@@ -32,8 +32,20 @@ class WordService:
             items (List[GetUserWordModel]): user's word items
         """
         try: 
-            word_ids = self.user_words.find_word_ids_by_user_id(user_id)
-            return self.words.find_item_by_word_ids(word_ids)
+            user_word_models = self.user_words.find_models_by_user_id(user_id)
+            result: List[GetUserWordModel] = []
+            for uw_model in user_word_models: 
+                word_model = self.words.find_model_by_word_id(uw_model.word_id)
+                if word_model is None: 
+                    raise ServiceError("Failed to word_model")
+                tmp = GetUserWordModel(
+                    word_id=uw_model.word_id, 
+                    word_base=word_model.word_base, 
+                    example_base=uw_model.example_base
+                )
+                result.append(tmp)
+
+            return result
 
         except ValidationError as e: 
             raise ServiceError(f"Data validation error: {e}")
@@ -68,14 +80,14 @@ class WordService:
         parts = [re.escape(ch) for ch in q]
         return ".*".join(parts)
 
-    def make_candidates_from_word(self, input_word: str, limit: int) -> List[WordModel]:
+    def collect_candidates_by_word_str(self, input_word: str, limit: int) -> List[WordModel]:
         """
         Build a subsequence regex from input_word and fetch candidate words from DB.
         """
         subseq = self.make_subsequence_regex(input_word)
-        return self.words.search_items_by_word_subseq(subseq, limit)
+        return self.words.search_models_by_word_subseq(subseq, limit)
 
-    def suggest_items(self, input_word: str, limit: int, cap: int = 100) -> List[WordBaseModel]: 
+    def collect_suggest_models(self, input_word: str, limit: int, cap: int = 100) -> List[WordBaseModel]: 
         """
         get input_word and return suggest word items which are collected using the algorithm
         
@@ -85,88 +97,87 @@ class WordService:
             cap(int) : maximum number of word items which are collected when sorted by lcs
 
         Returns: 
-            items(List[WordModel]) : suggest items 
+            items(List[WordBaseModel]) : suggest items 
         """
         try: 
             # 1) lcsの長さが大きいものから順番に取る（最大N個）
-            candidate_items = self.make_candidates_from_word(input_word, cap)
-            if not candidate_items: 
+            candidate_models = self.collect_candidates_by_word_str(input_word, cap)
+            if not candidate_models: 
                 return [] 
             
-            # 2) (score, item)という形でsuggest itemsをlistにまとめる
+            # 2) (score, model)という形でsuggest modelsをlistにまとめる
             scored: List[Tuple[float, WordModel]] = []  
             lw = input_word.lower()
-            for it in candidate_items:
-                w = it.entry.word
+            for im in candidate_models:
+                w = im.word_base.word
                 score = self.lcs_score(lw, w.lower())
-                scored.append((score, it))
+                scored.append((score, im))
 
-            # 2. itemをregistered_countが大きいものの順に並べる
-            scored.sort(key=lambda t: (-t[0], -t[1].registered_count, len(t[1].entry.word), t[1].entry.word))
+            # 3) itemをregistered_countが大きいものの順に並べる
+            scored.sort(key=lambda t: (-t[0], -t[1].register_count, len(t[1].word_base.word), t[1].word_base.word))
 
-            return [pair[1] for pair in scored[:limit]]
+            return [pair[1].word_base for pair in scored[:limit]]
         except mongo_errors.PyMongoError as e:
             raise ServiceError(f"Database error: {e}")
 
     # --- register word --- 
-    def register_word(self, entry: Entry, user_id: str) -> str: 
+    def register_word(self, entry_model: WordBaseModel, user_id: PyObjectId) -> PyObjectId: 
         """
         Entryが含まれていないならDBにNew Itemを加える
         Itemのregistered_countをインクリメント
         user_wordテーブルに加える
 
         Args: 
-            entry(Entry) : entry to register 
-            user_id(str) : current user's id
+            entry_model(WordBaseModel) : entry to register 
+            user_id(PyObjectId) : current user's id
 
         Returns: 
-            registered_id(str) : new user_word_id
+            registered_id(PyObjectId) : new user_word_id
             
         """
-        self._validate_entry(entry)
-
         try: 
-            fpr = self.entry2fingerprint(entry)
-
             # 1) get word_id, if None, create a new one
-            word_id = self.words.get_id_by_fpr(fpr)
-            if word_id is None: 
-                word_id = self.words.create_item(fpr, entry)
-            if not word_id: 
+            word_model = self.words.find_model_by_word_base_model(entry_model)
+            if word_model: 
+                word_entry_id = word_model.id
+            else: 
+                word_entry_id = self.words.create(entry_model)
+
+            if not word_entry_id: 
                 raise ServiceError("Failed to get word_id")
 
             # 2) check if the user has alerady registered the word item
-            if self.user_words.get_link(user_id, word_id):
+            if self.user_words.find_link(user_id, word_entry_id):
                 raise ConflictError("Word item is already registered by this user.")
 
             # 3) increment registered_count 
-            self.words.increment_registered_count(word_id)
+            self.words.increment_registered_count(word_entry_id)
 
             # 4) create link and return 
-            return self.user_words.create_link(user_id, word_id)
+            return self.user_words.create(user_id, word_entry_id, )
         except mongo_errors.PyMongoError as e:
             raise ServiceError(f"Database error: {e}")
 
     # --- delete a word item from user_word collection ---
-    def delete_user_item(self, word_id: str, user_id: str) -> str: 
+    def delete_user_item(self, word_id: PyObjectId, user_id: PyObjectId) -> PyObjectId: 
         """
         delete a word item from user_word collection if the item exists in it
 
         Args: 
-            word_id (str): word_id to delete from user collection 
-            user_id (str): current user id 
+            word_id (PyObjectId): word_id to delete from user collection 
+            user_id (PyObjectId): current user id 
 
         Returns: 
-            user_word_id (str): deleted item id (no longer exist in the user_word collection
+            user_word_id (PyObjectId): deleted item id (no longer exist in the user_word collection
         """
         
         try: 
             # 1) check if the item is in the collection 
-            if not self.words.exists_word_id(word_id): 
+            if not self.words.find_model_by_word_id(word_id): 
                 raise BadRequestError("Word item does not exist in the dictionary")
             
             # 2. check if user_word link exists
-            user_word_id = self.user_words.get_link(user_id, word_id)
+            user_word_id = self.user_words.find_link(user_id, word_id)
             if not user_word_id: 
                 raise BadRequestError("Word item have not been registered by the current user")
 
@@ -185,51 +196,4 @@ class WordService:
         
         except mongo_errors.PyMongoError as e:
             raise ServiceError(f"Database error: {e}")
-
-    # --- internal validation ---
-    def _validate_entry(self, entry: Entry) -> None:
-        """Validate Entry payload for business rules."""
-        if not entry or not (entry.word and entry.meaning):
-            raise BadRequestError("Entry must contain 'word' and 'meaning'")
-        # Keep lengths reasonable (example thresholds)
-        if len(entry.word) > 64:
-            raise BadRequestError("word is too long")
-        if len(entry.meaning) > 2048:
-            raise BadRequestError("meaning is too long")
-
-
-    # --- fingerprint ---
-    def _canon_text(self, s: str) -> str:
-        """Return a canonicalized string for hashing.
-        - Unicode NFKC normalization (unify width & symbols)
-        - Trim leading/trailing whitespace
-        - Collapse consecutive whitespace into a single space
-        - Lowercase for ASCII letters (language-agnostic, safe for English words)
-        """
-        # Normalize Unicode (e.g., full-width -> half-width, compatibility forms)
-        s = unicodedata.normalize("NFKC", s)
-        # Strip leading/trailing whitespace
-        s = s.strip()
-        # Collapse all whitespace sequences to a single space
-        s = re.sub(r"\s+", " ", s)
-        # Lowercase (affects Latin letters; Japanese etc. remains unchanged)
-        s = s.lower()
-        return s
-
-    def entry2fingerprint(self, entry: Entry) -> str:
-        """Create a deterministic fingerprint for an Entry.
-        Uses BLAKE2b-128 over a versioned, canonical payload.
-        """
-        parts = [
-            self._canon_text(entry.word),
-            self._canon_text(entry.meaning),
-            self._canon_text(entry.example_sentence),
-            self._canon_text(entry.example_sentence_translation),
-        ]
-        # Versioned payload to allow future changes without breaking old items
-        payload = "entry:v1\n" + "\n".join(parts)
-
-        # blake2b with 16-byte digest (128-bit) is short & collision-resistant for this use
-        digest = hashlib.blake2b(payload.encode("utf-8"), digest_size=16).hexdigest()
-        return digest
 
