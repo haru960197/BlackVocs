@@ -11,7 +11,10 @@ class ExampleSentenceBase(BaseModel):
     example_sentence: str | None
     example_sentence_translation: str | None
 
-class WordResponseBase(WordBase, ExampleSentenceBase):
+class WordEntryBase(WordBase, ExampleSentenceBase): 
+    pass
+
+class WordResponseBase(WordEntryBase):
     word_id: PyObjectId
 
 # --- get user word list ---
@@ -30,11 +33,11 @@ class SuggestWordsResponse(BaseModel):
 class GenerateNewWordEntryRequest(BaseModel): 
     word: str
 
-class GenerateNewWordEntryResponse(WordBase, ExampleSentenceBase): 
+class GenerateNewWordEntryResponse(WordEntryBase): 
     pass
 
 # --- register word ---
-class RegisterWordRequest(WordBase, ExampleSentenceBase): 
+class RegisterWordRequest(WordEntryBase): 
     pass
 
 class RegisterWordResponse(BaseModel):  
