@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 ## How to develop
 
 1. `$ git clone https://github.com/haru960197/BlackVocs.git`
@@ -32,7 +30,6 @@ developにマージする前は、DB, service, webをすべて立ち上げ以下
 6. ログアウト
 7. 画面リロードしてもログアウトされているか
 
->>>>>>> c982319 (:green_heart: developマージ前のテストについて記載)
 ## SERVICE
 - `.env`を書き換えた場合、docker-imagesを再buildする必要あり
     - `$ docker compose down -v && docker compose build --no-cache && docker-compose up`を`service/`直下で実行
