@@ -1,30 +1,24 @@
-## How to develop
-
-1. `$ git clone https://github.com/haru960197/BlackVocs.git`
-2. `$ git config commit.template .commit_template` 
-3. `.env.example`ファイルをコピーして`.env`ファイルを作成
-4. `$ git checkout develop`;
-5. `$ git pull` (もしdevelopブランチが更新されない場合，`$ git reset --hard origin/develop`を実行)
-6. `$ git checkout -b branch_name`
-7. serviceを起動
-    1. `$ cd ./service`
-    2. `$ docker compose up` (docker-desktopを立ち上げた状態で行う) 
-8. webを起動
-    1. `$ cd ../web/`
-    2. `$ npm install`
-    3. `$ npm run dev` (失敗する場合は，`$ npm run openapi-ts`を実行)
-
-### 注意点
-
-- serviceを先に起動しないと，`localhost:4000/openapi.json`へのフェッチが失敗し，openapiによるクライアント生成ができないことに注意．
-
 ## SERVICE
-### General 
 - `.env`を書き換えた場合、docker-imagesを再buildする必要あり
-- `$ docker compose down -v && docker compose build --no-cache && docker-compose up`を`service/`直下で実行
+    - `$ docker compose down -v && docker compose build --no-cache && docker-compose up`を`service/`直下で実行
 
-### Database 
-- データベース名：`.env`に記載
+### DBの構造、Modelsの使い方について
+
+![DB structure](https://private-user-images.githubusercontent.com/106721539/492382633-fb434f56-449a-49b7-85dc-d96bfe6c5f01.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NTg4MTQxMjAsIm5iZiI6MTc1ODgxMzgyMCwicGF0aCI6Ii8xMDY3MjE1MzkvNDkyMzgyNjMzLWZiNDM0ZjU2LTQ0OWEtNDliNy04NWRjLWQ5NmJmZTZjNWYwMS5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwOTI1JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDkyNVQxNTIzNDBaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0yZTY0NDdhNzE0ZTFkNzRhMTFmMzI1ZjQwNjE0NDNhMmI0NzIyZGE4NTM5ZGI3NTExY2YzMzFhMDZhYjRiYWM1JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.oMQiYvCbYROxXO0LG82g21JURdpRzHKib9_9eF1PMoI)
+
+### main changes
+- Modelsは以下の通り
+    - `word.py`: wordテーブルに保存するフィールドの指定
+    - `user.py`: userテーブルに保存するフィールドの指定
+    - `user_word.py`: wordテーブルに保存するフィールドの指定
+    - `common.py`: これらにまたがって使われたり、service層で使うモデルの定義
+
+- Idの管理について
+    今までは`str`で層間でやりとりしていたけど、`PyObjectId`を使う
+    `PyObjectId`は`ObjectId`<->`str`をやり取りするのに楽
+
+
+
 ## WEB
 
 - バックエンドのAPIを修正したときは，フロントエンド側のクライアントコードを修正する必要があるので，`web`直下で，`$npm run openapi-ts`を実行する
@@ -54,4 +48,3 @@
 - 以下を作成するときは，Labelを付与
     - issue
     - pull request
-
