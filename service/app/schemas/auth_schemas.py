@@ -17,6 +17,10 @@ class SignUpRequest(BaseModel):
 class SignUpResponse(BaseModel):
     id: str 
 
+# --- sign out ---
+class SignOutResponse(BaseModel): 
+    pass
+
 # --- check if signed in ---
 class SignedInCheckResponse(BaseModel):
     user_id: str 
