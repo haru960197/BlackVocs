@@ -81,7 +81,11 @@ async def register_word(
         example_sentence=payload.example_sentence, 
         example_sentence_translation=payload.example_sentence_translation
     )
-    registered_id = svc.register_word(word_base_model, example_base_model, user_id)  
+    word_entry = WordEntryModel(
+        word_base=word_base_model, 
+        example_base=example_base_model, 
+    )
+    registered_id = svc.register_word(word_entry, user_id)  
     return word_schemas.RegisterWordResponse(user_word_id=registered_id)
 
 @router.post(

@@ -3,7 +3,8 @@ from typing import List, Tuple
 from pymongo.database import Database
 from pymongo import errors as mongo_errors
 from pydantic import ValidationError
-from models.common import GetUserWordModel, PyObjectId, WordBaseModel
+from models.common import ExampleBaseModel, GetUserWordModel, PyObjectId, WordBaseModel, WordEntryModel
+from models.user_word import UserWordModel
 from models.word import WordModel
 from repositories.word_repository import WordRepository
 from repositories.user_word_repository import UserWordRepository
@@ -119,7 +120,7 @@ class WordService:
             raise ServiceError(f"Database error: {e}")
 
     # --- register word --- 
-    def register_word(self, entry_model: WordBaseModel, user_id: PyObjectId) -> PyObjectId: 
+    def register_word(self, entry_model: WordEntryModel, user_id: PyObjectId) -> PyObjectId: 
         """
         Entryが含まれていないならDBにNew Itemを加える
         Itemのregistered_countをインクリメント
@@ -135,11 +136,11 @@ class WordService:
         """
         try: 
             # 1) get word_id, if None, create a new one
-            word_model = self.words.find_model_by_word_base_model(entry_model)
+            word_model = self.words.find_model_by_word_base_model(entry_model.word_base)
             if word_model: 
                 word_entry_id = word_model.id
             else: 
-                word_entry_id = self.words.create(entry_model)
+                word_entry_id = self.words.create(entry_model.word_base)
 
             if not word_entry_id: 
                 raise ServiceError("Failed to get word_id")
@@ -152,7 +153,12 @@ class WordService:
             self.words.increment_registered_count(word_entry_id)
 
             # 4) create link and return 
-            return self.user_words.create(user_id, word_entry_id, )
+            new_entry_model = UserWordModel(
+                user_id=user_id, 
+                word_id=word_entry_id, 
+                example_base=entry_model.example_base,
+            )
+            return self.user_words.create(new_entry_model)
         except mongo_errors.PyMongoError as e:
             raise ServiceError(f"Database error: {e}")
 
