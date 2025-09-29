@@ -45,7 +45,7 @@ async def sign_up(
     """
     svc = AuthService(db)
     user_id = svc.sign_up(payload.username, payload.password)
-    return auth_schemas.SignUpResponse(id=user_id)
+    return auth_schemas.SignUpResponse(id=str(user_id))
 
 
 @router.post(
@@ -74,4 +74,4 @@ async def signed_in_check(user_id: PyObjectId = Depends(AuthService.get_user_id_
     """
     return user_id if signed in, else raise TokenInvalidError or TokenInvalidError
     """
-    return auth_schemas.SignedInCheckResponse(user_id=user_id)
+    return auth_schemas.SignedInCheckResponse(user_id=str(user_id))

@@ -86,7 +86,7 @@ async def register_word(
         example_base=example_base_model, 
     )
     registered_id = svc.register_word(word_entry, user_id)  
-    return word_schemas.RegisterWordResponse(user_word_id=registered_id)
+    return word_schemas.RegisterWordResponse(user_word_id=str(registered_id))
 
 @router.post(
     "/delete_word", 
@@ -99,5 +99,5 @@ async def delete_word(
     db: Database = Depends(get_db), 
 ): 
     svc = WordService(db)
-    deleted_id = svc.delete_user_item(payload.word_id, user_id)
+    deleted_id = svc.delete_user_item(PyObjectId(payload.word_id), user_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

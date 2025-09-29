@@ -1,8 +1,6 @@
 from pydantic import BaseModel 
 from typing import List
 
-from models.common import PyObjectId
-
 class WordBase(BaseModel): 
     word: str 
     meaning: str
@@ -15,7 +13,7 @@ class WordEntryBase(WordBase, ExampleSentenceBase):
     pass
 
 class WordResponseBase(WordEntryBase):
-    word_id: PyObjectId
+    word_id: str 
 
 # --- get user word list ---
 class GetUserWordListResponse(BaseModel):
@@ -41,9 +39,9 @@ class RegisterWordRequest(WordEntryBase):
     pass
 
 class RegisterWordResponse(BaseModel):  
-    user_word_id: PyObjectId 
+    user_word_id: str
 
 # --- delete ---
 class DeleteWordRequest(BaseModel): 
-    word_id: PyObjectId
+    word_id: str
 
