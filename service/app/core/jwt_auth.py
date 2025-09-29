@@ -58,7 +58,7 @@ class AuthJwtCsrt:
         now = datetime.now(timezone.utc)
         exp = now + expires_delta
         payload = {
-            "sub": user_id,
+            "sub": str(user_id), 
             "iat": int(now.timestamp()),
             "exp": int(exp.timestamp()),
         }
