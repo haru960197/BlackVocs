@@ -43,8 +43,6 @@ class UserWordRepository:
         )
         return doc["_id"] if doc else None
 
-    # --- update ---
-
     # --- delete ---
     def delete_link(self, user_id: PyObjectId, word_id: PyObjectId) -> PyObjectId | None: 
         doc = self.col.find_one_and_delete(
