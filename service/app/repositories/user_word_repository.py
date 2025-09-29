@@ -12,9 +12,10 @@ class UserWordRepository:
         self.col: Collection = db[collection_name]
 
     # --- create ---
-    def create(self, user_id: PyObjectId, word_id: PyObjectId) -> PyObjectId:
+    def create(self, user_word_model: UserWordModel) -> PyObjectId:
         """Create (user_id, word_id) link and return string id."""
-        res = self.col.insert_one({"user_id": user_id, "word_id": word_id})
+        doc = user_word_model.model_dump(by_alias=True, exclude_none=True)
+        res = self.col.insert_one(doc)
         return res.inserted_id
 
     # --- read ---

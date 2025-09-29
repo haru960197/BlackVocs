@@ -77,11 +77,11 @@ async def register_word(
         word=payload.word, 
         meaning=payload.meaning, 
     )
-    exmple_base_model = ExampleBaseModel(
+    example_base_model = ExampleBaseModel(
         example_sentence=payload.example_sentence, 
         example_sentence_translation=payload.example_sentence_translation
     )
-    registered_id = svc.register_word(word_base_model, user_id)  
+    registered_id = svc.register_word(word_base_model, example_base_model, user_id)  
     return word_schemas.RegisterWordResponse(user_word_id=registered_id)
 
 @router.post(
@@ -91,7 +91,7 @@ async def register_word(
 )
 async def delete_word(
     payload: word_schemas.DeleteWordRequest, 
-    user_id: str = Depends(AuthService.get_user_id_from_cookie), 
+    user_id: PyObjectId = Depends(AuthService.get_user_id_from_cookie), 
     db: Database = Depends(get_db), 
 ): 
     svc = WordService(db)
