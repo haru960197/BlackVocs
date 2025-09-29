@@ -1,8 +1,6 @@
 import re
 from typing import List, Tuple 
 from pymongo.database import Database
-import unicodedata
-import hashlib
 from pymongo import errors as mongo_errors
 from pydantic import ValidationError
 from models.common import GetUserWordModel, PyObjectId, WordBaseModel
