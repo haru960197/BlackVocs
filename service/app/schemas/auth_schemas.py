@@ -1,4 +1,5 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
+from models.common import PyObjectId
 
 # --- General ---
 class User(BaseModel):
@@ -18,7 +19,7 @@ class SignUpRequest(User):
     password: str
 
 class SignUpResponse(BaseModel):
-    id: str
+    id: str 
 
 # --- sign out ---
 class SignOutResponse(BaseModel): 

@@ -11,8 +11,9 @@ from core.errors import (
     InvalidTokenError, 
     TokenExpiredError, 
 )
-from models.user import UserInDB
 from core.jwt_auth import AuthJwtCsrt
+from models.common import PyObjectId
+from models.user import UserModel
 
 class AuthService:
     def __init__(self, db: Database, auth: AuthJwtCsrt | None = None):
@@ -33,12 +34,12 @@ class AuthService:
         """
         try: 
             # 1) check if user exists
-            user_id = self.users.get_user_id_by_username(username)
+            user_id = self.users.find_user_id_by_username(username)
             if not user_id: 
                 raise InvalidCredentialsError("Incorrect username or password")
 
             # 2) get hashed password
-            hashed_pw = self.users.get_hashed_pw_by_user_id(user_id)
+            hashed_pw = self.users.find_hashed_pw_by_user_id(user_id)
             if not hashed_pw: 
                 raise ServiceError("Password is not registered")
 
@@ -53,7 +54,7 @@ class AuthService:
             raise ServiceError(f"Database error during deletion: {e}")
 
     # --- Sign up ---
-    def sign_up(self, username: str, password: str) -> str:
+    def sign_up(self, username: str, password: str) -> PyObjectId:
         """
         Create a new user and return user_id
 
@@ -62,15 +63,15 @@ class AuthService:
             password(str) : plaintext password
 
         Returns: 
-            user_id(str) : 
+            user_id(PyObjectId) : 
         """
         try: 
             # 1) check if username is not taken 
-            if self.users.get_user_id_by_username(username): 
+            if self.users.find_user_id_by_username(username): 
                 raise ConflictError("Username is already taken")
 
-            # 2) generate UserInDB model (manage the info in the model between layers(service -> repo))
-            user = UserInDB(
+            # 2) generate UserModel (manage the info in the model between layers(service -> repo))
+            user = UserModel(
                 username=username,
                 hashed_password=self.auth.generate_hashed_pw(password), 
             )
@@ -87,7 +88,7 @@ class AuthService:
 
     # --- check if signed in ---
     @staticmethod
-    def get_user_id_from_cookie(request: Request) -> str: 
+    def get_user_id_from_cookie(request: Request) -> PyObjectId: 
         """get user_id from cookie, return user_id """
         try: 
             auth = AuthJwtCsrt()
