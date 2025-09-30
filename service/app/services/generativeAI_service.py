@@ -1,8 +1,7 @@
 import re
 import requests
 import core.config as config
-from models.common import WordEntryModel
-
+from models.common import ExampleBaseModel, WordBaseModel, WordEntryModel
 
 from requests import RequestException
 from core.errors import ServiceError
@@ -98,10 +97,8 @@ class GenerativeAIService:
                 raise ServiceError("DS response missing required fields")
 
             return WordEntryModel(
-                word=word, 
-                meaning=meaning, 
-                example_sentence=example_sentence, 
-                example_sentence_translation=example_sentence_translation, 
+                word_base=WordBaseModel(word=word, meaning=meaning), 
+                example_base=ExampleBaseModel(example_sentence=example_sentence, example_sentence_translation=example_sentence_translation), 
             )
         except RequestException as e: 
             raise ServiceError("Failed to call DeepSeek API") from e
