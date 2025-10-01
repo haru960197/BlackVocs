@@ -3,7 +3,7 @@ from typing import List, Tuple
 from pymongo.database import Database
 from pymongo import errors as mongo_errors
 from pydantic import ValidationError
-from models.common import ExampleBaseModel, GetUserWordModel, PyObjectId, WordBaseModel, WordEntryModel
+from models.common import GetUserWordModel, PyObjectId, WordBaseModel, WordEntryModel
 from models.user_word import UserWordModel
 from models.word import WordModel
 from repositories.word_repository import WordRepository
