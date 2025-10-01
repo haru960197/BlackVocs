@@ -1,7 +1,7 @@
 from bson import ObjectId
 from typing import Any
 from pydantic_core import core_schema
-from pydantic import BaseModel
+from pydantic import GetJsonSchemaHandler, BaseModel
 from pydantic.json_schema import JsonSchemaValue
 
 class PyObjectId(ObjectId):
@@ -23,8 +23,6 @@ class PyObjectId(ObjectId):
 
     @classmethod
     def validate(cls, v: Any) -> ObjectId:
-        if isinstance(v, ObjectId):
-            return v
         if not ObjectId.is_valid(v):
             raise ValueError("Invalid ObjectId")
         return ObjectId(v)
@@ -54,7 +52,7 @@ class GetUserWordModel(BaseModel):
     def to_schema(self) -> "WordResponseBase": 
         from schemas.word_schemas import WordResponseBase
         return WordResponseBase(
-            word_id=str(self.word_id), 
+            word_id=self.word_id, 
             word=self.word_base.word,
             meaning=self.word_base.meaning, 
             example_sentence=self.example_base.example_sentence, 
