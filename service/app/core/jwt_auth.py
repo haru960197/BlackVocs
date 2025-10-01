@@ -83,7 +83,7 @@ class AuthJwtCsrt:
             sub = payload.get("sub")
             if not sub:
                 raise InvalidTokenError("JWT 'sub' claim is missing")
-            return sub
+            return PyObjectId(sub)
 
         except jwt.ExpiredSignatureError:
             raise TokenExpiredError("The JWT has expired")

@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from models.common import PyObjectId
 
 # --- General ---
 class User(BaseModel):

@@ -3,7 +3,7 @@ from typing import List, Tuple
 from pymongo.database import Database
 from pymongo import errors as mongo_errors
 from pydantic import ValidationError
-from models.common import ExampleBaseModel, GetUserWordModel, PyObjectId, WordBaseModel, WordEntryModel
+from models.common import GetUserWordModel, PyObjectId, WordBaseModel, WordEntryModel
 from models.user_word import UserWordModel
 from models.word import WordModel
 from repositories.word_repository import WordRepository
@@ -113,7 +113,7 @@ class WordService:
                 scored.append((score, im))
 
             # 3) itemをregistered_countが大きいものの順に並べる
-            scored.sort(key=lambda t: (-t[0], -t[1].register_count, len(t[1].word_base.word), t[1].word_base.word))
+            scored.sort(key=lambda t: (-t[0], -t[1].registered_count, len(t[1].word_base.word), t[1].word_base.word))
 
             return [pair[1].word_base for pair in scored[:limit]]
         except mongo_errors.PyMongoError as e:
@@ -140,7 +140,7 @@ class WordService:
             if word_model: 
                 word_entry_id = word_model.id
             else: 
-                word_entry_id = self.words.create(entry_model.word_base)
+                word_entry_id = self.words.create(WordModel(word_base=entry_model.word_base))
 
             if not word_entry_id: 
                 raise ServiceError("Failed to get word_id")

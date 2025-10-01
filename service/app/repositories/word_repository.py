@@ -14,9 +14,9 @@ class WordRepository:
         self.col: Collection = db[collection_name]
 
     # --- create ---
-    def create(self, word_base_model: WordBaseModel) -> PyObjectId: 
+    def create(self, word_model: WordModel) -> PyObjectId: 
         """ insert a new word item """
-        doc = word_base_model.model_dump(by_alias=True, exclude_none=True)
+        doc = word_model.model_dump(by_alias=True, exclude_none=True)
         res = self.col.insert_one(doc)
         return res.inserted_id
 
@@ -26,7 +26,7 @@ class WordRepository:
         return WordModel.model_validate(doc) if doc else None
 
     def find_model_by_word_base_model(self, word_base_model: WordBaseModel) -> WordModel | None: 
-        doc = self.col.find_one({"word_base": word_base_model})
+        doc = self.col.find_one({"word_base": word_base_model.model_dump(by_alias=True, exclude_none=True)})
         return WordModel.model_validate(doc) if doc else None
 
     def find_models_by_word_ids(self, word_ids: List[PyObjectId]) -> List[WordModel]:
@@ -82,6 +82,3 @@ class WordRepository:
             return_document=ReturnDocument.AFTER,
             projection={"_id": 1},
         )
-
-
-
