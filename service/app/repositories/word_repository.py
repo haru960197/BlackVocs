@@ -82,6 +82,3 @@ class WordRepository:
             return_document=ReturnDocument.AFTER,
             projection={"_id": 1},
         )
-
-
-
