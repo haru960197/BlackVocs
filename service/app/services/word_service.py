@@ -135,7 +135,10 @@ class WordService:
             
         """
         try: 
-            # 1) get word_id, if None, create a new one
+            # convert the word of entry_model to lowercase
+            entry_model.word_base.word = entry_model.word_base.word.lower()
+
+            # get word_id, if None, create a new one
             word_model = self.words.find_model_by_word_base_model(entry_model.word_base)
             if word_model: 
                 word_entry_id = word_model.id
@@ -145,14 +148,14 @@ class WordService:
             if not word_entry_id: 
                 raise ServiceError("Failed to get word_id")
 
-            # 2) check if the user has alerady registered the word item
+            # check if the user has alerady registered the word item
             if self.user_words.find_link(user_id, word_entry_id):
                 raise ConflictError("Word item is already registered by this user.")
 
-            # 3) increment registered_count 
+            # increment registered_count 
             self.words.increment_registered_count(word_entry_id)
 
-            # 4) create link and return 
+            # create link and return 
             new_entry_model = UserWordModel(
                 user_id=user_id, 
                 word_id=word_entry_id, 
