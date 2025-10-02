@@ -1,12 +1,8 @@
 from pydantic import BaseModel
 
-# --- General ---
-class User(BaseModel):
-    username: str
-    disabled: bool = False
-
 # --- sign in ---
-class SignInRequest(User):
+class SignInRequest(BaseModel):
+    username: str
     password: str
 
 class SignInResponse(BaseModel):
@@ -14,7 +10,8 @@ class SignInResponse(BaseModel):
     token_type: str
 
 # --- sign up ---
-class SignUpRequest(User):
+class SignUpRequest(BaseModel):
+    username: str
     password: str
 
 class SignUpResponse(BaseModel):
@@ -22,7 +19,7 @@ class SignUpResponse(BaseModel):
 
 # --- sign out ---
 class SignOutResponse(BaseModel): 
-    msg: str
+    pass
 
 # --- check if signed in ---
 class SignedInCheckResponse(BaseModel):
