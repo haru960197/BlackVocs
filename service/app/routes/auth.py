@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Response, status
 from pymongo.database import Database
 from repositories.session import get_db
 from services.auth_service import AuthService
@@ -62,7 +62,7 @@ async def sign_out(response: Response):
         samesite="none",
         secure=True,
     )
-    return auth_schemas.SignOutResponse(msg="Successfully signed out")
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @router.get(
     "/signed_in_check", 
