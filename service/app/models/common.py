@@ -31,7 +31,7 @@ class PyObjectId(ObjectId):
 
 # --- components for DB models ---
 class WordBaseModel(BaseModel): 
-    word: str
+    word: str 
     meaning: str
 
     def to_schema(self) -> "WordBase": 
@@ -42,8 +42,8 @@ class WordBaseModel(BaseModel):
         )
 
 class ExampleBaseModel(BaseModel): 
-    example_sentence: str
-    example_sentence_translation: str
+    example_sentence: str | None = None
+    example_sentence_translation: str | None = None
 
 # --- common models ---
 class GetUserWordModel(BaseModel): 
@@ -60,6 +60,10 @@ class GetUserWordModel(BaseModel):
             example_sentence=self.example_base.example_sentence, 
             example_sentence_translation=self.example_base.example_sentence_translation,
         )
+
+class AIGenerateModel(BaseModel): 
+    word_base: WordBaseModel
+    example_base: ExampleBaseModel
 
 class WordEntryModel(BaseModel):
     word_base: WordBaseModel

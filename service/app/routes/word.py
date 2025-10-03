@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Response, status
 from pymongo.database import Database
-from models.common import ExampleBaseModel, PyObjectId, WordBaseModel, WordEntryModel
+from models.common import AIGenerateModel, ExampleBaseModel, PyObjectId, WordBaseModel, WordEntryModel
 import schemas.common_schemas as common_schemas
 from repositories.session import get_db
 from services.word_service import WordService
@@ -58,7 +58,19 @@ async def generate_new_word_entry(
     user_id: str = Depends(AuthService.get_user_id_from_cookie), # only for auth check
 ):
     svc = GenerativeAIService()
-    generated_entry = svc.generate_entry(payload.word)
+    word_base = WordBaseModel(
+        word=payload.word, 
+        meaning=payload.meaning,
+    )
+    example_base = ExampleBaseModel(
+        example_sentence=payload.example_sentence, 
+        example_sentence_translation=payload.example_sentence_translation,
+    )
+    entry_model = AIGenerateModel(
+        word_base=word_base, 
+        example_base=example_base, 
+    )
+    generated_entry = svc.generate_entry(entry_model)
     return generated_entry.to_schema()
 
 @router.post(
