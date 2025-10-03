@@ -8,6 +8,7 @@ from core.errors import ServiceError
 
 DEEPSEEK_API_KEY = config.DEEPSEEK_API_KEY
 DEEPSEEK_URL = config.DEEPSEEK_URL or ""
+AI_GENERATION_PROMPT = config.AI_GENERATION_PROMPT
 
 LABEL_RX = {
     "meaning": re.compile(r"^\s*意味\s*[:：\-]?\s*(.*)\s*$"),
@@ -38,29 +39,23 @@ class GenerativeAIService:
         Returns: 
             WordEntryModel : generated entry
         """
-
-        prompt = (
-            f"単語: {entry_model.word_base.word}\n\n"
-            "1. この英単語の意味を日本語で簡潔に説明してください。\n"
-            "2. この単語を使った自然な英文を1文作ってください。\n"
-            "3. その英文の日本語訳を教えてください。\n\n"
-            "出力形式:\n"
-            "意味: ...\n"
-            "英文: ...\n"
-            "和訳: ...\n"
-        )
-
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json",
-        }
-        payload = {
-            "model": "deepseek-chat",
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0.7,
-        }
-
+         
         try: 
+            # get prompt setting 
+            if AI_GENERATION_PROMPT is None: 
+                raise ServiceError("failed to get AI_GENERATION_PROMPT")
+            prompt = AI_GENERATION_PROMPT.format(word=entry_model.word_base.word)
+
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
+            }
+            payload = {
+                "model": "deepseek-chat",
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0.7,
+            }
+
             # post prompt
             resp = requests.post(DEEPSEEK_URL, headers=headers, json=payload, timeout=self.timeout)
             if resp.status_code != 200:
