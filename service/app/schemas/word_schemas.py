@@ -6,8 +6,8 @@ class WordBase(BaseModel):
     meaning: str
 
 class ExampleSentenceBase(BaseModel): 
-    example_sentence: str
-    example_sentence_translation: str 
+    example_sentence: str | None = None
+    example_sentence_translation: str | None = None
 
 class WordEntryBase(WordBase, ExampleSentenceBase): 
     pass
@@ -28,8 +28,8 @@ class SuggestWordsResponse(BaseModel):
     word_items: List[WordBase]
 
 # --- generate ---
-class GenerateNewWordEntryRequest(BaseModel): 
-    word: str
+class GenerateNewWordEntryRequest(WordEntryBase): 
+    pass
 
 class GenerateNewWordEntryResponse(WordEntryBase): 
     pass
