@@ -11,6 +11,7 @@ DEEPSEEK_URL = config.DEEPSEEK_URL or ""
 AI_GENERATION_PROMPT = config.AI_GENERATION_PROMPT
 
 LABEL_RX = {
+    "word": re.compile(r"^\s*単語\s*[:：\-]?\s*(.*)\s*$"),
     "meaning": re.compile(r"^\s*意味\s*[:：\-]?\s*(.*)\s*$"),
     "en": re.compile(r"^\s*英文\s*[:：\-]?\s*(.*)\s*$"),
     "ja": re.compile(r"^\s*和訳\s*[:：\-]?\s*(.*)\s*$"),
@@ -44,7 +45,12 @@ class GenerativeAIService:
             # get prompt setting 
             if AI_GENERATION_PROMPT is None: 
                 raise ServiceError("failed to get AI_GENERATION_PROMPT")
-            prompt = AI_GENERATION_PROMPT.format(word=entry_model.word_base.word)
+            prompt = AI_GENERATION_PROMPT.format(
+                word=entry_model.word_base.word, 
+                meaning=entry_model.word_base.meaning, 
+                example_sentence=entry_model.example_base.example_sentence, 
+                example_sentence_translation=entry_model.example_base.example_sentence_translation,
+            )
 
             headers = {
                 "Authorization": f"Bearer {self.api_key}",
@@ -71,10 +77,14 @@ class GenerativeAIService:
                 raise ServiceError("DeepSeek returned empty content")
 
             # extract each components
-            meaning = example_sentence = example_sentence_translation = ""
+            word = meaning = example_sentence = example_sentence_translation = ""
             for raw_line in content.splitlines():
                 s = raw_line.strip()
                 if not s:
+                    continue
+                m = LABEL_RX["word"].match(s)
+                if m:
+                    word = m.group(1).strip()
                     continue
                 m = LABEL_RX["meaning"].match(s)
                 if m:
@@ -88,11 +98,11 @@ class GenerativeAIService:
                 if m:
                     example_sentence_translation = m.group(1).strip()
                     continue
-            if not (meaning and example_sentence and example_sentence_translation):
+            if not (word and meaning and example_sentence and example_sentence_translation):
                 raise ServiceError("DS response missing required fields")
 
             return WordEntryModel(
-                word_base=WordBaseModel(word=entry_model.word_base.word, meaning=meaning), 
+                word_base=WordBaseModel(word=word, meaning=meaning), 
                 example_base=ExampleBaseModel(example_sentence=example_sentence, example_sentence_translation=example_sentence_translation), 
             )
         except RequestException as e: 
