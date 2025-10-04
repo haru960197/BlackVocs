@@ -1,13 +1,16 @@
-from pydantic import BaseModel 
-from typing import List
+from pydantic import BaseModel, StringConstraints
+from typing import List, Annotated
+
+WordText = Annotated[str, StringConstraints(min_length=1, max_length=45, strip_whitespace=True)]
+SentenceText = Annotated[str, StringConstraints(max_length=120, strip_whitespace=True)]
 
 class WordBase(BaseModel): 
-    word: str 
-    meaning: str
+    word: WordText
+    meaning: WordText
 
 class ExampleSentenceBase(BaseModel): 
-    example_sentence: str | None = None
-    example_sentence_translation: str | None = None
+    example_sentence: SentenceText | None = None
+    example_sentence_translation: SentenceText | None = None
 
 class WordEntryBase(WordBase, ExampleSentenceBase): 
     pass
