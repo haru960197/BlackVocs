@@ -7,7 +7,7 @@ PASSWORD_REGEX = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$#!%*?&]{
 
 # --- sign in ---
 class SignInRequest(BaseModel):
-    username: str = Field(validation_alias="userName", serialization_alias="userName")
+    username: Username = Field(validation_alias="userName", serialization_alias="userName")
     password: SecretStr 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -29,7 +29,7 @@ class SignInResponse(BaseModel):
 
 # --- sign up ---
 class SignUpRequest(BaseModel):
-    username: str = Field(validation_alias="userName", serialization_alias="userName")
+    username: Username = Field(validation_alias="userName", serialization_alias="userName")
     password: SecretStr 
     model_config = ConfigDict(populate_by_name=True)
 
