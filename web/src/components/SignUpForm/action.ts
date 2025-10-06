@@ -16,7 +16,6 @@ export const handleSignUpUser = async (
 }> => {
   const res = await signUp({
     body: {
-      email: email,
       username: userName,
       password: password,
     },
