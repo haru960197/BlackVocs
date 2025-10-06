@@ -31,8 +31,24 @@ developにマージする前は、DB, service, webをすべて立ち上げ以下
 7. 画面リロードしてもログアウトされているか
 
 ## SERVICE
+### General 
 - `.env`を書き換えた場合、docker-imagesを再buildする必要あり
-  - `$ docker compose down -v && docker compose build --no-cache && docker-compose up`を`service/`直下で実行
+    - `$ docker compose down -v && docker compose build --no-cache && docker-compose up`を`service/`直下で実行
+
+### DBの構造、Modelsの使い方について
+
+![DB structure](https://private-user-images.githubusercontent.com/106721539/492382633-fb434f56-449a-49b7-85dc-d96bfe6c5f01.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NTg4MTQxMjAsIm5iZiI6MTc1ODgxMzgyMCwicGF0aCI6Ii8xMDY3MjE1MzkvNDkyMzgyNjMzLWZiNDM0ZjU2LTQ0OWEtNDliNy04NWRjLWQ5NmJmZTZjNWYwMS5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwOTI1JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDkyNVQxNTIzNDBaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0yZTY0NDdhNzE0ZTFkNzRhMTFmMzI1ZjQwNjE0NDNhMmI0NzIyZGE4NTM5ZGI3NTExY2YzMzFhMDZhYjRiYWM1JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.oMQiYvCbYROxXO0LG82g21JURdpRzHKib9_9eF1PMoI)
+
+### main changes
+- Modelsは以下の通り
+    - `word.py`: wordテーブルに保存するフィールドの指定
+    - `user.py`: userテーブルに保存するフィールドの指定
+    - `user_word.py`: wordテーブルに保存するフィールドの指定
+    - `common.py`: これらにまたがって使われたり、service層で使うモデルの定義
+
+- Idの管理について
+    今までは`str`で層間でやりとりしていたけど、`PyObjectId`を使う
+    `PyObjectId`は`ObjectId`<->`str`をやり取りするのに楽
 
 ## WEB
 
@@ -63,4 +79,3 @@ developにマージする前は、DB, service, webをすべて立ち上げ以下
 - 以下を作成するときは，Labelを付与
     - issue
     - pull request
-
