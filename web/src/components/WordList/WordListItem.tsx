@@ -4,6 +4,7 @@ import { WordInfo } from '@/types/word';
 import { BiSolidTrash } from "react-icons/bi";
 import { handleDeleteWord } from './action';
 import { useToast } from '@/context/ToastContext';
+import { useState } from 'react';
 
 type Props = {
   key: string;
@@ -12,10 +13,15 @@ type Props = {
 
 export const WordListItem = (props: Props) => {
   const { key, wordInfo}  = props;
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const { showToast } = useToast();
 
   const handleDeleteClick = async () => {
+    setIsDeleting(true);
+
     const res = await handleDeleteWord(wordInfo.id);
+
+    setIsDeleting(false);
     
     if (res.success) {
       showToast('削除に成功しました', 'success');
@@ -38,7 +44,7 @@ export const WordListItem = (props: Props) => {
         </div>
       </div>
       <div className="btn btn-ghost text-error" onClick={handleDeleteClick}>
-        <BiSolidTrash className='w-6 h-6'/>
+        {isDeleting ? <span className="loading loading-spinner w-6 h-6" /> : <BiSolidTrash className='w-6 h-6'/>}
       </div>
     </li>
   );
