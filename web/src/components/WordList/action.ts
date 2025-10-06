@@ -2,6 +2,7 @@
 
 import { deleteWord, DeleteWordError, DeleteWordResponse } from '@/lib/api';
 import { cookies } from 'next/headers';
+import { revalidatePath } from 'next/cache';
 
 /**
  * 単語を削除する
@@ -32,6 +33,8 @@ export const handleDeleteWord = async (
   if (res.error) {
     return { success: false, error: res.error };
   }
+
+  revalidatePath("/word-list");
 
   return { success: true, data: res.data };
 }
