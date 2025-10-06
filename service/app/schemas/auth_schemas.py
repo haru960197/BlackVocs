@@ -1,12 +1,8 @@
-from pydantic import BaseModel, EmailStr
-
-# --- General ---
-class User(BaseModel):
-    username: str
-    disabled: bool = False
+from pydantic import BaseModel
 
 # --- sign in ---
-class SignInRequest(User):
+class SignInRequest(BaseModel):
+    username: str
     password: str
 
 class SignInResponse(BaseModel):
@@ -14,15 +10,12 @@ class SignInResponse(BaseModel):
     token_type: str
 
 # --- sign up ---
-class SignUpRequest(User):
+class SignUpRequest(BaseModel):
+    username: str
     password: str
 
 class SignUpResponse(BaseModel):
-    id: str
-
-# --- sign out ---
-class SignOutResponse(BaseModel): 
-    msg: str
+    id: str 
 
 # --- check if signed in ---
 class SignedInCheckResponse(BaseModel):
