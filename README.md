@@ -47,6 +47,8 @@ developにマージする前は、DB, service, webをすべて立ち上げ以下
 
 ![DB structure](https://github.com/user-attachments/assets/db8f18e1-7cb2-4f1f-9587-051cf9855953)
 
+- データベース名：`.env`に記載
+
 ## WEB
 
 - バックエンドのAPIを修正したときは，フロントエンド側のクライアントコードを修正する必要があるので，`web`直下で，`$npm run openapi-ts`を実行する
