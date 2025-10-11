@@ -32,21 +32,21 @@ class AuthService:
             token(str) : access token 
         """
         try: 
-            # 1) check if user exists
+            # check if user exists
             user_id = self.users.get_user_id_by_username(username)
             if not user_id: 
                 raise InvalidCredentialsError("Incorrect username or password")
 
-            # 2) get hashed password
+            # get hashed password
             hashed_pw = self.users.get_hashed_pw_by_user_id(user_id)
             if not hashed_pw: 
                 raise ServiceError("Password is not registered")
 
-            # 3) check if the plaintext password is collect
+            # check if the plaintext password is collect
             if not self.auth.verify_pw(password, hashed_pw): 
                 raise InvalidCredentialsError("Incorrect username or password")
 
-            # 4) create token 
+            # create token 
             return self.auth.create_access_token(user_id)
 
         except mongo_errors.PyMongoError as e:
@@ -65,17 +65,17 @@ class AuthService:
             user_id(str) : 
         """
         try: 
-            # 1) check if username is not taken 
+            # check if username is not taken 
             if self.users.get_user_id_by_username(username): 
                 raise ConflictError("Username is already taken")
 
-            # 2) generate UserInDB model (manage the info in the model between layers(service -> repo))
+            # generate UserInDB model (manage the info in the model between layers(service -> repo))
             user = UserInDB(
                 username=username,
                 hashed_password=self.auth.generate_hashed_pw(password), 
             )
 
-            # 3) register
+            # register
             user_id = self.users.create(user)
             if user_id is None: 
                 raise ServiceError("Failed to create user: insert returned None")
@@ -92,14 +92,14 @@ class AuthService:
         try: 
             auth = AuthJwtCsrt()
 
-            # 1) get token
+            # get token
             token = request.cookies.get("access_token")
             if token is None:
                 raise UnauthorizedError("Access token is missing in cookies")
             if token.startswith("Bearer "):
                 token = token[7:]
             
-            # 2) decode token
+            # decode token
             return auth.decode_jwt(token=token)
 
         except (InvalidTokenError, TokenExpiredError) as e: 

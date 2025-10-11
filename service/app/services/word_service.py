@@ -89,12 +89,12 @@ class WordService:
             items(List[Item]) : suggest items 
         """
         try: 
-            # 1) lcsの長さが大きいものから順番に取る（最大N個）
+            # lcsの長さが大きいものから順番に取る（最大N個）
             candidate_items = self.make_candidates_from_word(input_word, cap)
             if not candidate_items: 
                 return [] 
             
-            # 2) (score, item)という形でsuggest itemsをlistにまとめる
+            # (score, item)という形でsuggest itemsをlistにまとめる
             scored: List[Tuple[float, Item]] = []  
             lw = input_word.lower()
             for it in candidate_items:
@@ -102,7 +102,7 @@ class WordService:
                 score = self.lcs_score(lw, w.lower())
                 scored.append((score, it))
 
-            # 2. itemをregistered_countが大きいものの順に並べる
+            # itemをregistered_countが大きいものの順に並べる
             scored.sort(key=lambda t: (-t[0], -t[1].registered_count, len(t[1].entry.word), t[1].entry.word))
 
             return [pair[1] for pair in scored[:limit]]
@@ -130,21 +130,21 @@ class WordService:
         try: 
             fpr = self.entry2fingerprint(entry)
 
-            # 1) get word_id, if None, create a new one
+            # get word_id, if None, create a new one
             word_id = self.words.get_id_by_fpr(fpr)
             if word_id is None: 
                 word_id = self.words.create_item(fpr, entry)
             if not word_id: 
                 raise ServiceError("Failed to get word_id")
 
-            # 2) check if the user has alerady registered the word item
+            # check if the user has alerady registered the word item
             if self.user_words.get_link(user_id, word_id):
                 raise ConflictError("Word item is already registered by this user.")
 
-            # 3) increment registered_count 
+            # increment registered_count 
             self.words.increment_registered_count(word_id)
 
-            # 4) create link and return 
+            # create link and return 
             return self.user_words.create_link(user_id, word_id)
         except mongo_errors.PyMongoError as e:
             raise ServiceError(f"Database error: {e}")
@@ -163,22 +163,22 @@ class WordService:
         """
         
         try: 
-            # 1) check if the item is in the collection 
+            # check if the item is in the collection 
             if not self.words.exists_word_id(word_id): 
                 raise BadRequestError("Word item does not exist in the dictionary")
             
-            # 2. check if user_word link exists
+            # check if user_word link exists
             user_word_id = self.user_words.get_link(user_id, word_id)
             if not user_word_id: 
                 raise BadRequestError("Word item have not been registered by the current user")
 
-            # 3. declement register_word_count
+            # declement register_word_count
             registered_count = self.words.get_registered_count_by_id(word_id)
             if registered_count <= 0: 
                 raise BadRequestError("Registered count must be greater than 0")
             self.words.decrement_registered_count(word_id)
 
-            # 4. delete the link
+            # delete the link
             result = self.user_words.delete_link(user_id, word_id)
             if not result:
                 raise ServiceError("Failed to delete user_word item")
