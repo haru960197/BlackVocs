@@ -23,14 +23,14 @@ export const SignUpForm = () => {
     mode: 'onChange',
   });
 
-  const isDisabled = !!errors.email || !!errors.userName || !!errors.password;
+  const isDisabled = !!errors.userName || !!errors.password;
 
   const onSubmit: SubmitHandler<SignUpFormInput> = async (data) => {
     if (isDisabled) {
       return;
     }
 
-    const response = await handleSignUpUser(data.userName, data.email, data.password);
+    const response = await handleSignUpUser(data.userName, data.password);
 
     if (response.success) {
       // 登録に成功したので，ログインページにリダイレクトする
@@ -49,16 +49,6 @@ export const SignUpForm = () => {
     <div className="flex flex-col border-1 bg-base-200 border-base-300 rounded-lg p-4 gap-2">
       <form onSubmit={handleSubmit(onSubmit)}>
         <fieldset className="fieldset">
-          <label className="label text-lg">Email</label>
-          <input
-            type="email"
-            className={clsx('input text-xl', errors.email && 'input-error')}
-            placeholder="Email"
-            autoComplete="email"
-            {...register('email')}
-          />
-          {errors.email && <p className="text-error text-sm mt-1">{errors.email.message}</p>}
-
           <label className="label text-lg">User name</label>
           <input
             type="text"
