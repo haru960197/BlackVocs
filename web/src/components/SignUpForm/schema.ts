@@ -5,7 +5,6 @@ export const signUpSchema = z.object({
     .string()
     .max(25, { message: 'ユーザー名は25文字以下で入力してください' })
     .min(3, { message: 'ユーザー名は3文字以上で入力してください' }),
-  email: z.string().email({ message: '有効なメールアドレスを入力してください' }),
   password: z
     .string()
     .max(25, { message: 'パスワードは25文字以下で入力してください' })

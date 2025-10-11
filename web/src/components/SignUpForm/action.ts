@@ -7,7 +7,6 @@ import { SignUpResponse, signUp, SignUpError } from '@/lib/api';
  */
 export const handleSignUpUser = async (
   userName: string,
-  email: string,
   password: string
 ): Promise<{
   success: boolean;
@@ -16,7 +15,6 @@ export const handleSignUpUser = async (
 }> => {
   const res = await signUp({
     body: {
-      email: email,
       username: userName,
       password: password,
     },
