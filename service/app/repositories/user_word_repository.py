@@ -10,23 +10,19 @@ class UserWordRepository:
     def __init__(self, db: Database, collection_name: str = USER_WORD_COL):
         self.col: Collection = db[collection_name]
 
+    # --- create ---
     def create_link(self, user_id: str, word_id: str) -> str:
         """Create (user_id, word_id) link and return string id."""
         res = self.col.insert_one({"user_id": ObjectId(user_id), "word_id": ObjectId(word_id)})
         return str(res.inserted_id)
 
-    def delete_link(self, user_id: str, word_id: str) -> str | None: 
-        doc = self.col.find_one_and_delete(
-            {
-                "user_id": ObjectId(user_id),
-                "word_id": ObjectId(word_id),
-            },
-            projection={"_id": 1},  
-        )
+    # --- read ---
+    def get_word_ids_by_user_id(self, user_id: str) -> List[str]:
+        """Return word_id list for a given user."""
+        cur = self.col.find({"user_id": ObjectId(user_id)}, {"word_id": 1, "_id": 0})
+        return [str(doc["word_id"]) for doc in cur]
 
-        return str(doc["_id"]) if doc else None
-
-    def exist_link(self, user_id: str, word_id: str) -> str | None:
+    def get_link(self, user_id: str, word_id: str) -> str | None:
         """ 
         check if (user_id, word_id) is in the user_word_collection 
         if exist: return id 
@@ -41,7 +37,15 @@ class UserWordRepository:
         )
         return str(doc["_id"]) if doc else None
 
-    def list_word_ids_by_user(self, user_id: str) -> List[str]:
-        """Return word_id list for a given user."""
-        cur = self.col.find({"user_id": ObjectId(user_id)}, {"word_id": 1, "_id": 0})
-        return [str(doc["word_id"]) for doc in cur]
+    # --- delete ---
+    def delete_link(self, user_id: str, word_id: str) -> str | None: 
+        doc = self.col.find_one_and_delete(
+            {
+                "user_id": ObjectId(user_id),
+                "word_id": ObjectId(word_id),
+            },
+            projection={"_id": 1},  
+        )
+
+        return str(doc["_id"]) if doc else None
+

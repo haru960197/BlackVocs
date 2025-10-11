@@ -2,9 +2,11 @@ import jwt
 from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
 import core.config as config
+import core.const as const
 from core.errors import TokenExpiredError, InvalidTokenError
 
 JWT_KEY = config.JWT_KEY  
+ACCESS_TOKEN_EXPIRE_MINUTES = const.ACCESS_TOKEN_EXPIRE_MINUTES
 
 class AuthJwtCsrt:
     """
@@ -27,7 +29,13 @@ class AuthJwtCsrt:
         if not self.secret_key:
             raise RuntimeError("JWT secret key is missing. Set JWT_KEY in your config/env.")
 
-    # -------- Password helpers --------
+    # --- Access token ---
+    def create_access_token(self, user_id: str) -> str:
+        """Create signed JWT for given user_id."""
+        expire = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        return self.encode_jwt(user_id, expires_delta=expire)
+
+    # --- Password helpers ---
     def generate_hashed_pw(self, password: str) -> str:
         """Return bcrypt-hashed password."""
         return self.pwd_ctx.hash(password)
@@ -36,7 +44,7 @@ class AuthJwtCsrt:
         """Return True if plain password matches the hashed one."""
         return self.pwd_ctx.verify(plain_pw, hashed_pw)
 
-    # -------- JWT helpers --------
+    # --- JWT helpers ---
     def encode_jwt(
         self, 
         user_id: str, 

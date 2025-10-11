@@ -23,7 +23,7 @@ export const handleLogin = async (
 
   const res = await signIn({
     body: {
-      username_or_email: userName,
+      username: userName,
       password: password,
     },
   });
