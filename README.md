@@ -1,6 +1,53 @@
+## How to develop
+
+1. `$ git clone https://github.com/haru960197/BlackVocs.git`
+2. `$ git config commit.template .commit_template` 
+3. `.env.example`ファイルをコピーして`.env`ファイルを作成
+4. `$ git checkout develop`;
+5. `$ git pull` (もしdevelopブランチが更新されない場合，`$ git reset --hard origin/develop`を実行)
+6. `$ git checkout -b branch_name`
+7. serviceを起動
+    1. `$ cd ./service`
+    2. `$ docker compose up` (docker-desktopを立ち上げた状態で行う) 
+8. webを起動
+    1. `$ cd ../web/`
+    2. `$ npm install`
+    3. `$ npm run dev` (失敗する場合は，`$ npm run openapi-ts`を実行)
+
+### 注意点
+
+- serviceを先に起動しないと，`localhost:4000/openapi.json`へのフェッチが失敗し，openapiによるクライアント生成ができないことに注意．
+
+### テスト
+
+developにマージする前は、DB, service, webをすべて立ち上げ以下を確認
+
+1. ログイン
+2. 意味生成
+3. 単語登録
+4. 単語リスト確認
+5. 画面リロードしてもログインされているか確認
+6. ログアウト
+7. 画面リロードしてもログアウトされているか
+
 ## SERVICE
+### General
 - `.env`を書き換えた場合、docker-imagesを再buildする必要あり
-  - `$ docker compose down -v && docker compose build --no-cache && docker-compose up`を`service/`直下で実行
+    - `$ docker compose down -v && docker compose build --no-cache && docker-compose up`を`service/`直下で実行
+
+- Modelsは以下の通り
+    - `word.py`: wordテーブルに保存するフィールドの指定
+    - `user.py`: userテーブルに保存するフィールドの指定
+    - `user_word.py`: wordテーブルに保存するフィールドの指定
+    - `common.py`: これらにまたがって使われたり、service層で使うモデルの定義
+
+- Idの管理はPyObjectIdを使う（ObjectId<->strのやり取りが楽）
+
+### DBの構造
+
+![DB structure](https://github.com/user-attachments/assets/db8f18e1-7cb2-4f1f-9587-051cf9855953)
+
+- データベース名：`.env`に記載
 
 ## WEB
 
@@ -31,4 +78,3 @@
 - 以下を作成するときは，Labelを付与
     - issue
     - pull request
-

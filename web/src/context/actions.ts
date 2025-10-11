@@ -4,10 +4,10 @@ import { ACCESS_TOKEN_KEY } from '@/constant/auth';
 import {
   signedInCheck,
   SignedInCheckResponse,
-  signin,
-  SigninError,
-  SigninResponse,
-  signout,
+  signIn,
+  SignInError,
+  SignInResponse,
+  signOut,
 } from '@/lib/api';
 import { cookies } from 'next/headers';
 
@@ -16,14 +16,14 @@ export const handleLogin = async (
   password: string
 ): Promise<{
   success: boolean;
-  error?: SigninError;
-  data?: SigninResponse;
+  error?: SignInError;
+  data?: SignInResponse;
 }> => {
   const cookieStore = await cookies();
 
-  const res = await signin({
+  const res = await signIn({
     body: {
-      username_or_email: userName,
+      username: userName,
       password: password,
     },
   });
@@ -47,7 +47,7 @@ export const handleLogout = async (): Promise<{
 }> => {
   const cookieStore = await cookies();
 
-  const res = await signout();
+  const res = await signOut();
 
   if (res.error) {
     return { success: false };

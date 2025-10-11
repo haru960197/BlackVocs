@@ -1,48 +1,108 @@
-from typing import Tuple, Any
-from datetime import timedelta
+from fastapi import Request
 from pymongo.database import Database
+from pymongo import errors as mongo_errors
 from repositories.user_repository import UserRepository
-from jwt_auth import AuthJwtCsrt
-import core.config as config
-import core.const as const
+from core.config import USER_COLLECTION_NAME
+from core.errors import (
+    ServiceError,
+    InvalidCredentialsError,
+    ConflictError,
+    UnauthorizedError,
+    InvalidTokenError, 
+    TokenExpiredError, 
+)
+from models.user import UserInDB
+from core.jwt_auth import AuthJwtCsrt
 
 class AuthService:
-    """Sign-up / sign-in business logic."""
     def __init__(self, db: Database, auth: AuthJwtCsrt | None = None):
-        # Inject repository and crypto/JWT provider
-        self.users = UserRepository(db, collection_name=config.USER_COLLECTION_NAME)
+        self.users = UserRepository(db, collection_name=USER_COLLECTION_NAME)
         self.auth = auth or AuthJwtCsrt()
 
-    # --- Use cases ---
-    def signup(self, username: str, email: str, password: str) -> Tuple[str, dict]:
+    # --- sign in ---
+    def sign_in(self, username: str, password: str) -> str:
         """
-        Create a new user and return (inserted_id, sanitized_user_doc).
+        Authenticate a user with the given username and password
+
+        Args: 
+            username(str) : username used for login 
+            password(str) : Plaintext password
+
+        Returns: 
+            token(str) : access token 
         """
-        if self.users.exists_username_or_email(username) or self.users.exists_username_or_email(email):
-            raise ValueError("Username or email already registered")
+        try: 
+            # check if user exists
+            user_id = self.users.get_user_id_by_username(username)
+            if not user_id: 
+                raise InvalidCredentialsError("Incorrect username or password")
 
-        user_doc = {
-            "username": username,
-            "email": email,
-            "full_name": username,
-            "hashed_password": self.auth.generate_hashed_pw(password),
-            "disabled": False,
-        }
-        inserted_id = self.users.create(user_doc)
+            # get hashed password
+            hashed_pw = self.users.get_hashed_pw_by_user_id(user_id)
+            if not hashed_pw: 
+                raise ServiceError("Password is not registered")
 
-        sanitized = {k: v for k, v in user_doc.items() if k != "hashed_password"}
-        sanitized["id"] = inserted_id
-        return inserted_id, sanitized
+            # check if the plaintext password is collect
+            if not self.auth.verify_pw(password, hashed_pw): 
+                raise InvalidCredentialsError("Incorrect username or password")
 
-    def signin(self, identifier: str, password: str) -> dict[str, Any]:
+            # create token 
+            return self.auth.create_access_token(user_id)
+
+        except mongo_errors.PyMongoError as e:
+            raise ServiceError(f"Database error during deletion: {e}")
+
+    # --- Sign up ---
+    def sign_up(self, username: str, password: str) -> str:
         """
-        Validate credential and return (user_doc, jwt), username or email.
-        """
-        user = self.users.find_by_username_or_email(identifier)
-        if not user or not self.auth.verify_pw(password, user["hashed_password"]):
-            raise ValueError("Incorrect username, email or password")
+        Create a new user and return user_id
 
-        # Issue JWT with configured lifetime
-        expires = timedelta(minutes=const.ACCESS_TOKEN_EXPIRE_MINUTES)
-        token = self.auth.encode_jwt(str(user["_id"]), expires_delta=expires)
-        return user
+        Args: 
+            username(str) : new user's username
+            password(str) : plaintext password
+
+        Returns: 
+            user_id(str) : 
+        """
+        try: 
+            # check if username is not taken 
+            if self.users.get_user_id_by_username(username): 
+                raise ConflictError("Username is already taken")
+
+            # generate UserInDB model (manage the info in the model between layers(service -> repo))
+            user = UserInDB(
+                username=username,
+                hashed_password=self.auth.generate_hashed_pw(password), 
+            )
+
+            # register
+            user_id = self.users.create(user)
+            if user_id is None: 
+                raise ServiceError("Failed to create user: insert returned None")
+
+            return user_id
+
+        except mongo_errors.PyMongoError as e:
+            raise ServiceError(f"Database error during deletion: {e}")
+
+    # --- check if signed in ---
+    @staticmethod
+    def get_user_id_from_cookie(request: Request) -> str: 
+        """get user_id from cookie, return user_id """
+        try: 
+            auth = AuthJwtCsrt()
+
+            # get token
+            token = request.cookies.get("access_token")
+            if token is None:
+                raise UnauthorizedError("Access token is missing in cookies")
+            if token.startswith("Bearer "):
+                token = token[7:]
+            
+            # decode token
+            return auth.decode_jwt(token=token)
+
+        except (InvalidTokenError, TokenExpiredError) as e: 
+            raise UnauthorizedError(str(e))
+
+

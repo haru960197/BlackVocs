@@ -2,10 +2,9 @@ from typing import List, Dict, Any
 from pymongo.database import Database
 from pymongo.collection import Collection
 from pymongo import ReturnDocument
-from bson import ObjectId # type: ignore
+from bson import ObjectId 
 import core.config as config 
 from models.word import Item, Entry 
-from utils.fingerprint import entry2fingerprint
 
 WORD_COL = config.WORD_COLLECTION_NAME
 
@@ -14,58 +13,29 @@ class WordRepository:
     def __init__(self, db: Database, collection_name: str = WORD_COL):
         self.col: Collection = db[collection_name]
 
-    # --- find by ---
-    def find_by_fingerprint(self, fpr: str) -> str | None: 
-        doc = self.col.find_one({"fingerprint": fpr}, {"_id": 1})
-        return str(doc["_id"]) if doc else None
+    # --- create ---
+    def create_item(self, fpr: str, entry: Entry) -> str: 
+        """ insert a new word item """
+        doc: Dict[str, Any] = {
+            "fingerprint": fpr,
+            "entry": entry.model_dump(),
+            "registered_count": 0,  # initialize with 0
+        }
+        res = self.col.insert_one(doc)
+        return str(res.inserted_id)
 
-    def find_by_entry(self, entry: Entry) -> str | None: 
-        """ if an Entry is in DB, return ID, else return None """
-        fpr = entry2fingerprint(entry)
-        return self.find_by_fingerprint(fpr)
+    # --- read ---
+    def exists_word_id(self, word_id: str) -> bool: 
+        doc = self.col.find_one({"_id": ObjectId(word_id)})
+        return doc is not None
 
-    def find_by_ids(self, word_ids: List[str]) -> List[Item]:
-        """Find words by their IDs and return them as Item list (not Entry). """
-        if not word_ids:
-            return []
-
+    def get_items_by_word_ids(self, word_ids: List[str]) -> List[Item]:
+        """Find words by their IDs and return them as Item list. """
         object_ids = [ObjectId(wid) for wid in word_ids]
         docs = list(self.col.find({"_id": {"$in": object_ids}}))
-        ret = [Item.model_validate(doc) for doc in docs]
-        print(ret)
-        return ret
+        return [Item.model_validate(doc) for doc in docs]
 
-    # --- add ---
-    def upsert_and_inc_entry(self, entry: Entry) -> str:
-        fpr = entry2fingerprint(entry)
-        
-        updated = self.col.find_one_and_update(
-            {"fingerprint": fpr},
-            {
-                "$setOnInsert": { 
-                    "entry": entry.model_dump(), 
-                    "fingerprint": fpr, 
-                },
-                "$inc": {"registered_count": 1}, 
-            },
-            upsert=True,
-            return_document=ReturnDocument.AFTER,
-            projection={"_id": 1},
-        )
-        return str(updated["_id"])
-
-    def find_candidates_by_entry_word_regex(
-        self,
-        regex_filter: Dict[str, Any],
-        limit: int
-    ) -> List[Item]:
-        """
-        Find candidate words by applying a MongoDB regex filter to 'entry.word'.
-        """
-        cursor = self.col.find({"entry.word": regex_filter}).limit(int(limit))
-        return [Item.model_validate(doc) for doc in cursor]
-
-    def find_candidates_by_entry_word_subsequence(
+    def get_items_by_word_subseq(
         self,
         subseq_pattern: str,
         limit: int,
@@ -76,4 +46,48 @@ class WordRepository:
         """
         options = "i" if case_insensitive else ""
         regex = {"$regex": subseq_pattern, "$options": options}
-        return self.find_candidates_by_entry_word_regex(regex, limit)
+        docs = self.col.find({"entry.word": regex}).limit(limit)
+        return [Item.model_validate(doc) for doc in docs]
+
+    def get_id_by_fpr(self, fpr: str) -> str | None: 
+        """ Find word by fingerprint, return id, if not exist, return None """ 
+        doc = self.col.find_one({"fingerprint": fpr}, {"_id": 1})
+        return str(doc["_id"]) if doc else None
+
+    def get_registered_count_by_id(self, word_id: str) -> int:
+        """
+        Return the registered_count for a word item by word_id.
+        Returns -1 if not found.
+        """
+        doc = self.col.find_one(
+            {"_id": ObjectId(word_id)},
+            {"registered_count": 1}
+        )
+        if not doc:
+            return -1 
+
+        return int(doc.get("registered_count", 0))
+
+    # --- update ---
+    def increment_registered_count(self, word_id: str) -> None: 
+        self.col.find_one_and_update(
+            {"_id": ObjectId(word_id)},
+            {"$inc": {"registered_count": 1}},
+            return_document=ReturnDocument.AFTER,
+            projection={"_id": 1},
+        )
+
+    def decrement_registered_count(self, word_id: str) -> None:
+        """
+        Decrement registered_count of a word document by word_id
+        regisited_count must be greater than 0
+        """
+        self.col.find_one_and_update(
+            {"_id": ObjectId(word_id)},
+            {"$inc": {"registered_count": -1}},
+            return_document=ReturnDocument.AFTER,
+            projection={"_id": 1},
+        )
+
+
+

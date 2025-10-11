@@ -1,4 +1,10 @@
+'use client';
+
 import { WordInfo } from '@/types/word';
+import { BiSolidTrash } from "react-icons/bi";
+import { handleDeleteWord } from './action';
+import { useToast } from '@/context/ToastContext';
+import { useState } from 'react';
 
 type Props = {
   key: string;
@@ -6,17 +12,39 @@ type Props = {
 };
 
 export const WordListItem = (props: Props) => {
-  const { key, wordInfo } = props;
+  const { key, wordInfo}  = props;
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const { showToast } = useToast();
+
+  const handleDeleteClick = async () => {
+    setIsDeleting(true);
+
+    const res = await handleDeleteWord(wordInfo.id);
+
+    setIsDeleting(false);
+    
+    if (res.success) {
+      showToast('削除に成功しました', 'success');
+    } else {
+      showToast('削除に失敗しました', 'error');
+    }
+  };
+
   return (
-    <li key={key} className="list-row flex flex-col gap-1">
-      <div className="flex gap-4">
-        <div className="text-lg">{wordInfo.word}</div>
-        <div className="text-lg">{wordInfo.meaning}</div>
+    <li key={key} className="list-row flex flex-row items-center gap-4">
+      <div className='flex-1 flex flex-col gap-1'>
+        <div className="flex gap-4">
+          <div className="text-lg">{wordInfo.word}</div>
+          <div className="text-lg">{wordInfo.meaning}</div>
+        </div>
+        <hr className="text-neutral-content border-dashed" />
+        <div className="flex flex-col gap-1.5 text-xs mt-1">
+          <div>{wordInfo.exampleSentence}</div>
+          <div>{wordInfo.exampleSentenceTranslation}</div>
+        </div>
       </div>
-      <hr className="text-neutral-content border-dashed" />
-      <div className="flex flex-col gap-1.5 text-xs mt-1">
-        <div>{wordInfo.exampleSentence}</div>
-        <div>{wordInfo.exampleSentenceTranslation}</div>
+      <div className="btn btn-ghost text-error" onClick={handleDeleteClick}>
+        {isDeleting ? <span className="loading loading-spinner w-6 h-6" /> : <BiSolidTrash className='w-6 h-6'/>}
       </div>
     </li>
   );
