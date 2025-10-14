@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Response, status
 from pymongo.database import Database
-from models.common import PyObjectId
+from core.oid import PyObjectId
 from repositories.session import get_db
 from services.auth_service import AuthService
 import schemas.auth_schemas as auth_schemas

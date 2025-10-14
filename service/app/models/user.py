@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, ConfigDict
-from models.common import PyObjectId
+from core.oid import PyObjectId
 
 class UserModel(BaseModel):
     id: PyObjectId | None = Field(default=None, alias="_id")

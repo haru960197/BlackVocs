@@ -3,7 +3,8 @@ from pymongo.database import Database
 from pymongo.collection import Collection
 from pymongo import ReturnDocument
 import core.config as config 
-from models.common import PyObjectId, WordBaseModel
+from core.oid import PyObjectId
+from models.common import WordBaseModel
 from models.word import WordModel
 
 WORD_COL = config.WORD_COLLECTION_NAME

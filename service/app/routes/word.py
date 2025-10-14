@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Response, status
 from pymongo.database import Database
-from models.common import PyObjectId
+from core.oid import PyObjectId
 from models.word import WordBaseModel, WordEntryModel, ExampleBaseModel
 import schemas.common_schemas as common_schemas
 from repositories.session import get_db

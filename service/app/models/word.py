@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict, conint, Field
-from models.common import WordBaseModel, PyObjectId
+from core.oid import PyObjectId
 
 class WordBaseModel(BaseModel): 
     word: str

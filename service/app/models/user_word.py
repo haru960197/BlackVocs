@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, ConfigDict
-from models.common import PyObjectId
+from core.oid import PyObjectId
 from models.word import ExampleBaseModel
 
 class UserWordModel(BaseModel):

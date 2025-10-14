@@ -1,7 +1,7 @@
 from pymongo.database import Database
 from pymongo.collection import Collection
 import core.config as config
-from models.common import PyObjectId
+from core.oid import PyObjectId
 from models.user_word import UserWordModel
 
 USER_WORD_COL = config.USER_WORD_COLLECTION_NAME 

@@ -13,7 +13,7 @@ from core.errors import (
     TokenExpiredError, 
 )
 from core.jwt_auth import AuthJwtCsrt
-from models.common import PyObjectId
+from core.oid import PyObjectId
 from models.user import UserModel
 
 class AuthService:

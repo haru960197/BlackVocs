@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 import core.config as config
 import core.const as const
 from core.errors import TokenExpiredError, InvalidTokenError
-from models.common import PyObjectId
+from core.oid import PyObjectId
 
 JWT_KEY = config.JWT_KEY  
 ACCESS_TOKEN_EXPIRE_MINUTES = const.ACCESS_TOKEN_EXPIRE_MINUTES

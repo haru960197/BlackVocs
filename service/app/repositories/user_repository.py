@@ -2,7 +2,7 @@ from pymongo.database import Database
 from pymongo.collection import Collection
 import core.config as config
 from models.user import UserModel 
-from models.common import PyObjectId
+from core.oid import PyObjectId
 
 USER_COL = config.USER_COLLECTION_NAME 
 
