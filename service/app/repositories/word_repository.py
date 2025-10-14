@@ -15,32 +15,32 @@ class WordRepository:
         self.col: Collection = db[collection_name]
 
     # --- create ---
-    def create_word(self, word_model: WordModel) -> PyObjectId: 
+    def create(self, word_model: WordModel) -> PyObjectId: 
         """ insert a new word item """
         doc = word_model.model_dump(by_alias=True, exclude_none=True)
         res = self.col.insert_one(doc)
         return res.inserted_id
 
     # --- read ---
-    def find_word(
+    def find(
         self, 
-        word_id: PyObjectId | None = None, 
+        id: PyObjectId | None = None, 
         word_base: WordBaseModel | None = None,
-    ): 
+    ) -> WordModel | None: 
         
-        if not word_id and not word_base: 
+        if not id and not word_base: 
             raise ValueError("Either word_id or word_base must be provided")
 
-        if word_id: 
-            doc = self.col.find_one({"_id": word_id})
-            return WordModel.model_validate(doc) if doc else None
+        query = {}
+        if id: 
+            query["_id"] = id
+        else: 
+            query["word_base"] = word_base.model_dump(by_alias=True, exclude_none=True)
 
-        if word_base: 
-            query = {"word_base": word_base.model_dump(by_alias=True, exclude_none=True)}
-            doc = self.col.find_one(query)
-            return WordModel.model_validate(doc) if doc else None
+        doc = self.col.find_one(query)
+        return WordModel.model_validate(doc) if doc else None
 
-    def find_words_by_word_subseq(
+    def find_by_word_subseq(
         self,
         subseq_pattern: str,
         max_num: int,
@@ -55,21 +55,21 @@ class WordRepository:
         return [WordModel.model_validate(doc) for doc in cur]
 
     # --- update ---
-    def increment_registered_count(self, word_id: PyObjectId) -> None: 
+    def increment_registered_count(self, id: PyObjectId) -> None: 
         self.col.find_one_and_update(
-            {"_id": word_id},
+            {"_id": id},
             {"$inc": {"registered_count": 1}},
             return_document=ReturnDocument.AFTER,
             projection={"_id": 1},
         )
 
-    def decrement_registered_count(self, word_id: PyObjectId) -> None:
+    def decrement_registered_count(self, id: PyObjectId) -> None:
         """
         Decrement registered_count of a word document by word_id
         regisited_count must be greater than 0
         """
         self.col.find_one_and_update(
-            {"_id": word_id},
+            {"_id": id},
             {"$inc": {"registered_count": -1}},
             return_document=ReturnDocument.AFTER,
             projection={"_id": 1},

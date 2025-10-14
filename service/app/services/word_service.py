@@ -5,7 +5,7 @@ from pymongo import errors as mongo_errors
 from pydantic import ValidationError
 from models.common import GetUserWordModel
 from models.user_word import UserWordModel
-from models.word import WordModel, WordBaseModel, WordEntryModel
+from models.word import WordBaseModelWithId, WordModel, WordEntryModel
 from repositories.word_repository import WordRepository
 from repositories.user_word_repository import UserWordRepository
 from core.oid import PyObjectId
@@ -32,13 +32,11 @@ class WordService:
             items (List[GetUserWordModel]): user's word items
         """
         try: 
-            user_word_models = self.user_words.find_user_word(user_id=user_id)
-            if user_word_models is None: 
-                return []
+            models = self.user_words.find_all(user_id=user_id)
 
             result: List[GetUserWordModel] = []
-            for m in user_word_models: 
-                word = self.words.find_word(word_id=m.word_id)
+            for m in models: 
+                word = self.words.find(id=m.word_id)
                 if word is None: 
                     raise ServiceError("Failed to word_model")
                 tmp = GetUserWordModel(
@@ -88,9 +86,9 @@ class WordService:
         Build a subsequence regex from input_word and fetch candidate words from DB.
         """
         subseq = self.make_subsequence_regex(input_word)
-        return self.words.find_words_by_word_subseq(subseq, limit)
+        return self.words.find_by_word_subseq(subseq, limit)
 
-    def collect_suggest_models(self, input_word: str, limit: int, cap: int = 100) -> List[WordBaseModel]: 
+    def collect_suggest_models(self, input_word: str, limit: int, cap: int = 100) -> List[WordBaseModelWithId]: 
         """
         get input_word and return suggest word items which are collected using the algorithm
         
@@ -104,14 +102,14 @@ class WordService:
         """
         try: 
             # lcsの長さが大きいものから順番に取る（最大N個）
-            candidate_models = self.collect_candidates_by_word_str(input_word, cap)
-            if not candidate_models: 
+            words = self.collect_candidates_by_word_str(input_word, cap)
+            if not words: 
                 return [] 
             
             # (score, item)という形でsuggest itemsをlistにまとめる
             scored: List[Tuple[float, WordModel]] = []  
             lw = input_word.lower()
-            for m in candidate_models:
+            for m in words:
                 w = m.word_base.word
                 score = self.lcs_score(lw, w.lower())
                 scored.append((score, m))
@@ -119,7 +117,16 @@ class WordService:
             # itemをregistered_countが大きいものの順に並べる
             scored.sort(key=lambda t: (-t[0], -t[1].registered_count, len(t[1].word_base.word), t[1].word_base.word))
 
-            return [pair[1].word_base for pair in scored[:limit]]
+            ret_models = []
+            for m in scored[:limit]:
+                tmp = WordBaseModelWithId(
+                    id=m[1].id, 
+                    word=m[1].word_base.word, 
+                    meaning=m[1].word_base.meaning,
+                )
+                ret_models.append(tmp)
+
+            return ret_models
         except mongo_errors.PyMongoError as e:
             raise ServiceError(f"Database error: {e}")
 
@@ -140,17 +147,17 @@ class WordService:
         """
 
         try: 
-            word = self.words.find_word(word_base=entry_model.word_base)
+            word = self.words.find(word_base=entry_model.word_base)
             if word is None: 
                 new_word = WordModel(word_base=entry_model.word_base)
-                word_id = self.words.create_word(new_word)
+                word_id = self.words.create(new_word)
             else:
                 word_id = word.id
             if not word_id: 
                 raise ServiceError("Failed to get word_id")
 
             # check if the user has alerady registered the word item
-            if self.user_words.find_user_word(user_id=user_id, word_id=word_id):
+            if self.user_words.find(user_id=user_id, word_id=word_id):
                 raise ConflictError("Word item is already registered by this user.")
 
             # increment registered_count 
@@ -162,7 +169,7 @@ class WordService:
                 word_id=word_id, 
                 example_base=entry_model.example_base,
             )
-            return self.user_words.create_user_word(new_user_word_model)
+            return self.user_words.create(new_user_word_model)
         except mongo_errors.PyMongoError as e:
             raise ServiceError(f"Database error: {e}")
 
@@ -181,12 +188,12 @@ class WordService:
         
         try: 
             # check if the item is in the collection 
-            word = self.words.find_word(word_id=word_id)
+            word = self.words.find(id=word_id)
             if not word: 
                 raise ServiceError("Word item does not exist in the dictionary")
             
             # check if user_word link exists
-            user_word = self.user_words.find_user_word(user_id, word_id)
+            user_word = self.user_words.find(user_id=user_id, word_id=word_id)
             if not user_word: 
                 raise BadRequestError("Word item have not been registered by the current user")
 
@@ -196,10 +203,15 @@ class WordService:
             self.words.decrement_registered_count(word_id)
 
             # delete the link
-            deleted_user_word = self.user_words.delete_user_word(user_word_id=user_word.id)
+            if not user_word.id: 
+                raise ServiceError("user_word id is empty")
+            deleted_user_word = self.user_words.delete(id=user_word.id)
+
             if not deleted_user_word:
                 raise ServiceError("Failed to delete user word item")
-            
+            if not deleted_user_word.id:
+                raise ServiceError("deleted_user_word id is empty")
+           
             return deleted_user_word.id
         
         except mongo_errors.PyMongoError as e:

@@ -5,12 +5,17 @@ class WordBaseModel(BaseModel):
     word: str
     meaning: str
 
+class WordBaseModelWithId(WordBaseModel):
+    id: PyObjectId
+
     def to_schema(self) -> "WordBase": 
-        from schemas.word_schemas import WordBase
-        return WordBase(
+        from schemas.word_schemas import WordBaseWithId
+        return WordBaseWithId(
+            id=str(self.id), 
             word=self.word, 
             meaning=self.meaning,
         )
+
 
 class ExampleBaseModel(BaseModel): 
     example_sentence: str

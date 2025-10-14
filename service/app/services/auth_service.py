@@ -35,7 +35,7 @@ class AuthService:
         """
         try: 
             # check if user exists
-            user = self.users.find_user(username=username)
+            user = self.users.find(username=username)
             if not user: 
                 raise NotFoundError("given username is not in DB")
 
@@ -46,7 +46,7 @@ class AuthService:
             # create token 
             if user.id is None: 
                 raise ServiceError("failed to get user id")
-            return self.auth.create_access_token(user.id)
+            return self.auth.encode_jwt(user.id)
 
         except mongo_errors.PyMongoError as e:
             raise ServiceError(f"Database error during deletion: {e}")
@@ -65,7 +65,7 @@ class AuthService:
         """
         try: 
             # check if username is not taken 
-            if self.users.find_user(username=username): 
+            if self.users.find(username=username): 
                 raise ConflictError("Username is already taken")
 
             # generate usermodel
@@ -75,7 +75,7 @@ class AuthService:
             )
 
             # register
-            user_id = self.users.create_user(user)
+            user_id = self.users.create(user)
             if user_id is None: 
                 raise ServiceError("Failed to create user: insert returned None")
 

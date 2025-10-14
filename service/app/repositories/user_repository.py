@@ -12,24 +12,27 @@ class UserRepository:
         self.col: Collection = db[collection_name]
 
     # --- create ---
-    def create_user(self, user: UserModel) -> PyObjectId:
+    def create(self, user: UserModel) -> PyObjectId:
         """Insert a new user item"""
         doc = user.model_dump(by_alias=True, exclude_none=True)
         res = self.col.insert_one(doc)
         return res.inserted_id
 
     # --- read ---
-    def find_user(
+    def find(
         self,
-        user_id: PyObjectId | None = None,
+        id: PyObjectId | None = None,
         username: str | None = None,
-        projection: dict | None = None,
     ) -> UserModel | None:
 
-        if not user_id and not username:
+        if not id and not username:
             raise ValueError("Either user_id or username must be provided")
 
-        query = {"_id": user_id} if user_id else {"username": username}
+        query = {}
+        if id: 
+            query["_id"] = id
+        else: 
+            query["username"] = username 
 
-        doc = self.col.find_one(query, projection)
+        doc = self.col.find_one(query)
         return UserModel.model_validate(doc) if doc else None

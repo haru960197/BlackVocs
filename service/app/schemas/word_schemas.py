@@ -24,8 +24,11 @@ class SuggestWordsRequest(BaseModel):
     input_word: str
     max_num: int = 10 
 
+class WordBaseWithId(WordBase): 
+    id: str
+
 class SuggestWordsResponse(BaseModel):
-    word_list: List[WordBase]
+    word_list: List[WordBaseWithId]
 
 # --- generate ---
 class GenerateNewWordEntryRequest(BaseModel): 

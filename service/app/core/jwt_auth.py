@@ -30,12 +30,6 @@ class AuthJwtCsrt:
         if not self.secret_key:
             raise RuntimeError("JWT secret key is missing. Set JWT_KEY in your config/env.")
 
-    # --- Access token ---
-    def create_access_token(self, user_id: PyObjectId) -> str:
-        """Create signed JWT for given user_id."""
-        expire = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        return self.encode_jwt(user_id, expires_delta=expire)
-
     # --- Password helpers ---
     def generate_hashed_pw(self, password: str) -> str:
         """Return bcrypt-hashed password."""
@@ -49,12 +43,16 @@ class AuthJwtCsrt:
     def encode_jwt(
         self, 
         user_id: PyObjectId, 
-        expires_delta: timedelta = timedelta(minutes=15)
+        expires_delta: timedelta | None = None
     ) -> str:
         """
-        Create a signed JWT with subject = user_id.
+        Create signed JWT for given user_id.
         - Uses UTC timestamps for iat/exp to avoid timezone issues.
         """
+
+        if expires_delta is None: 
+            expires_delta = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+
         now = datetime.now(timezone.utc)
         exp = now + expires_delta
         payload = {
