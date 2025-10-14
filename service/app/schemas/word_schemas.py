@@ -17,7 +17,7 @@ class WordResponseBase(WordEntryBase):
 
 # --- get user word list ---
 class GetUserWordListResponse(BaseModel):
-    word_items: List[WordResponseBase]
+    word_list: List[WordResponseBase]
 
 # --- suggest ---
 class SuggestWordsRequest(BaseModel): 
@@ -25,7 +25,7 @@ class SuggestWordsRequest(BaseModel):
     max_num: int = 10 
 
 class SuggestWordsResponse(BaseModel):
-    word_items: List[WordBase]
+    word_list: List[WordBase]
 
 # --- generate ---
 class GenerateNewWordEntryRequest(BaseModel): 

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Response, status
 from pymongo.database import Database
-from models.common import ExampleBaseModel, PyObjectId, WordBaseModel, WordEntryModel
+from models.common import PyObjectId
+from models.word import WordBaseModel, WordEntryModel, ExampleBaseModel
 import schemas.common_schemas as common_schemas
 from repositories.session import get_db
 from services.word_service import WordService
@@ -24,7 +25,7 @@ async def get_user_word_list(
     svc = WordService(db)
     word_models = svc.get_user_word_list_by_user_id(user_id)
     return word_schemas.GetUserWordListResponse(
-        word_items=[item.to_schema() for item in word_models]
+        word_list=[item.to_schema() for item in word_models]
     )
 
 @router.post(
@@ -45,7 +46,7 @@ async def suggest_words(
         limit=request.max_num, 
         cap=CANDIDATE_CAP, 
     )
-    return word_schemas.SuggestWordsResponse(word_items=[it.to_schema() for it in models])
+    return word_schemas.SuggestWordsResponse(word_list=[it.to_schema() for it in models])
 
 @router.post(
     "/generate_new_word_entry", 
@@ -99,5 +100,5 @@ async def delete_word(
     db: Database = Depends(get_db), 
 ): 
     svc = WordService(db)
-    deleted_id = svc.delete_user_item(PyObjectId(payload.word_id), user_id)
+    deleted_id = svc.delete_word(PyObjectId(payload.word_id), user_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

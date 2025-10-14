@@ -14,7 +14,7 @@ class WordRepository:
         self.col: Collection = db[collection_name]
 
     # --- create ---
-    def create(self, word_model: WordModel) -> PyObjectId: 
+    def create_word(self, word_model: WordModel) -> PyObjectId: 
         """ insert a new word item """
         doc = word_model.model_dump(by_alias=True, exclude_none=True)
         res = self.col.insert_one(doc)
@@ -39,7 +39,7 @@ class WordRepository:
             doc = self.col.find_one(query)
             return WordModel.model_validate(doc) if doc else None
 
-    def find_models_by_word_subseq(
+    def find_words_by_word_subseq(
         self,
         subseq_pattern: str,
         max_num: int,

@@ -3,9 +3,9 @@ from typing import List, Tuple
 from pymongo.database import Database
 from pymongo import errors as mongo_errors
 from pydantic import ValidationError
-from models.common import GetUserWordModel, PyObjectId, WordBaseModel, WordEntryModel
+from models.common import GetUserWordModel, PyObjectId
 from models.user_word import UserWordModel
-from models.word import WordModel
+from models.word import WordModel, WordBaseModel, WordEntryModel
 from repositories.word_repository import WordRepository
 from repositories.user_word_repository import UserWordRepository
 import core.config as config
@@ -87,7 +87,7 @@ class WordService:
         Build a subsequence regex from input_word and fetch candidate words from DB.
         """
         subseq = self.make_subsequence_regex(input_word)
-        return self.words.find_models_by_word_subseq(subseq, limit)
+        return self.words.find_words_by_word_subseq(subseq, limit)
 
     def collect_suggest_models(self, input_word: str, limit: int, cap: int = 100) -> List[WordBaseModel]: 
         """
@@ -142,7 +142,7 @@ class WordService:
             word = self.words.find_word(word_base=entry_model.word_base)
             if word is None: 
                 new_word = WordModel(word_base=entry_model.word_base)
-                word_id = self.words.create(new_word)
+                word_id = self.words.create_word(new_word)
             else:
                 word_id = word.id
             if not word_id: 
@@ -161,12 +161,12 @@ class WordService:
                 word_id=word_id, 
                 example_base=entry_model.example_base,
             )
-            return self.user_words.create(new_user_word_model)
+            return self.user_words.create_user_word(new_user_word_model)
         except mongo_errors.PyMongoError as e:
             raise ServiceError(f"Database error: {e}")
 
     # --- delete a word item from user_word collection ---
-    def delete_user_item(self, word_id: PyObjectId, user_id: PyObjectId) -> PyObjectId: 
+    def delete_word(self, word_id: PyObjectId, user_id: PyObjectId) -> PyObjectId: 
         """
         delete a word item from user_word collection if the item exists in it
 
@@ -195,7 +195,7 @@ class WordService:
             self.words.decrement_registered_count(word_id)
 
             # delete the link
-            deleted_user_word = self.user_words.delete(user_word_id=user_word.id)
+            deleted_user_word = self.user_words.delete_user_word(user_word_id=user_word.id)
             if not deleted_user_word:
                 raise ServiceError("Failed to delete user word item")
             

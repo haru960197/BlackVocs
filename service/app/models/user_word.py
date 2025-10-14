@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field, ConfigDict
-from models.common import ExampleBaseModel, PyObjectId
+from models.common import PyObjectId
+from models.word import ExampleBaseModel
 
 class UserWordModel(BaseModel):
     id: PyObjectId | None = Field(default=None, alias="_id")

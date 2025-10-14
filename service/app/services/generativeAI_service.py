@@ -1,7 +1,7 @@
 import re
 import requests
 import core.config as config
-from models.common import ExampleBaseModel, WordBaseModel, WordEntryModel
+from models.word import ExampleBaseModel, WordBaseModel, WordEntryModel
 
 from requests import RequestException
 from core.errors import ServiceError

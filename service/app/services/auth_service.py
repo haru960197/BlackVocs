@@ -75,7 +75,7 @@ class AuthService:
             )
 
             # register
-            user_id = self.users.create(user)
+            user_id = self.users.create_user(user)
             if user_id is None: 
                 raise ServiceError("Failed to create user: insert returned None")
 

@@ -11,7 +11,7 @@ class UserWordRepository:
         self.col: Collection = db[collection_name]
 
     # --- create ---
-    def create(self, user_word_model: UserWordModel) -> PyObjectId:
+    def create_user_word(self, user_word_model: UserWordModel) -> PyObjectId:
         """Create (user_id, word_id) link and return string id."""
         doc = user_word_model.model_dump(by_alias=True, exclude_none=True)
         res = self.col.insert_one(doc)
@@ -34,7 +34,7 @@ class UserWordRepository:
         return UserWordModel.model_validate(doc) if doc else None
 
     # --- delete ---
-    def delete(self, user_word_id: PyObjectId) -> UserWordModel | None: 
+    def delete_user_word(self, user_word_id: PyObjectId) -> UserWordModel | None: 
         doc = self.col.find_one_and_delete({"_id": user_word_id})
         return UserWordModel.model_validate(doc) if doc else None
 

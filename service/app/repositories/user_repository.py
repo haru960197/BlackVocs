@@ -12,7 +12,7 @@ class UserRepository:
         self.col: Collection = db[collection_name]
 
     # --- create ---
-    def create(self, user: UserModel) -> PyObjectId:
+    def create_user(self, user: UserModel) -> PyObjectId:
         """Insert a new user item"""
         doc = user.model_dump(by_alias=True, exclude_none=True)
         res = self.col.insert_one(doc)
