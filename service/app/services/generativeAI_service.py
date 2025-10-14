@@ -61,12 +61,12 @@ class GenerativeAIService:
         }
 
         try: 
-            # 1) post prompt
+            # post prompt
             resp = requests.post(DEEPSEEK_URL, headers=headers, json=payload, timeout=self.timeout)
             if resp.status_code != 200:
                 raise ServiceError(f"DeepSeek API error: {resp.status_code} {resp.text[:200]}")
 
-            # 2) get contents
+            # get contents
             choices = resp.json().get("choices") or []
             content = ""
             if choices: 
@@ -75,7 +75,7 @@ class GenerativeAIService:
             if not content:
                 raise ServiceError("DeepSeek returned empty content")
 
-            # 3) extract each components
+            # extract each components
             meaning = example_sentence = example_sentence_translation = ""
             for raw_line in content.splitlines():
                 s = raw_line.strip()
