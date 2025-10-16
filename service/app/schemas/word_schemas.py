@@ -3,15 +3,15 @@ from typing import List
 
 class WordBase(BaseModel): 
     word: str 
-    meaning: str
+    meaning: str | None = None
 
     @field_validator("word")
     def to_lowercase(cls, v: str) -> str:
         return v.strip().lower()
 
 class ExampleSentenceBase(BaseModel): 
-    example_sentence: str
-    example_sentence_translation: str 
+    example_sentence: str | None = None 
+    example_sentence_translation: str | None = None
 
 class WordEntryBase(WordBase, ExampleSentenceBase): 
     pass
@@ -35,8 +35,8 @@ class SuggestWordsResponse(BaseModel):
     word_list: List[WordBaseWithId]
 
 # --- generate ---
-class GenerateNewWordEntryRequest(BaseModel): 
-    word: str
+class GenerateNewWordEntryRequest(WordEntryBase): 
+    pass
 
 class GenerateNewWordEntryResponse(WordEntryBase): 
     pass
