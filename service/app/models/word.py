@@ -3,7 +3,7 @@ from core.oid import PyObjectId
 
 class WordBaseModel(BaseModel): 
     word: str
-    meaning: str
+    meaning: str | None
 
 class WordBaseModelWithId(WordBaseModel):
     id: PyObjectId
@@ -18,8 +18,8 @@ class WordBaseModelWithId(WordBaseModel):
 
 
 class ExampleBaseModel(BaseModel): 
-    example_sentence: str
-    example_sentence_translation: str
+    example_sentence: str | None = None
+    example_sentence_translation: str | None = None
 
 class WordEntryModel(BaseModel):
     word_base: WordBaseModel

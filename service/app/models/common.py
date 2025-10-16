@@ -18,3 +18,6 @@ class GetUserWordModel(BaseModel):
             example_sentence_translation=self.example_base.example_sentence_translation,
         )
 
+class AIGenerateModel(BaseModel): 
+    word_base: WordBaseModel
+    example_base: ExampleBaseModel

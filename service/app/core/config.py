@@ -12,9 +12,10 @@ USER_WORD_COLLECTION_NAME=os.getenv("USER_WORD_COLLECTION_NAME", "")
 #jwt
 JWT_KEY = os.getenv("JWT_KEY")
 
-# API
+# Deepseek API
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 DEEPSEEK_URL = os.getenv("DEEPSEEK_URL")
+AI_GENERATION_PROMPT = os.getenv("AI_GENERATION_PROMPT")
 
 # Service port 
 SERVICE_PORT = os.getenv("SERVICE_PORT", "8000")
