@@ -68,7 +68,7 @@ def register_exception_handlers(app):
         # Pydantic/validation errors for request bodies/query params -> 422
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            content={"error": {"type": "ValidationError", "detail": exc.errors()}},
+            content={"error": {"type": "ValidationError", "detail": str(exc.errors())}},
         )
 
     @app.exception_handler(HTTPException)

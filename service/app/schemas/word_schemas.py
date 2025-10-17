@@ -1,17 +1,20 @@
-from pydantic import BaseModel, field_validator
-from typing import List
+from pydantic import BaseModel, field_validator, StringConstraints
+from typing import List, Annotated
+
+WordText = Annotated[str, StringConstraints(min_length=1, max_length=45, strip_whitespace=True)]
+SentenceText = Annotated[str, StringConstraints(max_length=120, strip_whitespace=True)]
 
 class WordBase(BaseModel): 
-    word: str 
-    meaning: str | None = None
+    word: WordText 
+    meaning: WordText | None = None 
 
     @field_validator("word")
     def to_lowercase(cls, v: str) -> str:
         return v.strip().lower()
 
 class ExampleSentenceBase(BaseModel): 
-    example_sentence: str | None = None 
-    example_sentence_translation: str | None = None
+    example_sentence: SentenceText | None = None
+    example_sentence_translation: SentenceText | None = None 
 
 class WordEntryBase(WordBase, ExampleSentenceBase): 
     pass

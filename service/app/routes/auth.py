@@ -19,7 +19,7 @@ async def sign_in(
     db: Database = Depends(get_db),
 ):
     svc = AuthService(db)
-    token = svc.sign_in(payload.username, payload.password)
+    token = svc.sign_in(payload.username, payload.password.get_secret_value())
 
     response.set_cookie(
         key="access_token",
@@ -44,7 +44,7 @@ async def sign_up(
     Create a new user.
     """
     svc = AuthService(db)
-    user_id = svc.sign_up(payload.username, payload.password)
+    user_id = svc.sign_up(payload.username, payload.password.get_secret_value())
     return auth_schemas.SignUpResponse(id=str(user_id))
 
 
