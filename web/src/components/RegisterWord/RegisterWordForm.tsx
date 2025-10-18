@@ -76,7 +76,12 @@ export const RegisterWordForm = () => {
           return;
         }
 
-        setSuggestions(response.data.items);
+        setSuggestions(
+          response.data.word_list.map((word) => ({
+            id: word.word_id,
+            ...word
+          }))
+        );
         setIsLoadingSuggestions(false);
       };
 
@@ -112,12 +117,12 @@ export const RegisterWordForm = () => {
 
     if (res.success) {
       const data = res.data;
-      if (data?.item) {
+      if (data?.word) {
         // フォームに生成されたデータをセットする
-        setValue('word', data.item.word);
-        setValue('meaning', data.item.meaning);
-        setValue('example', data.item.exampleSentence);
-        setValue('exampleTranslation', data.item.exampleSentenceTranslation);
+        setValue('word', data.word);
+        setValue('meaning', data.meaning);
+        setValue('example', data.example_sentence);
+        setValue('exampleTranslation', data.example_sentence_translation);
 
         showToast('単語情報を生成しました', 'success');
       } else {

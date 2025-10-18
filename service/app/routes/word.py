@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends, Response, status
 from pymongo.database import Database
+from core.oid import PyObjectId
+from models.word import WordBaseModel, WordEntryModel, ExampleBaseModel
 import schemas.common_schemas as common_schemas
 from repositories.session import get_db
 from services.word_service import WordService
 from services.auth_service import AuthService 
 from services.generativeAI_service import GenerativeAIService
 import schemas.word_schemas as word_schemas
-from models.word import Entry
 
 router = APIRouter(prefix="/word", tags=["word"], responses=common_schemas.COMMON_ERROR_RESPONSES)
 
@@ -17,14 +18,14 @@ router = APIRouter(prefix="/word", tags=["word"], responses=common_schemas.COMMO
     response_model=word_schemas.GetUserWordListResponse, 
 )
 async def get_user_word_list(
-    user_id: str = Depends(AuthService.get_user_id_from_cookie),
+    user_id: PyObjectId = Depends(AuthService.get_user_id_from_cookie),
     db: Database = Depends(get_db)
 ):
     """Return the current user's saved word list."""
     svc = WordService(db)
-    items = svc.get_word_items_by_user_id(user_id)
+    word_models = svc.get_user_word_list_by_user_id(user_id)
     return word_schemas.GetUserWordListResponse(
-        items=[item.to_schema_item() for item in items]
+        word_list=[item.to_schema() for item in word_models]
     )
 
 @router.post(
@@ -40,12 +41,12 @@ async def suggest_words(
     svc = WordService(db)
     CANDIDATE_CAP = 100
 
-    items = svc.suggest_items(
+    models = svc.collect_suggest_models(
         input_word=request.input_word, 
-        limit=request.limit, 
+        limit=request.max_num, 
         cap=CANDIDATE_CAP, 
     )
-    return word_schemas.SuggestWordsResponse(items=[it.to_schema_item() for it in items])
+    return word_schemas.SuggestWordsResponse(word_list=[it.to_schema() for it in models])
 
 @router.post(
     "/generate_new_word_entry", 
@@ -59,7 +60,7 @@ async def generate_new_word_entry(
 ):
     svc = GenerativeAIService()
     generated_entry = svc.generate_entry(payload.word)
-    return word_schemas.GenerateNewWordEntryResponse(item=generated_entry.to_schema_item())
+    return generated_entry.to_schema()
 
 @router.post(
     "/register_word", 
@@ -69,13 +70,24 @@ async def generate_new_word_entry(
 )
 async def register_word(
     payload: word_schemas.RegisterWordRequest,
-    user_id: str = Depends(AuthService.get_user_id_from_cookie),
+    user_id: PyObjectId = Depends(AuthService.get_user_id_from_cookie),
     db: Database = Depends(get_db),
 ):
     svc = WordService(db)
-    entry = Entry(**payload.dict())  
-    registered_id = svc.register_word(entry, user_id)  
-    return word_schemas.RegisterWordResponse(user_word_id=registered_id)
+    word_base_model = WordBaseModel(
+        word=payload.word, 
+        meaning=payload.meaning, 
+    )
+    example_base_model = ExampleBaseModel(
+        example_sentence=payload.example_sentence, 
+        example_sentence_translation=payload.example_sentence_translation
+    )
+    word_entry = WordEntryModel(
+        word_base=word_base_model, 
+        example_base=example_base_model, 
+    )
+    registered_id = svc.register_word(word_entry, user_id)  
+    return word_schemas.RegisterWordResponse(user_word_id=str(registered_id))
 
 @router.post(
     "/delete_word", 
@@ -84,9 +96,9 @@ async def register_word(
 )
 async def delete_word(
     payload: word_schemas.DeleteWordRequest, 
-    user_id: str = Depends(AuthService.get_user_id_from_cookie), 
+    user_id: PyObjectId = Depends(AuthService.get_user_id_from_cookie), 
     db: Database = Depends(get_db), 
 ): 
     svc = WordService(db)
-    deleted_id = svc.delete_user_item(payload.word_id, user_id)
+    deleted_id = svc.delete_word(PyObjectId(payload.word_id), user_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

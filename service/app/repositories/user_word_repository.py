@@ -1,8 +1,9 @@
 from typing import List
 from pymongo.database import Database
 from pymongo.collection import Collection
-from bson import ObjectId #type: ignore
 import core.config as config
+from core.oid import PyObjectId
+from models.user_word import UserWordModel
 
 USER_WORD_COL = config.USER_WORD_COLLECTION_NAME 
 
@@ -11,41 +12,54 @@ class UserWordRepository:
         self.col: Collection = db[collection_name]
 
     # --- create ---
-    def create_link(self, user_id: str, word_id: str) -> str:
+    def create(self, user_word_model: UserWordModel) -> PyObjectId:
         """Create (user_id, word_id) link and return string id."""
-        res = self.col.insert_one({"user_id": ObjectId(user_id), "word_id": ObjectId(word_id)})
-        return str(res.inserted_id)
+        doc = user_word_model.model_dump(by_alias=True, exclude_none=True)
+        res = self.col.insert_one(doc)
+        return res.inserted_id
 
     # --- read ---
-    def get_word_ids_by_user_id(self, user_id: str) -> List[str]:
-        """Return word_id list for a given user."""
-        cur = self.col.find({"user_id": ObjectId(user_id)}, {"word_id": 1, "_id": 0})
-        return [str(doc["word_id"]) for doc in cur]
+    def find(
+        self, 
+        id: PyObjectId | None = None,
+        user_id: PyObjectId | None = None, 
+        word_id: PyObjectId | None = None, 
+    ) -> UserWordModel | None:
+        """ find a user_word matching to the condition """
+        if id: 
+            query = {"_id": id}
+            doc = self.col.find_one(query)
+            return UserWordModel.model_validate(doc) if doc else None
 
-    def get_link(self, user_id: str, word_id: str) -> str | None:
-        """ 
-        check if (user_id, word_id) is in the user_word_collection 
-        if exist: return id 
-        else: return None
-        """
-        doc = self.col.find_one(
-            {
-                "user_id": ObjectId(user_id),
-                "word_id": ObjectId(word_id),
-            },
-            {"_id": 1}  
-        )
-        return str(doc["_id"]) if doc else None
+        if not (user_id and word_id): 
+            raise ValueError("both user_id and word_id must be provided")
+
+        query = {"user_id": user_id, "word_id": word_id}
+        doc = self.col.find_one(query)
+        return UserWordModel.model_validate(doc) if doc else None
+
+    def find_all(
+        self, 
+        user_id: PyObjectId | None = None, 
+        word_id: PyObjectId | None = None
+    ) -> List[UserWordModel]:
+        """ find user_word list matching to the condition """
+
+        if not user_id and not word_id: 
+            raise ValueError("either user_id and word_id must be provided")
+
+        query = {}
+        if user_id: 
+            query["user_id"] = user_id
+        if word_id: 
+            query["word_id"] = word_id
+            
+        cur = self.col.find(query)
+        return [UserWordModel.model_validate(doc) for doc in cur]
+
 
     # --- delete ---
-    def delete_link(self, user_id: str, word_id: str) -> str | None: 
-        doc = self.col.find_one_and_delete(
-            {
-                "user_id": ObjectId(user_id),
-                "word_id": ObjectId(word_id),
-            },
-            projection={"_id": 1},  
-        )
-
-        return str(doc["_id"]) if doc else None
+    def delete(self, id: PyObjectId) -> UserWordModel | None: 
+        doc = self.col.find_one_and_delete({"_id": id})
+        return UserWordModel.model_validate(doc) if doc else None
 
