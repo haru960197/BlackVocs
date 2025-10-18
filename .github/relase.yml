@@ -1,3 +1,6 @@
+configuration:
+  target-branch: develop
+
 changelog:
   exclude:
     labels:
