@@ -229,7 +229,7 @@ export const RegisterWordForm = () => {
             リセット
           </button>
           <button
-            className="btn btn-secondary btn-sm lg:btn-lg text-lg lg:text-xl"
+            className="btn btn-secondary btn-sm lg:btn-lg w-[94px] lg:w-[120px] text-lg lg:text-xl"
             disabled={isGeneratingDisabled || isGenerating}
             onClick={handleGenerateClick}
           >
