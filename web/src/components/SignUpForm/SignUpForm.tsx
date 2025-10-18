@@ -47,7 +47,7 @@ export const SignUpForm = () => {
 
   return (
     <div className="flex flex-col border-1 bg-base-200 border-base-300 rounded-lg p-4 gap-2">
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-2'>
         <fieldset className="fieldset">
           <label className="label text-lg">User name</label>
           <input
