@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 import core.config as config
 import core.const as const
 from core.errors import TokenExpiredError, InvalidTokenError
+from core.oid import PyObjectId
 
 JWT_KEY = config.JWT_KEY  
 ACCESS_TOKEN_EXPIRE_MINUTES = const.ACCESS_TOKEN_EXPIRE_MINUTES
@@ -29,12 +30,6 @@ class AuthJwtCsrt:
         if not self.secret_key:
             raise RuntimeError("JWT secret key is missing. Set JWT_KEY in your config/env.")
 
-    # --- Access token ---
-    def create_access_token(self, user_id: str) -> str:
-        """Create signed JWT for given user_id."""
-        expire = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        return self.encode_jwt(user_id, expires_delta=expire)
-
     # --- Password helpers ---
     def generate_hashed_pw(self, password: str) -> str:
         """Return bcrypt-hashed password."""
@@ -47,17 +42,21 @@ class AuthJwtCsrt:
     # --- JWT helpers ---
     def encode_jwt(
         self, 
-        user_id: str, 
-        expires_delta: timedelta = timedelta(minutes=15)
+        user_id: PyObjectId, 
+        expires_delta: timedelta | None = None
     ) -> str:
         """
-        Create a signed JWT with subject = user_id.
+        Create signed JWT for given user_id.
         - Uses UTC timestamps for iat/exp to avoid timezone issues.
         """
+
+        if expires_delta is None: 
+            expires_delta = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+
         now = datetime.now(timezone.utc)
         exp = now + expires_delta
         payload = {
-            "sub": user_id,
+            "sub": str(user_id), 
             "iat": int(now.timestamp()),
             "exp": int(exp.timestamp()),
         }
@@ -67,7 +66,7 @@ class AuthJwtCsrt:
         self, 
         token: str, 
         leeway_seconds: int = 0
-    ) -> str:
+    ) -> PyObjectId:
         """
         Decode JWT and return subject (user_id).
         """
@@ -82,7 +81,7 @@ class AuthJwtCsrt:
             sub = payload.get("sub")
             if not sub:
                 raise InvalidTokenError("JWT 'sub' claim is missing")
-            return sub
+            return PyObjectId(sub)
 
         except jwt.ExpiredSignatureError:
             raise TokenExpiredError("The JWT has expired")

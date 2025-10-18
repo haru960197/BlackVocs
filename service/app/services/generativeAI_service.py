@@ -1,7 +1,7 @@
 import re
 import requests
 import core.config as config
-from models.word import Entry
+from models.word import ExampleBaseModel, WordBaseModel, WordEntryModel
 
 from requests import RequestException
 from core.errors import ServiceError
@@ -28,7 +28,7 @@ class GenerativeAIService:
         self.url = url
         self.timeout = timeout
 
-    def generate_entry(self, word: str) -> Entry:
+    def generate_entry(self, word: str) -> WordEntryModel:
         """
         Return dict(word, meaning, example_sentence, example_sentence_translation).
 
@@ -36,7 +36,7 @@ class GenerativeAIService:
             word(str) : word which current user writes     
         
         Returns: 
-            Entry : generated entry
+            WordEntryModel : generated entry
         """
 
         prompt = (
@@ -61,12 +61,12 @@ class GenerativeAIService:
         }
 
         try: 
-            # 1) post prompt
+            # post prompt
             resp = requests.post(DEEPSEEK_URL, headers=headers, json=payload, timeout=self.timeout)
             if resp.status_code != 200:
                 raise ServiceError(f"DeepSeek API error: {resp.status_code} {resp.text[:200]}")
 
-            # 2) get contents
+            # get contents
             choices = resp.json().get("choices") or []
             content = ""
             if choices: 
@@ -75,7 +75,7 @@ class GenerativeAIService:
             if not content:
                 raise ServiceError("DeepSeek returned empty content")
 
-            # 3) extract each components
+            # extract each components
             meaning = example_sentence = example_sentence_translation = ""
             for raw_line in content.splitlines():
                 s = raw_line.strip()
@@ -96,11 +96,9 @@ class GenerativeAIService:
             if not (meaning and example_sentence and example_sentence_translation):
                 raise ServiceError("DS response missing required fields")
 
-            return Entry(
-                word=word,
-                meaning=meaning,
-                example_sentence=example_sentence,
-                example_sentence_translation=example_sentence_translation,
+            return WordEntryModel(
+                word_base=WordBaseModel(word=word, meaning=meaning), 
+                example_base=ExampleBaseModel(example_sentence=example_sentence, example_sentence_translation=example_sentence_translation), 
             )
         except RequestException as e: 
             raise ServiceError("Failed to call DeepSeek API") from e
