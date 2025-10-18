@@ -77,9 +77,11 @@ export const RegisterWordForm = () => {
         }
 
         setSuggestions(
-          // TODO
           response.data.word_list.map((word) => ({
-            id: word.word);
+            id: word.word_id,
+            ...word
+          }))
+        );
         setIsLoadingSuggestions(false);
       };
 

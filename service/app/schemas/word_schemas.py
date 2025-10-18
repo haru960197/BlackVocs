@@ -25,7 +25,7 @@ class SuggestWordsRequest(BaseModel):
     max_num: int = 10 
 
 class WordBaseWithId(WordBase): 
-    id: str
+    word_id: str
 
 class SuggestWordsResponse(BaseModel):
     word_list: List[WordBaseWithId]

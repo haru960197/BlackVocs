@@ -11,7 +11,7 @@ class WordBaseModelWithId(WordBaseModel):
     def to_schema(self) -> "WordBase": 
         from schemas.word_schemas import WordBaseWithId
         return WordBaseWithId(
-            id=str(self.id), 
+            word_id=str(self.id), 
             word=self.word, 
             meaning=self.meaning,
         )
