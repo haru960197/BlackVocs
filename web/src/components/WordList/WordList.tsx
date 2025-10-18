@@ -3,6 +3,7 @@
 import { getUserWordList } from '@/lib/api';
 import { WordListItem } from './WordListItem';
 import { cookies } from 'next/headers';
+import { WordInfo } from '@/types/word';
 
 export const WordList = async () => {
   const cookieStore = await cookies();
@@ -14,7 +15,12 @@ export const WordList = async () => {
     },
   });
 
-  const wordInfoList = res.data ? res.data.items : [];
+  const wordInfoList: WordInfo[] = res.data
+    ? res.data.word_list.map((word) => ({
+      id: word.word_id,
+      ...word,
+    }))
+    : [];
 
   return (
     <ul className="list bg-base-100 rounded-box shadow-md w-full mx-4">

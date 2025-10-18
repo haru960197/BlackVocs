@@ -37,8 +37,8 @@ export const handleRegisterWord = async (
     body: {
 	  word,
 	  meaning,
-	  exampleSentence: example,
-	  exampleSentenceTranslation: exampleTranslation,
+	  example_sentence: example,
+	  example_sentence_translation: exampleTranslation,
     },
     headers: {
       Cookie: `${tokenCookie.name}=${tokenCookie.value}`,
