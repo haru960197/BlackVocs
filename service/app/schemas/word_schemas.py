@@ -1,9 +1,13 @@
-from pydantic import BaseModel 
+from pydantic import BaseModel, field_validator
 from typing import List
 
 class WordBase(BaseModel): 
     word: str 
     meaning: str
+
+    @field_validator("word")
+    def to_lowercase(cls, v: str) -> str:
+        return v.strip().lower()
 
 class ExampleSentenceBase(BaseModel): 
     example_sentence: str
