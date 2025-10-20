@@ -115,5 +115,5 @@ async def delete_word(
     db: Database = Depends(get_db), 
 ): 
     svc = WordService(db)
-    deleted_id = svc.delete_word(PyObjectId(payload.word_id), user_id)
+    deleted_id = svc.delete_user_word(PyObjectId(payload.user_word_id), user_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

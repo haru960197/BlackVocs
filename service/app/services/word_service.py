@@ -39,8 +39,11 @@ class WordService:
                 word = self.words.find(id=m.word_id)
                 if word is None: 
                     raise ServiceError("Failed to word_model")
+                if not m.id: 
+                    raise ServiceError("Failed to get user_word_id")
+
                 tmp = GetUserWordModel(
-                    word_id=m.word_id, 
+                    user_word_id=m.id, 
                     word_base=word.word_base, 
                     example_base=m.example_base
                 )
@@ -174,12 +177,12 @@ class WordService:
             raise ServiceError(f"Database error: {e}")
 
     # --- delete a word item from user_word collection ---
-    def delete_word(self, word_id: PyObjectId, user_id: PyObjectId) -> PyObjectId: 
+    def delete_user_word(self, user_word_id: PyObjectId, user_id: PyObjectId) -> PyObjectId: 
         """
         delete a word item from user_word collection if the item exists in it
 
         Args: 
-            word_id (PyObjectId): word_id to delete from user collection 
+            user_word_id (PyObjectId): user_word_id to delete from user collection 
             user_id (PyObjectId): current user id 
 
         Returns: 
@@ -187,25 +190,23 @@ class WordService:
         """
         
         try: 
-            # check if the item is in the collection 
-            word = self.words.find(id=word_id)
-            if not word: 
-                raise ServiceError("Word item does not exist in the dictionary")
-            
-            # check if user_word link exists
-            user_word = self.user_words.find(user_id=user_id, word_id=word_id)
+            # get user_word
+            user_word = self.user_words.find(user_word_id)
             if not user_word: 
                 raise BadRequestError("Word item have not been registered by the current user")
+
+            # check if the word_base is in the collection 
+            word = self.words.find(id=user_word.word_id)
+            if not word: 
+                raise ServiceError("Word item does not exist in the dictionary")
 
             # declement register_word_count
             if word.registered_count <= 0: 
                 raise ServiceError("Registered count must be greater than 0")
-            self.words.decrement_registered_count(word_id)
+            self.words.decrement_registered_count(user_word.word_id)
 
             # delete the link
-            if not user_word.id: 
-                raise ServiceError("user_word id is empty")
-            deleted_user_word = self.user_words.delete(id=user_word.id)
+            deleted_user_word = self.user_words.delete(id=user_word_id)
 
             if not deleted_user_word:
                 raise ServiceError("Failed to delete user word item")

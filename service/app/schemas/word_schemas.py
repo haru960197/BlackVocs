@@ -23,8 +23,11 @@ class WordResponseBase(WordEntryBase):
     word_id: str 
 
 # --- get user word list ---
+class GetUserWordResponseBase(WordBase, ExampleSentenceBase): 
+    user_word_id: str
+
 class GetUserWordListResponse(BaseModel):
-    word_list: List[WordResponseBase]
+    word_list: List[GetUserWordResponseBase]
 
 # --- suggest ---
 class SuggestWordsRequest(BaseModel): 
@@ -53,5 +56,5 @@ class RegisterWordResponse(BaseModel):
 
 # --- delete ---
 class DeleteWordRequest(BaseModel): 
-    word_id: str
+    user_word_id: str
 
