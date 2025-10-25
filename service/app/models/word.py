@@ -3,7 +3,7 @@ from core.oid import PyObjectId
 
 class WordBaseModel(BaseModel): 
     word: str
-    meaning: str
+    meaning: str | None
 
 class WordBaseModelWithId(WordBaseModel):
     id: PyObjectId
