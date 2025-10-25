@@ -62,14 +62,17 @@ developにマージする前は、DB, service, webをすべて立ち上げ以下
 
 ### ブランチ名
 
-`type/issue-num/description`
+`type/issue_num[-sub_issue_num]/description`
 
 - `type`
     - `feature`
     - `fix`
-- `issue-num`
+- `issue_num`
     - issueの番号
     - `#33`なら，`feature/33/~~`
+- `sub_issue_num`
+    - sub-issueの番号
+    - `#38`なら（元issueは`#33`），`feature/33-38/~~`
 - `description`
     - そのブランチに関する簡単な説明
 
