@@ -1,49 +1,53 @@
 from pydantic import BaseModel, field_validator
 from typing import List
 
-class WordBase(BaseModel): 
+# --- get user word list ---
+class GetUserWordListResponseBase(BaseModel):
+    word_id: str 
     word: str 
     meaning: str | None = None
+    example_sentence: str | None = None
+    example_sentence_translation: str | None = None
 
     @field_validator("word")
     def to_lowercase(cls, v: str) -> str:
         return v.strip().lower()
 
-class ExampleSentenceBase(BaseModel): 
-    example_sentence: str | None = None 
-    example_sentence_translation: str | None = None
-
-class WordEntryBase(WordBase, ExampleSentenceBase): 
-    pass
-
-class WordResponseBase(WordEntryBase):
-    word_id: str 
-
-# --- get user word list ---
 class GetUserWordListResponse(BaseModel):
-    word_list: List[WordResponseBase]
+    word_list: List[GetUserWordListResponseBase]
 
 # --- suggest ---
 class SuggestWordsRequest(BaseModel): 
     input_word: str
     max_num: int = 10 
 
-class WordBaseWithId(WordBase): 
+class SuggestWordsResponseBase(BaseModel): 
     word_id: str
+    word: str 
+    meaning: str | None = None 
 
 class SuggestWordsResponse(BaseModel):
-    word_list: List[WordBaseWithId]
+    word_list: List[SuggestWordsResponseBase]
 
 # --- generate ---
-class GenerateNewWordEntryRequest(WordEntryBase): 
-    pass
+class GenerateNewWordEntryRequest(BaseModel): 
+    word: str 
+    meaning: str | None = None
+    example_sentence: str | None = None
+    example_sentence_translation: str | None = None
 
-class GenerateNewWordEntryResponse(WordEntryBase): 
-    pass
+class GenerateNewWordEntryResponse(BaseModel): 
+    word: str 
+    meaning: str
+    example_sentence: str
+    example_sentence_translation: str
 
 # --- register word ---
-class RegisterWordRequest(WordEntryBase): 
-    pass
+class RegisterWordRequest(BaseModel): 
+    word: str 
+    meaning: str | None = None
+    example_sentence: str | None = None
+    example_sentence_translation: str | None = None
 
 class RegisterWordResponse(BaseModel):  
     user_word_id: str

@@ -11,6 +11,7 @@ from repositories.user_word_repository import UserWordRepository
 from core.oid import PyObjectId
 import core.config as config
 from core.errors import ServiceError, BadRequestError, ConflictError
+from schemas.word_schemas import SuggestWordsResponseBase
 
 DEEPSEEK_API_KEY = config.DEEPSEEK_API_KEY
 
@@ -98,7 +99,7 @@ class WordService:
             cap(int) : maximum number of word items which are collected when sorted by lcs
 
         Returns: 
-            items(List[WordBaseModel]) : suggest items 
+            items(List[WordBaseModelWithId]) : suggest items 
         """
         try: 
             # lcsの長さが大きいものから順番に取る（最大N個）
@@ -119,6 +120,9 @@ class WordService:
 
             ret_models = []
             for m in scored[:limit]:
+                if not m[1].id: 
+                    raise ServiceError("failed to get id in WordModel item")
+
                 tmp = WordBaseModelWithId(
                     id=m[1].id, 
                     word=m[1].word_base.word, 

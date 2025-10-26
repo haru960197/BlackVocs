@@ -8,9 +8,9 @@ class GetUserWordModel(BaseModel):
     word_base: WordBaseModel
     example_base: ExampleBaseModel
 
-    def to_schema(self) -> "WordResponseBase": 
-        from schemas.word_schemas import WordResponseBase
-        return WordResponseBase(
+    def to_schema(self) -> "GetUserWordListResponseBase": 
+        from schemas.word_schemas import GetUserWordListResponseBase
+        return GetUserWordListResponseBase(
             word_id=str(self.word_id), 
             word=self.word_base.word,
             meaning=self.word_base.meaning, 
