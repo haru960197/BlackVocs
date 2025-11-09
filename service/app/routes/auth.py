@@ -11,7 +11,7 @@ router = APIRouter(prefix="/user", tags=["auth"], responses=common_schemas.COMMO
 @router.post(
     "/sign_in",
     operation_id="sign_in",
-    response_model=auth_schemas.SignInResponse,
+    status_code=status.HTTP_200_OK
 )
 async def sign_in(
     payload: auth_schemas.SignInRequest,
@@ -19,39 +19,36 @@ async def sign_in(
     db: Database = Depends(get_db),
 ):
     svc = AuthService(db)
-    token = svc.sign_in(payload.username, payload.password)
+
+    access_token = svc.create_access_token(payload)
 
     response.set_cookie(
         key="access_token",
-        value=token,  
+        value=access_token,  
         httponly=True,
         samesite="none",
         secure=True,
     )
-    return auth_schemas.SignInResponse(access_token=token, token_type="bearer")
+    
+    return
 
 @router.post(
     "/sign_up",
     operation_id="sign_up",
-    response_description="sign up new user",
-    response_model=auth_schemas.SignUpResponse,
+    status_code=status.HTTP_200_OK
 )
 async def sign_up(
     payload: auth_schemas.SignUpRequest, 
     db: Database = Depends(get_db)
 ):
-    """
-    Create a new user.
-    """
     svc = AuthService(db)
-    user_id = svc.sign_up(payload.username, payload.password)
-    return auth_schemas.SignUpResponse(id=str(user_id))
-
+    svc.sign_up(payload)
+    return
 
 @router.post(
     "/sign_out",
     operation_id="sign_out", 
-    response_description="sign out of the user account",
+    status_code=status.HTTP_204_NO_CONTENT
 )
 async def sign_out(response: Response):
     """
@@ -63,7 +60,7 @@ async def sign_out(response: Response):
         samesite="none",
         secure=True,
     )
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return
 
 @router.get(
     "/signed_in_check", 

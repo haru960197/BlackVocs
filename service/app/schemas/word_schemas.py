@@ -3,13 +3,13 @@ from typing import List
 
 # --- get user word list ---
 class GetUserWordListResponseBase(BaseModel):
-    word_id: str 
-    word: str 
+    user_word_id: str 
+    spelling: str 
     meaning: str | None = None
     example_sentence: str | None = None
     example_sentence_translation: str | None = None
 
-    @field_validator("word")
+    @field_validator("spelling")
     def to_lowercase(cls, v: str) -> str:
         return v.strip().lower()
 
@@ -18,12 +18,12 @@ class GetUserWordListResponse(BaseModel):
 
 # --- suggest ---
 class SuggestWordsRequest(BaseModel): 
-    input_word: str
+    input_str: str
     max_num: int = 10 
 
 class SuggestWordsResponseBase(BaseModel): 
     word_id: str
-    word: str 
+    spelling: str 
     meaning: str | None = None 
 
 class SuggestWordsResponse(BaseModel):
@@ -31,20 +31,20 @@ class SuggestWordsResponse(BaseModel):
 
 # --- generate ---
 class GenerateNewWordEntryRequest(BaseModel): 
-    word: str 
+    spelling: str 
     meaning: str | None = None
     example_sentence: str | None = None
     example_sentence_translation: str | None = None
 
 class GenerateNewWordEntryResponse(BaseModel): 
-    word: str 
+    spelling: str 
     meaning: str
     example_sentence: str
     example_sentence_translation: str
 
 # --- register word ---
 class RegisterWordRequest(BaseModel): 
-    word: str 
+    spelling: str 
     meaning: str | None = None
     example_sentence: str | None = None
     example_sentence_translation: str | None = None
@@ -54,5 +54,5 @@ class RegisterWordResponse(BaseModel):
 
 # --- delete ---
 class DeleteWordRequest(BaseModel): 
-    word_id: str
+    user_word_id: str
 
