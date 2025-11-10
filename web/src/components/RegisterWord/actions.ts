@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 import {
   generateNewWordEntry,
@@ -10,8 +10,8 @@ import {
   suggestWords,
   SuggestWordsError,
   SuggestWordsResponse,
-} from '@/lib/api';
-import { cookies } from 'next/headers';
+} from "@/lib/api";
+import { cookies } from "next/headers";
 
 /**
  * 英単語を登録する
@@ -27,7 +27,7 @@ export const handleRegisterWord = async (
   data?: RegisterWordResponse;
 }> => {
   const cookieStore = await cookies();
-  const tokenCookie = cookieStore.get('access_token');
+  const tokenCookie = cookieStore.get("access_token");
 
   if (!tokenCookie) {
     return { success: false };
@@ -66,7 +66,7 @@ export const handleGenerateWordData = async (
   data?: GenerateNewWordEntryResponse;
 }> => {
   const cookieStore = await cookies();
-  const tokenCookie = cookieStore.get('access_token');
+  const tokenCookie = cookieStore.get("access_token");
 
   if (!tokenCookie) {
     return { success: false };
@@ -99,7 +99,7 @@ export const getSuggestWords = async (
   data?: SuggestWordsResponse;
 }> => {
   const cookieStore = await cookies();
-  const tokenCookie = cookieStore.get('access_token');
+  const tokenCookie = cookieStore.get("access_token");
 
   if (!tokenCookie) {
     return { success: false };

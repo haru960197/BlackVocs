@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-  '/': {
+  "/": {
     parameters: {
       query?: never;
       header?: never;
@@ -12,7 +12,7 @@ export interface paths {
       cookie?: never;
     };
     /** Root */
-    get: operations['root__get'];
+    get: operations["root__get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -21,7 +21,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/add_new_word': {
+  "/add_new_word": {
     parameters: {
       query?: never;
       header?: never;
@@ -34,14 +34,14 @@ export interface paths {
      * Add New Word
      * @description 単語からitemを生成し，データベースに保存
      */
-    post: operations['add_new_word_add_new_word_post'];
+    post: operations["add_new_word_add_new_word_post"];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/items/all': {
+  "/items/all": {
     parameters: {
       query?: never;
       header?: never;
@@ -52,7 +52,7 @@ export interface paths {
      * Get All Items
      * @description 全ての単語情報を取得
      */
-    get: operations['get_all_items_items_all_get'];
+    get: operations["get_all_items_items_all_get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -72,17 +72,17 @@ export interface components {
     };
     /** AddNewWordResponse */
     AddNewWordResponse: {
-      item: components['schemas']['Item'];
+      item: components["schemas"]["Item"];
     };
     /** GetAllItemsResponse */
     GetAllItemsResponse: {
       /** Items */
-      items: components['schemas']['Item'][];
+      items: components["schemas"]["Item"][];
     };
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
-      detail?: components['schemas']['ValidationError'][];
+      detail?: components["schemas"]["ValidationError"][];
     };
     /** Item */
     Item: {
@@ -130,7 +130,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': unknown;
+          "application/json": unknown;
         };
       };
     };
@@ -144,7 +144,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['AddNewWordRequest'];
+        "application/json": components["schemas"]["AddNewWordRequest"];
       };
     };
     responses: {
@@ -154,7 +154,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['AddNewWordResponse'];
+          "application/json": components["schemas"]["AddNewWordResponse"];
         };
       };
       /** @description Validation Error */
@@ -163,7 +163,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['HTTPValidationError'];
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
@@ -183,7 +183,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['GetAllItemsResponse'];
+          "application/json": components["schemas"]["GetAllItemsResponse"];
         };
       };
     };

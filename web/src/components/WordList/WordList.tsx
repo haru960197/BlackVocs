@@ -1,13 +1,13 @@
-'use server';
+"use server";
 
-import { getUserWordList } from '@/lib/api';
-import { WordListItem } from './WordListItem';
-import { cookies } from 'next/headers';
-import { WordInfo } from '@/types/word';
+import { getUserWordList } from "@/lib/api";
+import { WordListItem } from "./WordListItem";
+import { cookies } from "next/headers";
+import { WordInfo } from "@/types/word";
 
 export const WordList = async () => {
   const cookieStore = await cookies();
-  const tokenCookie = cookieStore.get('access_token');
+  const tokenCookie = cookieStore.get("access_token");
 
   const res = await getUserWordList({
     headers: {

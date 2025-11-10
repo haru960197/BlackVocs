@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { handleSignUpUser } from './action';
-import { useRouter } from 'next/navigation';
-import { useToast } from '@/context/ToastContext';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { SignUpFormInput, signUpSchema } from './schema';
-import { zodResolver } from '@hookform/resolvers/zod';
-import clsx from 'clsx';
+import Link from "next/link";
+import { handleSignUpUser } from "./action";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/context/ToastContext";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { SignUpFormInput, signUpSchema } from "./schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import clsx from "clsx";
 
 export const SignUpForm = () => {
   const router = useRouter();
@@ -20,7 +20,7 @@ export const SignUpForm = () => {
     formState: { errors, isSubmitting },
   } = useForm<SignUpFormInput>({
     resolver: zodResolver(signUpSchema),
-    mode: 'onChange',
+    mode: "onChange",
   });
 
   const isDisabled = !!errors.userName || !!errors.password;
@@ -34,13 +34,13 @@ export const SignUpForm = () => {
 
     if (response.success) {
       // 登録に成功したので，ログインページにリダイレクトする
-      showToast('登録に成功しました', 'success');
-      router.push('/login');
+      showToast("登録に成功しました", "success");
+      router.push("/login");
     } else {
-      if (typeof response.error?.detail === 'string') {
-        showToast(response.error?.detail, 'error');
+      if (typeof response.error?.detail === "string") {
+        showToast(response.error?.detail, "error");
       } else {
-        showToast('予期せぬエラーが発生しました', 'error');
+        showToast("予期せぬエラーが発生しました", "error");
       }
     }
   };
@@ -52,20 +52,20 @@ export const SignUpForm = () => {
           <label className="label text-lg">User name</label>
           <input
             type="text"
-            className={clsx('input text-xl', errors.userName && 'input-error')}
+            className={clsx("input text-xl", errors.userName && "input-error")}
             placeholder="User name"
             autoComplete="username"
-            {...register('userName')}
+            {...register("userName")}
           />
           {errors.userName && <p className="text-error text-sm mt-1">{errors.userName.message}</p>}
 
           <label className="label text-lg">Password</label>
           <input
             type="password"
-            className={clsx('input text-xl', errors.password && 'input-error')}
+            className={clsx("input text-xl", errors.password && "input-error")}
             placeholder="Password"
             autoComplete="new-password"
-            {...register('password')}
+            {...register("password")}
           />
           {errors.password && <p className="text-error text-sm mt-1">{errors.password.message}</p>}
         </fieldset>
@@ -76,14 +76,14 @@ export const SignUpForm = () => {
             className="btn btn-primary btn-sm lg:btn-lg text-lg lg:text-xl"
             disabled={isDisabled || isSubmitting}
           >
-            {isSubmitting ? <span className="loading loading-spinner" /> : '登録'}
+            {isSubmitting ? <span className="loading loading-spinner" /> : "登録"}
           </button>
         </div>
       </form>
 
       <p>
         アカウントをお持ちの方：
-        <Link href={'/login'} className="link link-primary">
+        <Link href={"/login"} className="link link-primary">
           ログイン
         </Link>
       </p>

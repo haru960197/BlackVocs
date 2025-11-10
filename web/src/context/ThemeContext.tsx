@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { Theme, themes } from '@/constant/theme';
-import { createContext, useEffect, useState } from 'react';
+import { Theme, themes } from "@/constant/theme";
+import { createContext, useEffect, useState } from "react";
 
 export const ThemeContext = createContext<{
   theme: Theme;
@@ -17,7 +17,7 @@ export const ThemeProvider = ({ children }: React.PropsWithChildren) => {
 
   useEffect(() => {
     setIsMounted(true);
-    const storageValue = localStorage.getItem('theme');
+    const storageValue = localStorage.getItem("theme");
     const storedTheme: Theme =
       storageValue && themes.includes(storageValue as Theme) ? (storageValue as Theme) : themes[0];
 
@@ -31,7 +31,7 @@ export const ThemeProvider = ({ children }: React.PropsWithChildren) => {
   const toggleTheme = () => {
     const newTheme = theme === themes[0] ? themes[1] : themes[0];
     setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
+    localStorage.setItem("theme", newTheme);
   };
 
   return (

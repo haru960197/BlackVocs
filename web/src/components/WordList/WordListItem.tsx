@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { WordInfo } from '@/types/word';
-import { BiSolidTrash } from 'react-icons/bi';
-import { handleDeleteWord } from './action';
-import { useToast } from '@/context/ToastContext';
-import { useState } from 'react';
+import { WordInfo } from "@/types/word";
+import { BiSolidTrash } from "react-icons/bi";
+import { handleDeleteWord } from "./action";
+import { useToast } from "@/context/ToastContext";
+import { useState } from "react";
 
 type Props = {
   key: string;
@@ -24,9 +24,9 @@ export const WordListItem = (props: Props) => {
     setIsDeleting(false);
 
     if (res.success) {
-      showToast('削除に成功しました', 'success');
+      showToast("削除に成功しました", "success");
     } else {
-      showToast('削除に失敗しました', 'error');
+      showToast("削除に失敗しました", "error");
     }
   };
 

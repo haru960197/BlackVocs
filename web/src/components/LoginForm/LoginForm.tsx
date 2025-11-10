@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useToast } from '@/context/ToastContext';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { LoginFormInput, loginSchema } from './schema';
+import { useToast } from "@/context/ToastContext";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { LoginFormInput, loginSchema } from "./schema";
 
 export const LoginForm = () => {
   const router = useRouter();
@@ -20,7 +20,7 @@ export const LoginForm = () => {
     formState: { errors, isSubmitting },
   } = useForm<LoginFormInput>({
     resolver: zodResolver(loginSchema),
-    mode: 'onChange',
+    mode: "onChange",
   });
 
   const isDisabled = !!errors.userName || !!errors.password;
@@ -33,13 +33,13 @@ export const LoginForm = () => {
     const result = await login(data.userName, data.password);
 
     if (result) {
-      showToast('ログインに成功しました', 'success');
+      showToast("ログインに成功しました", "success");
 
-      const redirectUrl = searchParams.get('next') ?? '/register-word';
+      const redirectUrl = searchParams.get("next") ?? "/register-word";
       router.push(redirectUrl);
     } else {
       // ログインに失敗
-      showToast('ログインに失敗しました', 'error');
+      showToast("ログインに失敗しました", "error");
     }
   };
 
@@ -53,7 +53,7 @@ export const LoginForm = () => {
             className="input text-xl"
             placeholder="User name"
             autoComplete="username"
-            {...register('userName')}
+            {...register("userName")}
           />
           {errors.userName && <p className="text-error text-sm mt-1">{errors.userName.message}</p>}
 
@@ -63,7 +63,7 @@ export const LoginForm = () => {
             className="input text-xl"
             placeholder="Password"
             autoComplete="current-password"
-            {...register('password')}
+            {...register("password")}
           />
           {errors.password && <p className="text-error text-sm mt-1">{errors.password.message}</p>}
         </fieldset>
@@ -74,14 +74,14 @@ export const LoginForm = () => {
             className="btn btn-primary btn-sm lg:btn-lg text-lg lg:text-xl"
             disabled={isDisabled || isSubmitting}
           >
-            {isSubmitting ? <span className="loading loading-spinner" /> : 'ログイン'}
+            {isSubmitting ? <span className="loading loading-spinner" /> : "ログイン"}
           </button>
         </div>
       </form>
 
       <p>
         アカウントをお持ちでない方：
-        <Link href={'/signup'} className="link link-primary">
+        <Link href={"/signup"} className="link link-primary">
           登録
         </Link>
       </p>

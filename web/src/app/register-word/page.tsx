@@ -1,4 +1,4 @@
-import { RegisterWordForm } from '@/components/RegisterWord';
+import { RegisterWordForm } from "@/components/RegisterWord";
 
 export default function Page() {
   return (
