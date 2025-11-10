@@ -18,9 +18,9 @@ import { cookies } from 'next/headers';
  */
 export const handleRegisterWord = async (
   word: string,
-  meaning: string,
-  example: string,
-  exampleTranslation: string
+  meaning?: string,
+  example?: string,
+  exampleTranslation?: string
 ): Promise<{
   success: boolean;
   error?: RegisterWordError;
@@ -56,7 +56,10 @@ export const handleRegisterWord = async (
  * 生成AIを使って新しい単語情報を生成する
  */
 export const handleGenerateWordData = async (
-  word: string
+  word: string,
+  meaning?: string,
+  exampleSentence?: string,
+  exampleSentenceTranslation?: string,
 ): Promise<{
   success: boolean;
   error?: GenerateNewWordEntryError;
@@ -72,6 +75,9 @@ export const handleGenerateWordData = async (
   const res = await generateNewWordEntry({
     body: {
       word,
+      meaning,
+      example_sentence: exampleSentence,
+      example_sentence_translation: exampleSentenceTranslation,
     },
     headers: {
       Cookie: `${tokenCookie.name}=${tokenCookie.value}`,

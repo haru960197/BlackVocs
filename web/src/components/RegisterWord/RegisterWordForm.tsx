@@ -79,7 +79,10 @@ export const RegisterWordForm = () => {
         setSuggestions(
           response.data.word_list.map((word) => ({
             id: word.word_id,
-            ...word
+            word: word.word,
+            meaning: word.meaning ?? undefined,
+            exampleSentence: "",
+            exampleSentenceTranslation: "",
           }))
         );
         setIsLoadingSuggestions(false);
