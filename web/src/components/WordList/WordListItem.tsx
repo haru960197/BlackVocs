@@ -1,7 +1,7 @@
 'use client';
 
 import { WordInfo } from '@/types/word';
-import { BiSolidTrash } from "react-icons/bi";
+import { BiSolidTrash } from 'react-icons/bi';
 import { handleDeleteWord } from './action';
 import { useToast } from '@/context/ToastContext';
 import { useState } from 'react';
@@ -12,7 +12,7 @@ type Props = {
 };
 
 export const WordListItem = (props: Props) => {
-  const { key, wordInfo}  = props;
+  const { key, wordInfo } = props;
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const { showToast } = useToast();
 
@@ -22,7 +22,7 @@ export const WordListItem = (props: Props) => {
     const res = await handleDeleteWord(wordInfo.id);
 
     setIsDeleting(false);
-    
+
     if (res.success) {
       showToast('削除に成功しました', 'success');
     } else {
@@ -32,7 +32,7 @@ export const WordListItem = (props: Props) => {
 
   return (
     <li key={key} className="list-row flex flex-row items-center gap-4">
-      <div className='flex-1 flex flex-col gap-1'>
+      <div className="flex-1 flex flex-col gap-1">
         <div className="flex gap-4">
           <div className="text-lg">{wordInfo.word}</div>
           <div className="text-lg">{wordInfo.meaning}</div>
@@ -44,7 +44,11 @@ export const WordListItem = (props: Props) => {
         </div>
       </div>
       <div className="btn btn-ghost text-error" onClick={handleDeleteClick}>
-        {isDeleting ? <span className="loading loading-spinner w-6 h-6" /> : <BiSolidTrash className='w-6 h-6'/>}
+        {isDeleting ? (
+          <span className="loading loading-spinner w-6 h-6" />
+        ) : (
+          <BiSolidTrash className="w-6 h-6" />
+        )}
       </div>
     </li>
   );

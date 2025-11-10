@@ -35,10 +35,10 @@ export const handleRegisterWord = async (
 
   const res = await registerWord({
     body: {
-	    word,
-	    meaning,
-	    example_sentence: example,
-	    example_sentence_translation: exampleTranslation,
+      word,
+      meaning,
+      example_sentence: example,
+      example_sentence_translation: exampleTranslation,
     },
     headers: {
       Cookie: `${tokenCookie.name}=${tokenCookie.value}`,
@@ -59,7 +59,7 @@ export const handleGenerateWordData = async (
   word: string,
   meaning?: string,
   exampleSentence?: string,
-  exampleSentenceTranslation?: string,
+  exampleSentenceTranslation?: string
 ): Promise<{
   success: boolean;
   error?: GenerateNewWordEntryError;

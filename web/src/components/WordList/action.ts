@@ -8,7 +8,7 @@ import { revalidatePath } from 'next/cache';
  * 単語を削除する
  */
 export const handleDeleteWord = async (
-  wordId: string,
+  wordId: string
 ): Promise<{
   success: boolean;
   error?: DeleteWordError;
@@ -16,7 +16,7 @@ export const handleDeleteWord = async (
 }> => {
   const cookieStore = await cookies();
   const tokenCookie = cookieStore.get('access_token');
-  
+
   if (!tokenCookie) {
     return { success: false };
   }
@@ -34,7 +34,7 @@ export const handleDeleteWord = async (
     return { success: false, error: res.error };
   }
 
-  revalidatePath("/word-list");
+  revalidatePath('/word-list');
 
   return { success: true, data: res.data };
-}
+};

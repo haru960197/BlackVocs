@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
 
   useEffect(() => {
     const initialCheck = async () => {
-    const res = await loggedInCheck();
+      const res = await loggedInCheck();
 
       if (res.success && res.data?.user_id) {
         setIsLoggedIn(true);

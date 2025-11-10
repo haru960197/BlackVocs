@@ -81,8 +81,8 @@ export const RegisterWordForm = () => {
             id: word.word_id,
             word: word.word,
             meaning: word.meaning ?? undefined,
-            exampleSentence: "",
-            exampleSentenceTranslation: "",
+            exampleSentence: '',
+            exampleSentenceTranslation: '',
           }))
         );
         setIsLoadingSuggestions(false);
@@ -118,7 +118,7 @@ export const RegisterWordForm = () => {
       getValues('word'),
       getValues('meaning'),
       getValues('example'),
-      getValues('exampleTranslation'),
+      getValues('exampleTranslation')
     );
 
     if (res.success) {

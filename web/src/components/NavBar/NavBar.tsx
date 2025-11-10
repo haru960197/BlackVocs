@@ -25,8 +25,12 @@ export const NavBar = () => {
           {theme === 'light' ? <BiSun className="w-6 h-6" /> : <BiMoon className="w-6 h-6" />}
         </button>
 
-        <Link href="https://github.com/haru960197/BlackVocs" target='_blank' className="btn btn-square btn-ghost">
-          <BiLogoGithub className='w-6 h-6'/>
+        <Link
+          href="https://github.com/haru960197/BlackVocs"
+          target="_blank"
+          className="btn btn-square btn-ghost"
+        >
+          <BiLogoGithub className="w-6 h-6" />
         </Link>
       </div>
     </div>
