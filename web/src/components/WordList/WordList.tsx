@@ -1,13 +1,13 @@
-'use server';
+"use server";
 
-import { getUserWordList } from '@/lib/api';
-import { WordListItem } from './WordListItem';
-import { cookies } from 'next/headers';
-import { WordInfo } from '@/types/word';
+import { getUserWordList } from "@/lib/api";
+import { WordListItem } from "./WordListItem";
+import { cookies } from "next/headers";
+import { WordInfo } from "@/types/word";
 
 export const WordList = async () => {
   const cookieStore = await cookies();
-  const tokenCookie = cookieStore.get('access_token');
+  const tokenCookie = cookieStore.get("access_token");
 
   const res = await getUserWordList({
     headers: {
@@ -17,12 +17,12 @@ export const WordList = async () => {
 
   const wordInfoList: WordInfo[] = res.data
     ? res.data.word_list.map((word) => ({
-      id: word.word_id,
-      word: word.word,
-      meaning: word.meaning ?? undefined,
-      exampleSentence: word.example_sentence ?? undefined,
-      exampleSentenceTranslation: word.example_sentence_translation ?? undefined,
-    }))
+        id: word.word_id,
+        word: word.word,
+        meaning: word.meaning ?? undefined,
+        exampleSentence: word.example_sentence ?? undefined,
+        exampleSentenceTranslation: word.example_sentence_translation ?? undefined,
+      }))
     : [];
 
   return (

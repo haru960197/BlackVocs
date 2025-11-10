@@ -1,1 +1,1 @@
-export * from './RegisterWordForm';
+export * from "./RegisterWordForm";

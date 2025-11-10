@@ -1,14 +1,13 @@
-'use client';
+"use client";
 
-import { useToast } from '@/context/ToastContext';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { clsx } from 'clsx';
-import { useEffect, useState } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { getSuggestWords, handleGenerateWordData, handleRegisterWord } from './actions';
-import { WordFormInput, wordFormSchema } from './schema';
-import { WordInfo } from '@/types/word';
-import { get } from 'http';
+import { useToast } from "@/context/ToastContext";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { clsx } from "clsx";
+import { useEffect, useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { getSuggestWords, handleGenerateWordData, handleRegisterWord } from "./actions";
+import { WordFormInput, wordFormSchema } from "./schema";
+import { WordInfo } from "@/types/word";
 
 export const RegisterWordForm = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -28,21 +27,21 @@ export const RegisterWordForm = () => {
     formState: { errors, isSubmitting },
   } = useForm<WordFormInput>({
     resolver: zodResolver(wordFormSchema),
-    mode: 'onChange',
+    mode: "onChange",
   });
 
   const isDisabled =
-    !getValues('word') ||
+    !getValues("word") ||
     !!errors.word ||
     !!errors.meaning ||
     !!errors.example ||
     !!errors.exampleTranslation;
-  const isGeneratingDisabled = !getValues('word') || !!errors.word;
+  const isGeneratingDisabled = !getValues("word") || !!errors.word;
 
   // 'word'フィールドの値を監視
-  const watchedWord = watch('word');
+  const watchedWord = watch("word");
 
-  const { onBlur: rhfOnBlur, ...wordRegisterRest } = register('word', { required: true });
+  const { onBlur: rhfOnBlur, ...wordRegisterRest } = register("word", { required: true });
 
   const handleWordInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     // まず、react-hook-formのonBlurを実行してバリデーションをトリガー
@@ -56,12 +55,12 @@ export const RegisterWordForm = () => {
 
   useEffect(() => {
     // 入力が開始されたらローディング状態にする
-    if (watchedWord !== '') {
+    if (watchedWord !== "") {
       setIsLoadingSuggestions(true);
     }
 
     const timerId = setTimeout(() => {
-      if (watchedWord !== undefined && watchedWord.trim() === '') {
+      if (watchedWord !== undefined && watchedWord.trim() === "") {
         setSuggestions([]);
         // 入力が空になったらローディングは停止
         setIsLoadingSuggestions(false);
@@ -98,10 +97,10 @@ export const RegisterWordForm = () => {
   }, [watchedWord]);
 
   const handleSuggestionClick = (suggestion: WordInfo) => {
-    setValue('word', suggestion.word, { shouldValidate: true });
-    setValue('meaning', suggestion.meaning, { shouldValidate: true });
-    setValue('example', suggestion.exampleSentence ?? '', { shouldValidate: true });
-    setValue('exampleTranslation', suggestion.exampleSentenceTranslation ?? '', {
+    setValue("word", suggestion.word, { shouldValidate: true });
+    setValue("meaning", suggestion.meaning, { shouldValidate: true });
+    setValue("example", suggestion.exampleSentence ?? "", { shouldValidate: true });
+    setValue("exampleTranslation", suggestion.exampleSentenceTranslation ?? "", {
       shouldValidate: true,
     });
 
@@ -116,27 +115,27 @@ export const RegisterWordForm = () => {
     setIsGenerating(true);
 
     const res = await handleGenerateWordData(
-      getValues('word'),
-      getValues('meaning'),
-      getValues('example'),
-      getValues('exampleTranslation'),
+      getValues("word"),
+      getValues("meaning"),
+      getValues("example"),
+      getValues("exampleTranslation")
     );
 
     if (res.success) {
       const data = res.data;
       if (data?.word) {
         // フォームに生成されたデータをセットする
-        setValue('word', data.word);
-        setValue('meaning', data.meaning);
-        setValue('example', data.example_sentence);
-        setValue('exampleTranslation', data.example_sentence_translation);
+        setValue("word", data.word);
+        setValue("meaning", data.meaning);
+        setValue("example", data.example_sentence);
+        setValue("exampleTranslation", data.example_sentence_translation);
 
-        showToast('単語情報を生成しました', 'success');
+        showToast("単語情報を生成しました", "success");
       } else {
-        showToast('単語情報の生成に失敗しました', 'error');
+        showToast("単語情報の生成に失敗しました", "error");
       }
     } else {
-      showToast('単語情報の生成に失敗しました', 'error');
+      showToast("単語情報の生成に失敗しました", "error");
     }
 
     setIsGenerating(false);
@@ -155,9 +154,9 @@ export const RegisterWordForm = () => {
     );
 
     if (res.success) {
-      showToast('登録に成功しました', 'success');
+      showToast("登録に成功しました", "success");
     } else {
-      showToast('登録に失敗しました', 'error');
+      showToast("登録に失敗しました", "error");
     }
   };
 
@@ -170,7 +169,7 @@ export const RegisterWordForm = () => {
         <legend className="fieldset-legend text-xl">英単語</legend>
         <input
           type="text"
-          className={clsx('input text-xl', errors.word && 'input-error')}
+          className={clsx("input text-xl", errors.word && "input-error")}
           onFocus={() => setIsWordInputFocused(true)}
           placeholder="Pen"
           onBlur={handleWordInputBlur}
@@ -206,25 +205,25 @@ export const RegisterWordForm = () => {
         <legend className="fieldset-legend text-xl">意味</legend>
         <input
           type="text"
-          className={clsx('input text-xl', errors.meaning && 'input-error')}
+          className={clsx("input text-xl", errors.meaning && "input-error")}
           placeholder="ペン"
-          {...register('meaning', { required: true })}
+          {...register("meaning", { required: true })}
         />
         {errors.meaning && <p className="text-error text-sm mt-1">{errors.meaning.message}</p>}
 
         <legend className="fieldset-legend text-xl">例文</legend>
         <textarea
-          className={clsx('textarea text-lg w-full', errors.example && 'textarea-error')}
+          className={clsx("textarea text-lg w-full", errors.example && "textarea-error")}
           placeholder="This is a pen."
-          {...register('example', { required: true })}
+          {...register("example", { required: true })}
         />
         {errors.example && <p className="text-error text-sm mt-1">{errors.example.message}</p>}
 
         <legend className="fieldset-legend text-xl">例文（日本語訳）</legend>
         <textarea
-          className={clsx('textarea text-lg w-full', errors.exampleTranslation && 'textarea-error')}
+          className={clsx("textarea text-lg w-full", errors.exampleTranslation && "textarea-error")}
           placeholder="これはペンです。"
-          {...register('exampleTranslation', { required: true })}
+          {...register("exampleTranslation", { required: true })}
         />
         {errors.exampleTranslation && (
           <p className="text-error text-sm mt-1">{errors.exampleTranslation.message}</p>
@@ -245,7 +244,7 @@ export const RegisterWordForm = () => {
             disabled={isGeneratingDisabled || isGenerating}
             onClick={handleGenerateClick}
           >
-            {isGenerating ? <span className="loading loading-spinner" /> : 'AIで生成'}
+            {isGenerating ? <span className="loading loading-spinner" /> : "AIで生成"}
           </button>
         </div>
         <div className="flex justify-end">
@@ -254,7 +253,7 @@ export const RegisterWordForm = () => {
             className="btn btn-primary btn-sm lg:btn-lg text-lg lg:text-xl w-[94px]"
             disabled={isDisabled || isSubmitting}
           >
-            {isSubmitting ? <span className="loading loading-spinner" /> : '登録'}
+            {isSubmitting ? <span className="loading loading-spinner" /> : "登録"}
           </button>
         </div>
       </div>

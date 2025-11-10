@@ -1,4 +1,4 @@
-import { WordList } from '@/components/WordList';
+import { WordList } from "@/components/WordList";
 
 export default function Page() {
   return (
