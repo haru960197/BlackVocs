@@ -8,7 +8,6 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { getSuggestWords, handleGenerateWordData, handleRegisterWord } from './actions';
 import { WordFormInput, wordFormSchema } from './schema';
 import { WordInfo } from '@/types/word';
-import { get } from 'http';
 
 export const RegisterWordForm = () => {
   const [isGenerating, setIsGenerating] = useState(false);
