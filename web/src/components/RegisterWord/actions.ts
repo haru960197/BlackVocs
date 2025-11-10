@@ -35,10 +35,10 @@ export const handleRegisterWord = async (
 
   const res = await registerWord({
     body: {
-	  word,
-	  meaning,
-	  example_sentence: example,
-	  example_sentence_translation: exampleTranslation,
+	    word,
+	    meaning,
+	    example_sentence: example,
+	    example_sentence_translation: exampleTranslation,
     },
     headers: {
       Cookie: `${tokenCookie.name}=${tokenCookie.value}`,
