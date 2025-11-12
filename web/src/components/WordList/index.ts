@@ -1,1 +1,1 @@
-export * from './WordList';
+export * from "./WordList";

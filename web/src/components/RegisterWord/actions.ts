@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 import {
   generateNewWordEntry,
@@ -10,24 +10,24 @@ import {
   suggestWords,
   SuggestWordsError,
   SuggestWordsResponse,
-} from '@/lib/api';
-import { cookies } from 'next/headers';
+} from "@/lib/api";
+import { cookies } from "next/headers";
 
 /**
  * 英単語を登録する
  */
 export const handleRegisterWord = async (
   word: string,
-  meaning: string,
-  example: string,
-  exampleTranslation: string
+  meaning?: string,
+  example?: string,
+  exampleTranslation?: string
 ): Promise<{
   success: boolean;
   error?: RegisterWordError;
   data?: RegisterWordResponse;
 }> => {
   const cookieStore = await cookies();
-  const tokenCookie = cookieStore.get('access_token');
+  const tokenCookie = cookieStore.get("access_token");
 
   if (!tokenCookie) {
     return { success: false };
@@ -35,10 +35,10 @@ export const handleRegisterWord = async (
 
   const res = await registerWord({
     body: {
-	  word,
-	  meaning,
-	  example_sentence: example,
-	  example_sentence_translation: exampleTranslation,
+      word,
+      meaning,
+      example_sentence: example,
+      example_sentence_translation: exampleTranslation,
     },
     headers: {
       Cookie: `${tokenCookie.name}=${tokenCookie.value}`,
@@ -56,14 +56,17 @@ export const handleRegisterWord = async (
  * 生成AIを使って新しい単語情報を生成する
  */
 export const handleGenerateWordData = async (
-  word: string
+  word: string,
+  meaning?: string,
+  exampleSentence?: string,
+  exampleSentenceTranslation?: string
 ): Promise<{
   success: boolean;
   error?: GenerateNewWordEntryError;
   data?: GenerateNewWordEntryResponse;
 }> => {
   const cookieStore = await cookies();
-  const tokenCookie = cookieStore.get('access_token');
+  const tokenCookie = cookieStore.get("access_token");
 
   if (!tokenCookie) {
     return { success: false };
@@ -72,6 +75,9 @@ export const handleGenerateWordData = async (
   const res = await generateNewWordEntry({
     body: {
       word,
+      meaning,
+      example_sentence: exampleSentence,
+      example_sentence_translation: exampleSentenceTranslation,
     },
     headers: {
       Cookie: `${tokenCookie.name}=${tokenCookie.value}`,
@@ -93,7 +99,7 @@ export const getSuggestWords = async (
   data?: SuggestWordsResponse;
 }> => {
   const cookieStore = await cookies();
-  const tokenCookie = cookieStore.get('access_token');
+  const tokenCookie = cookieStore.get("access_token");
 
   if (!tokenCookie) {
     return { success: false };

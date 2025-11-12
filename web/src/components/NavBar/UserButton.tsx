@@ -1,8 +1,8 @@
-import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/context/ToastContext';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { BiSolidUserCheck, BiSolidUserX } from 'react-icons/bi';
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { BiSolidUserCheck, BiSolidUserX } from "react-icons/bi";
 
 export const UserButton = () => {
   const router = useRouter();
@@ -12,8 +12,8 @@ export const UserButton = () => {
   const handleLogoutClick = async () => {
     if (!isLoggedIn) {
       // ログインしていないので，ログインページにリダイレクトする
-      showToast('まだログインしていません', 'warning');
-      router.push('/login');
+      showToast("まだログインしていません", "warning");
+      router.push("/login");
       return;
     }
 
@@ -21,10 +21,10 @@ export const UserButton = () => {
 
     if (result) {
       // ログアウトに成功したので，ログインページにリダイレクトする
-      showToast('ログアウトしました', 'success');
-      router.push('/login');
+      showToast("ログアウトしました", "success");
+      router.push("/login");
     } else {
-      showToast('ログアウトに失敗しました', 'error');
+      showToast("ログアウトに失敗しました", "error");
     }
   };
 
@@ -46,7 +46,7 @@ export const UserButton = () => {
       >
         {!isLoggedIn ? (
           <li className="btn btn-ghost">
-            <Link href={'/login'} className="bg-transparent">
+            <Link href={"/login"} className="bg-transparent">
               Login
             </Link>
           </li>

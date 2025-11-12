@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import clsx from 'clsx';
-import { createContext, useContext, useState } from 'react';
+import clsx from "clsx";
+import { createContext, useContext, useState } from "react";
 
-type ToastType = 'info' | 'success' | 'warning' | 'error';
+type ToastType = "info" | "success" | "warning" | "error";
 
 type ToastData = {
   message: string;
@@ -19,7 +19,7 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toast, setToast] = useState<ToastData | null>(null);
 
-  const showToast = (message: string, type: ToastType = 'info') => {
+  const showToast = (message: string, type: ToastType = "info") => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
@@ -31,11 +31,11 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         <div className="toast toast-end">
           <div
             className={clsx(
-              'alert',
-              toast.type === 'info' && 'alert-info',
-              toast.type === 'success' && 'alert-success',
-              toast.type === 'error' && 'alert-error',
-              toast.type === 'warning' && 'alert-warning'
+              "alert",
+              toast.type === "info" && "alert-info",
+              toast.type === "success" && "alert-success",
+              toast.type === "error" && "alert-error",
+              toast.type === "warning" && "alert-warning"
             )}
           >
             <span>{toast.message}</span>
@@ -50,7 +50,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 export function useToast() {
   const context = useContext(ToastContext);
   if (!context) {
-    throw new Error('useToast must be used within a ToastProvider');
+    throw new Error("useToast must be used within a ToastProvider");
   }
   return context;
 }

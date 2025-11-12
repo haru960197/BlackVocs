@@ -1,6 +1,6 @@
-'use server';
+"use server";
 
-import { ACCESS_TOKEN_KEY } from '@/constant/auth';
+import { ACCESS_TOKEN_KEY } from "@/constant/auth";
 import {
   signedInCheck,
   SignedInCheckResponse,
@@ -8,8 +8,8 @@ import {
   SignInError,
   SignInResponse,
   signOut,
-} from '@/lib/api';
-import { cookies } from 'next/headers';
+} from "@/lib/api";
+import { cookies } from "next/headers";
 
 export const handleLogin = async (
   userName: string,
@@ -35,7 +35,7 @@ export const handleLogin = async (
   cookieStore.set(ACCESS_TOKEN_KEY, res.data.access_token, {
     httpOnly: true,
     maxAge: 60 * 60,
-    sameSite: 'none',
+    sameSite: "none",
     secure: true,
   });
 
@@ -63,7 +63,7 @@ export const loggedInCheck = async (): Promise<{
   data?: SignedInCheckResponse;
 }> => {
   const cookieStore = await cookies();
-  const tokenCookie = cookieStore.get('access_token');
+  const tokenCookie = cookieStore.get("access_token");
 
   const res = await signedInCheck({
     headers: {
