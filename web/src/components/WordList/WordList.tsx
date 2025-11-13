@@ -17,8 +17,8 @@ export const WordList = async () => {
 
   const wordInfoList: WordInfo[] = res.data
     ? res.data.word_list.map((word) => ({
-        id: word.word_id,
-        word: word.word,
+        id: word.user_word_id,
+        spelling: word.spelling,
         meaning: word.meaning ?? undefined,
         exampleSentence: word.example_sentence ?? undefined,
         exampleSentenceTranslation: word.example_sentence_translation ?? undefined,

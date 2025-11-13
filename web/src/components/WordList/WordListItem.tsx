@@ -34,7 +34,7 @@ export const WordListItem = (props: Props) => {
     <li key={key} className="list-row flex flex-row items-center gap-4">
       <div className="flex-1 flex flex-col gap-1">
         <div className="flex gap-4">
-          <div className="text-lg">{wordInfo.word}</div>
+          <div className="text-lg">{wordInfo.spelling}</div>
           <div className="text-lg">{wordInfo.meaning}</div>
         </div>
         <hr className="text-neutral-content border-dashed" />

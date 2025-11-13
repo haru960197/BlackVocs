@@ -2,7 +2,6 @@ from fastapi import Request
 from pymongo.database import Database
 from pymongo import errors as mongo_errors
 from repositories.user_repository import UserRepository
-from core.config import USER_COLLECTION_NAME
 from core.errors import (
     NotFoundError,
     ServiceError,
@@ -15,32 +14,27 @@ from core.errors import (
 from core.jwt_auth import AuthJwtCsrt
 from core.oid import PyObjectId
 from models.user import UserModel
+from schemas.auth_schemas import SignInRequest, SignUpRequest
 
 class AuthService:
-    def __init__(self, db: Database, auth: AuthJwtCsrt | None = None):
-        self.users = UserRepository(db, collection_name=USER_COLLECTION_NAME)
-        self.auth = auth or AuthJwtCsrt()
+    def __init__(self, db: Database):
+        self.users = UserRepository(db)
+        self.auth = AuthJwtCsrt()
 
     # --- sign in ---
-    def sign_in(self, username: str, plaintext_password: str) -> str:
+    def create_access_token(self, payload: SignInRequest) -> str:
         """
-        Authenticate a user with the given username and password
-
-        Args: 
-            username(str) : username used for login 
-            password(str) : Plaintext password
-
-        Returns: 
-            token(str) : access token 
+        Authenticate a user with the given username and plaintext password
+        return access token
         """
         try: 
             # check if user exists
-            user = self.users.find(username=username)
+            user = self.users.find(username=payload.username)
             if not user: 
                 raise NotFoundError("given username is not in DB")
 
             # check if the plaintext password is collect
-            if not self.auth.verify_pw(plaintext_password, user.hashed_password): 
+            if not self.auth.verify_pw(payload.password, user.hashed_password): 
                 raise InvalidCredentialsError("Incorrect password")
 
             # create token 
@@ -50,39 +44,35 @@ class AuthService:
 
         except mongo_errors.PyMongoError as e:
             raise ServiceError(f"Database error during deletion: {e}")
+        except Exception as e:
+            raise ServiceError(f"service error: {e}")
 
     # --- Sign up ---
-    def sign_up(self, username: str, plaintext_password: str) -> PyObjectId:
+    def sign_up(self, payload: SignUpRequest) -> None:
         """
         Create a new user and return user_id
-
-        Args: 
-            username(str) : new user's username
-            password(str) : plaintext password
-
-        Returns: 
-            user_id(PyObjectId) : 
         """
         try: 
             # check if username is not taken 
-            if self.users.find(username=username): 
+            if self.users.find(username=payload.username): 
                 raise ConflictError("Username is already taken")
 
-            # generate usermodel
-            user = UserModel(
-                username=username,
-                hashed_password=self.auth.generate_hashed_pw(plaintext_password), 
+            new_user_model = UserModel(
+                username=payload.username,
+                hashed_password=self.auth.generate_hashed_pw(payload.password), 
             )
 
             # register
-            user_id = self.users.create(user)
+            user_id = self.users.create(new_user_model)
             if user_id is None: 
                 raise ServiceError("Failed to create user: insert returned None")
 
-            return user_id
+            return 
 
         except mongo_errors.PyMongoError as e:
             raise ServiceError(f"Database error during deletion: {e}")
+        except Exception as e:
+            raise ServiceError(f"service error: {e}")
 
     # --- check if signed in ---
     @staticmethod
@@ -103,5 +93,7 @@ class AuthService:
 
         except (InvalidTokenError, TokenExpiredError) as e: 
             raise UnauthorizedError(str(e))
+        except Exception as e:
+            raise ServiceError(f"service error: {e}")
 
 

@@ -6,7 +6,6 @@ import {
   GenerateNewWordEntryResponse,
   registerWord,
   RegisterWordError,
-  RegisterWordResponse,
   suggestWords,
   SuggestWordsError,
   SuggestWordsResponse,
@@ -17,14 +16,13 @@ import { cookies } from "next/headers";
  * 英単語を登録する
  */
 export const handleRegisterWord = async (
-  word: string,
+  spelling: string,
   meaning?: string,
   example?: string,
   exampleTranslation?: string
 ): Promise<{
   success: boolean;
   error?: RegisterWordError;
-  data?: RegisterWordResponse;
 }> => {
   const cookieStore = await cookies();
   const tokenCookie = cookieStore.get("access_token");
@@ -35,7 +33,7 @@ export const handleRegisterWord = async (
 
   const res = await registerWord({
     body: {
-      word,
+      spelling,
       meaning,
       example_sentence: example,
       example_sentence_translation: exampleTranslation,
@@ -49,14 +47,14 @@ export const handleRegisterWord = async (
     return { success: false, error: res.error };
   }
 
-  return { success: true, data: res.data };
+  return { success: true };
 };
 
 /**
  * 生成AIを使って新しい単語情報を生成する
  */
 export const handleGenerateWordData = async (
-  word: string,
+  spelling: string,
   meaning?: string,
   exampleSentence?: string,
   exampleSentenceTranslation?: string
@@ -74,7 +72,7 @@ export const handleGenerateWordData = async (
 
   const res = await generateNewWordEntry({
     body: {
-      word,
+      spelling,
       meaning,
       example_sentence: exampleSentence,
       example_sentence_translation: exampleSentenceTranslation,
@@ -92,7 +90,7 @@ export const handleGenerateWordData = async (
 };
 
 export const getSuggestWords = async (
-  wordInput: string
+  spellingInput: string
 ): Promise<{
   success: boolean;
   error?: SuggestWordsError;
@@ -107,7 +105,7 @@ export const getSuggestWords = async (
 
   const res = await suggestWords({
     body: {
-      input_word: wordInput,
+      input_str: spellingInput,
     },
     headers: {
       Cookie: `${tokenCookie.name}=${tokenCookie.value}`,

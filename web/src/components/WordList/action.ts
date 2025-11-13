@@ -23,7 +23,7 @@ export const handleDeleteWord = async (
 
   const res = await deleteWord({
     body: {
-      word_id: wordId,
+      user_word_id: wordId,
     },
     headers: {
       Cookie: `${tokenCookie.name}=${tokenCookie.value}`,

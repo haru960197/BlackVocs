@@ -13,7 +13,7 @@ class UserWordRepository:
 
     # --- create ---
     def create(self, user_word_model: UserWordModel) -> PyObjectId:
-        """Create (user_id, word_id) link and return string id."""
+        """Create (user_id, word_id) link and return id."""
         doc = user_word_model.model_dump(by_alias=True, exclude_none=True)
         res = self.col.insert_one(doc)
         return res.inserted_id
@@ -21,13 +21,14 @@ class UserWordRepository:
     # --- read ---
     def find(
         self, 
-        id: PyObjectId | None = None,
+        *, 
+        user_word_id: PyObjectId | None = None,
         user_id: PyObjectId | None = None, 
         word_id: PyObjectId | None = None, 
     ) -> UserWordModel | None:
         """ find a user_word matching to the condition """
-        if id: 
-            query = {"_id": id}
+        if user_word_id is not None: 
+            query = {"_id": user_word_id}
             doc = self.col.find_one(query)
             return UserWordModel.model_validate(doc) if doc else None
 
@@ -40,6 +41,7 @@ class UserWordRepository:
 
     def find_all(
         self, 
+        *,
         user_id: PyObjectId | None = None, 
         word_id: PyObjectId | None = None
     ) -> List[UserWordModel]:
@@ -49,17 +51,16 @@ class UserWordRepository:
             raise ValueError("either user_id and word_id must be provided")
 
         query = {}
-        if user_id: 
+        if user_id is not None: 
             query["user_id"] = user_id
-        if word_id: 
+        if word_id is not None: 
             query["word_id"] = word_id
             
         cur = self.col.find(query)
         return [UserWordModel.model_validate(doc) for doc in cur]
 
-
     # --- delete ---
-    def delete(self, id: PyObjectId) -> UserWordModel | None: 
-        doc = self.col.find_one_and_delete({"_id": id})
+    def delete(self, user_word_id: PyObjectId) -> UserWordModel | None: 
+        doc = self.col.find_one_and_delete({"_id": user_word_id})
         return UserWordModel.model_validate(doc) if doc else None
 

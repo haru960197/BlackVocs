@@ -1,11 +1,10 @@
 from typing import List
+from pymongo import ReturnDocument
 from pymongo.database import Database
 from pymongo.collection import Collection
-from pymongo import ReturnDocument
-import core.config as config 
-from core.oid import PyObjectId
-from models.common import WordBaseModel
-from models.word import WordModel
+import core.config as config
+from core.oid import PyObjectId 
+from models.word import WordDetails, WordModel
 
 WORD_COL = config.WORD_COLLECTION_NAME
 
@@ -15,7 +14,7 @@ class WordRepository:
         self.col: Collection = db[collection_name]
 
     # --- create ---
-    def create(self, word_model: WordModel) -> PyObjectId: 
+    def create(self, word_model: WordModel) -> PyObjectId:
         """ insert a new word item """
         doc = word_model.model_dump(by_alias=True, exclude_none=True)
         res = self.col.insert_one(doc)
@@ -24,18 +23,19 @@ class WordRepository:
     # --- read ---
     def find(
         self, 
-        id: PyObjectId | None = None, 
-        word_base: WordBaseModel | None = None,
+        *, 
+        word_id: PyObjectId | None = None, 
+        word_details: WordDetails| None = None,
     ) -> WordModel | None: 
         
-        if not id and not word_base: 
+        if not word_id and not word_details: 
             raise ValueError("Either word_id or word_base must be provided")
 
         query = {}
-        if id: 
-            query["_id"] = id
-        else: 
-            query["word_base"] = word_base.model_dump(by_alias=True, exclude_none=True)
+        if word_id is not None: 
+            query["_id"] = word_id
+        if word_details is not None: 
+            query["details"] = word_details.model_dump(by_alias=True, exclude_none=True)
 
         doc = self.col.find_one(query)
         return WordModel.model_validate(doc) if doc else None
@@ -51,26 +51,26 @@ class WordRepository:
         """
         options = "i" if case_insensitive else ""
         regex = {"$regex": subseq_pattern, "$options": options}
-        cur = self.col.find({"word_base.word": regex}).limit(max_num)
+        cur = self.col.find({"details.spelling": regex}).limit(max_num)
         return [WordModel.model_validate(doc) for doc in cur]
 
     # --- update ---
-    def increment_registered_count(self, id: PyObjectId) -> None: 
+    def increment_registration_count(self, word_id: PyObjectId) -> None: 
         self.col.find_one_and_update(
-            {"_id": id},
-            {"$inc": {"registered_count": 1}},
+            {"_id": word_id},
+            {"$inc": {"registration_count": 1}},
             return_document=ReturnDocument.AFTER,
             projection={"_id": 1},
         )
 
-    def decrement_registered_count(self, id: PyObjectId) -> None:
+    def decrement_registration_count(self, word_id: PyObjectId) -> None:
         """
         Decrement registered_count of a word document by word_id
         regisited_count must be greater than 0
         """
         self.col.find_one_and_update(
-            {"_id": id},
-            {"$inc": {"registered_count": -1}},
+            {"_id": word_id},
+            {"$inc": {"registration_count": -1}},
             return_document=ReturnDocument.AFTER,
             projection={"_id": 1},
         )
