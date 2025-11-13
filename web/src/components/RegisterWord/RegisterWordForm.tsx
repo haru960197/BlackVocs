@@ -31,17 +31,17 @@ export const RegisterWordForm = () => {
   });
 
   const isDisabled =
-    !getValues("word") ||
-    !!errors.word ||
+    !getValues("spelling") ||
+    !!errors.spelling ||
     !!errors.meaning ||
     !!errors.example ||
     !!errors.exampleTranslation;
-  const isGeneratingDisabled = !getValues("word") || !!errors.word;
+  const isGeneratingDisabled = !getValues("spelling") || !!errors.spelling;
 
-  // 'word'フィールドの値を監視
-  const watchedWord = watch("word");
+  // 'spelling'フィールドの値を監視
+  const watchedSpelling = watch("spelling");
 
-  const { onBlur: rhfOnBlur, ...wordRegisterRest } = register("word", { required: true });
+  const { onBlur: rhfOnBlur, ...wordRegisterRest } = register("spelling", { required: true });
 
   const handleWordInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     // まず、react-hook-formのonBlurを実行してバリデーションをトリガー
@@ -55,12 +55,12 @@ export const RegisterWordForm = () => {
 
   useEffect(() => {
     // 入力が開始されたらローディング状態にする
-    if (watchedWord !== "") {
+    if (watchedSpelling !== "") {
       setIsLoadingSuggestions(true);
     }
 
     const timerId = setTimeout(() => {
-      if (watchedWord !== undefined && watchedWord.trim() === "") {
+      if (watchedSpelling !== undefined && watchedSpelling.trim() === "") {
         setSuggestions([]);
         // 入力が空になったらローディングは停止
         setIsLoadingSuggestions(false);
@@ -68,7 +68,7 @@ export const RegisterWordForm = () => {
       }
 
       const fetchSuggestions = async () => {
-        const response = await getSuggestWords(watchedWord);
+        const response = await getSuggestWords(watchedSpelling);
 
         if (!response.success || !response.data) {
           setSuggestions([]);
@@ -79,7 +79,7 @@ export const RegisterWordForm = () => {
         setSuggestions(
           response.data.word_list.map((word) => ({
             id: word.word_id,
-            word: word.word,
+            spelling: word.spelling,
             meaning: word.meaning ?? undefined,
             exampleSentence: "",
             exampleSentenceTranslation: "",
@@ -94,10 +94,10 @@ export const RegisterWordForm = () => {
     return () => {
       clearTimeout(timerId);
     };
-  }, [watchedWord]);
+  }, [watchedSpelling]);
 
   const handleSuggestionClick = (suggestion: WordInfo) => {
-    setValue("word", suggestion.word, { shouldValidate: true });
+    setValue("spelling", suggestion.spelling, { shouldValidate: true });
     setValue("meaning", suggestion.meaning, { shouldValidate: true });
     setValue("example", suggestion.exampleSentence ?? "", { shouldValidate: true });
     setValue("exampleTranslation", suggestion.exampleSentenceTranslation ?? "", {
@@ -115,7 +115,7 @@ export const RegisterWordForm = () => {
     setIsGenerating(true);
 
     const res = await handleGenerateWordData(
-      getValues("word"),
+      getValues("spelling"),
       getValues("meaning"),
       getValues("example"),
       getValues("exampleTranslation")
@@ -123,9 +123,9 @@ export const RegisterWordForm = () => {
 
     if (res.success) {
       const data = res.data;
-      if (data?.word) {
+      if (data?.spelling) {
         // フォームに生成されたデータをセットする
-        setValue("word", data.word);
+        setValue("spelling", data.spelling);
         setValue("meaning", data.meaning);
         setValue("example", data.example_sentence);
         setValue("exampleTranslation", data.example_sentence_translation);
@@ -147,7 +147,7 @@ export const RegisterWordForm = () => {
     }
 
     const res = await handleRegisterWord(
-      data.word,
+      data.spelling,
       data.meaning,
       data.example,
       data.exampleTranslation
@@ -169,13 +169,13 @@ export const RegisterWordForm = () => {
         <legend className="fieldset-legend text-xl">英単語</legend>
         <input
           type="text"
-          className={clsx("input text-xl", errors.word && "input-error")}
+          className={clsx("input text-xl", errors.spelling && "input-error")}
           onFocus={() => setIsWordInputFocused(true)}
           placeholder="Pen"
           onBlur={handleWordInputBlur}
           {...wordRegisterRest}
         />
-        {errors.word && <p className="text-error text-sm mt-1">{errors.word.message}</p>}
+        {errors.spelling && <p className="text-error text-sm mt-1">{errors.spelling.message}</p>}
 
         <div>
           {/* ローディング表示と候補リスト */}
@@ -195,7 +195,7 @@ export const RegisterWordForm = () => {
                     className="list-row px-3 py-2 text-lg cursor-pointer hover:bg-accent"
                     onClick={() => handleSuggestionClick(suggestion)}
                   >
-                    {`${suggestion.word} | ${suggestion.meaning}`}
+                    {`${suggestion.spelling} | ${suggestion.meaning}`}
                   </li>
                 ))}
             </ul>

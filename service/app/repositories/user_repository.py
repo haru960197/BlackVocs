@@ -21,17 +21,18 @@ class UserRepository:
     # --- read ---
     def find(
         self,
-        id: PyObjectId | None = None,
+        *, 
+        user_id: PyObjectId | None = None,
         username: str | None = None,
     ) -> UserModel | None:
 
-        if not id and not username:
+        if user_id is None and username is None:
             raise ValueError("Either user_id or username must be provided")
 
         query = {}
-        if id: 
-            query["_id"] = id
-        else: 
+        if user_id is not None: 
+            query["_id"] = user_id
+        if username is not None: 
             query["username"] = username 
 
         doc = self.col.find_one(query)

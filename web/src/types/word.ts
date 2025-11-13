@@ -1,6 +1,6 @@
 export type WordInfo = {
   id: string;
-  word: string;
+  spelling: string;
   meaning?: string;
   exampleSentence?: string;
   exampleSentenceTranslation?: string;

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const wordFormSchema = z.object({
-  word: z
+  spelling: z
     .string()
     .max(45, { message: "45文字以内で入力してください" })
     .min(1, { message: "単語は必須です" }),
