@@ -1,6 +1,6 @@
 "use server";
 
-import { SignUpResponse, signUp, SignUpError } from "@/lib/api";
+import { signUp, SignUpError } from "@/lib/api";
 
 /**
  * ユーザーを新規登録する
@@ -11,7 +11,6 @@ export const handleSignUpUser = async (
 ): Promise<{
   success: boolean;
   error?: SignUpError;
-  data?: SignUpResponse;
 }> => {
   const res = await signUp({
     body: {
@@ -24,5 +23,5 @@ export const handleSignUpUser = async (
     return { success: false, error: res.error };
   }
 
-  return { success: true, data: res.data };
+  return { success: true };
 };
