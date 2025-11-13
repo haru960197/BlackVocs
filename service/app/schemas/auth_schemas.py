@@ -5,6 +5,9 @@ class SignInRequest(BaseModel):
     username: str
     password: str
 
+class SignInResponse(BaseModel):
+    access_token: str
+
 # --- sign up ---
 class SignUpRequest(BaseModel):
     username: str

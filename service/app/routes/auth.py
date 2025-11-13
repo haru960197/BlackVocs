@@ -11,7 +11,7 @@ router = APIRouter(prefix="/user", tags=["auth"], responses=common_schemas.COMMO
 @router.post(
     "/sign_in",
     operation_id="sign_in",
-    status_code=status.HTTP_200_OK
+    response_model=auth_schemas.SignInResponse
 )
 async def sign_in(
     payload: auth_schemas.SignInRequest,
@@ -30,7 +30,7 @@ async def sign_in(
         secure=True,
     )
     
-    return
+    return auth_schemas.SignInResponse(access_token=access_token)
 
 @router.post(
     "/sign_up",
