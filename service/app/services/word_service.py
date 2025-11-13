@@ -11,11 +11,12 @@ from repositories.user_word_repository import UserWordRepository
 from core.oid import PyObjectId
 import core.config as config
 from core.errors import ServiceError, BadRequestError, ConflictError
-from schemas.word_schemas import DeleteWordRequest, GetUserWordListResponse, GetUserWordListResponseBase, RegisterWordRequest, RegisterWordResponse, SuggestWordsRequest, SuggestWordsResponse, SuggestWordsResponseBase
+from schemas.word_schemas import DeleteWordRequest, GetUserWordListResponse, GetUserWordListResponseBase, RegisterWordRequest, SuggestWordsRequest, SuggestWordsResponse, SuggestWordsResponseBase
 
 DEEPSEEK_API_KEY = config.DEEPSEEK_API_KEY
 MAX_NUM_WORD_SUGGEST = const.MAX_NUM_WORD_SUGGEST
-CANDIDATE_CAP = const.CANDIDATE_CAP
+MAX_NUM_WORD_SUGGEST_CANDIDATE = const.MAX_NUM_WORD_SUGGEST_CANDIDATE
+
 
 class WordService:
     """Business logic for word operations including DeepSeek integration."""
@@ -57,54 +58,20 @@ class WordService:
             raise ServiceError(f"service error: {e}")
 
     # --- suggest word ---
-    def _lcs_len(self, a: str, b: str) -> int:
-        """Return LCS length using O(len(a)*len(b)) DP."""
-        n, m = len(a), len(b)
-        # Small optimization: keep a rolling 1D DP array
-        prev = [0] * (m + 1)
-        for i in range(1, n + 1):
-            cur = [0]
-            ai = a[i - 1]
-            for j in range(1, m + 1):
-                if ai == b[j - 1]:
-                    cur.append(prev[j - 1] + 1)
-                else:
-                    cur.append(max(prev[j], cur[-1]))
-            prev = cur
-        return prev[-1]
-
-    def _lcs_score(self, query: str, candidate: str) -> float:
-        """Normalize LCS length by max length to get [0,1]."""
-        if not query or not candidate:
-            return 0.0
-        return self._lcs_len(query, candidate) / max(len(query), len(candidate))
-
-    def _make_subsequence_regex(self, q: str) -> str:
-        """Build a regex like 'a.*b.*c' to quickly prefilter subsequence-like matches."""
-        parts = [re.escape(ch) for ch in q]
-        return ".*".join(parts)
-
-    def _collect_candidates_by_word_str(self, input_str: str, limit: int = CANDIDATE_CAP) -> List[WordModel]:
-        """
-        Build a subsequence regex from input_word and fetch candidate words from DB.
-        """
-        subseq = self._make_subsequence_regex(input_str)
-        return self.words.find_by_word_subseq(subseq, limit)
-
     def generate_word_suggestion(self, payload: SuggestWordsRequest) -> SuggestWordsResponse: 
         """
         get input_word and return suggest word items which are collected using the algorithm
         """
         try: 
             # lcsの長さが大きいものから順番に取る（最大N個）
-            words = self._collect_candidates_by_word_str(input_str=payload.input_str)
-            
+            words = self.__collect_candidates_by_word_str(input_str=payload.input_str)
+
             # (score, item)という形でsuggest itemsをlistにまとめる
             scored: List[Tuple[float, WordModel]] = []  
             lw = payload.input_str.lower()
             for m in words:
                 w = m.details.spelling
-                score = self._lcs_score(lw, w.lower())
+                score = self.__lcs_score(lw, w.lower())
                 scored.append((score, m))
 
             # itemをregistered_countが大きいものの順に並べる
@@ -129,7 +96,7 @@ class WordService:
             raise ServiceError(f"service error: {e}")
 
     # --- register word --- 
-    def register_word(self, payload: RegisterWordRequest, user_id: PyObjectId) -> RegisterWordResponse: 
+    def register_word(self, payload: RegisterWordRequest, user_id: PyObjectId) -> None: 
         """
         Entryが含まれていないならDBにNew Itemを加える
         Itemのregistered_countをインクリメント
@@ -160,9 +127,10 @@ class WordService:
                 word_id=word_id, 
                 usage_example=UsageExample(sentence=payload.example_sentence, translation=payload.example_sentence_translation),
             )
-            new_user_word_id = self.user_words.create(new_user_word_model)
 
-            return RegisterWordResponse(user_word_id=str(new_user_word_id))           
+            self.user_words.create(new_user_word_model)
+            return            
+
         except mongo_errors.PyMongoError as e:
             raise ServiceError(f"Database error: {e}")
         except Exception as e:
@@ -201,4 +169,39 @@ class WordService:
             raise ServiceError(f"Database error: {e}")
         except Exception as e:
             raise ServiceError(f"service error: {e}")
+
+    # --- private ---
+    def __lcs_len(self, a: str, b: str) -> int:
+        """Return LCS length using O(len(a)*len(b)) DP."""
+        n, m = len(a), len(b)
+        # Small optimization: keep a rolling 1D DP array
+        prev = [0] * (m + 1)
+        for i in range(1, n + 1):
+            cur = [0]
+            ai = a[i - 1]
+            for j in range(1, m + 1):
+                if ai == b[j - 1]:
+                    cur.append(prev[j - 1] + 1)
+                else:
+                    cur.append(max(prev[j], cur[-1]))
+            prev = cur
+        return prev[-1]
+
+    def __lcs_score(self, query: str, candidate: str) -> float:
+        """Normalize LCS length by max length to get [0,1]."""
+        if not query or not candidate:
+            return 0.0
+        return self.__lcs_len(query, candidate) / max(len(query), len(candidate))
+
+    def __make_subsequence_regex(self, q: str) -> str:
+        """Build a regex like 'a.*b.*c' to quickly prefilter subsequence-like matches."""
+        parts = [re.escape(ch) for ch in q]
+        return ".*".join(parts)
+
+    def __collect_candidates_by_word_str(self, input_str: str, limit: int = MAX_NUM_WORD_SUGGEST_CANDIDATE) -> List[WordModel]:
+        """
+        Build a subsequence regex from input_word and fetch candidate words from DB.
+        """
+        subseq = self.__make_subsequence_regex(input_str)
+        return self.words.find_by_word_subseq(subseq, limit)
 

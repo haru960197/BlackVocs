@@ -9,10 +9,6 @@ class GetUserWordListResponseBase(BaseModel):
     example_sentence: str | None = None
     example_sentence_translation: str | None = None
 
-    @field_validator("spelling")
-    def to_lowercase(cls, v: str) -> str:
-        return v.strip().lower()
-
 class GetUserWordListResponse(BaseModel):
     word_list: List[GetUserWordListResponseBase]
 
@@ -49,8 +45,9 @@ class RegisterWordRequest(BaseModel):
     example_sentence: str | None = None
     example_sentence_translation: str | None = None
 
-class RegisterWordResponse(BaseModel):  
-    user_word_id: str
+    @field_validator("spelling")
+    def to_lowercase(cls, v: str) -> str:
+        return v.strip().lower()
 
 # --- delete ---
 class DeleteWordRequest(BaseModel): 

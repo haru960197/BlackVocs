@@ -45,13 +45,13 @@ class WordRepository:
         subseq_pattern: str,
         max_num: int,
         case_insensitive: bool = True
-    ) -> List[WordModel]: 
+    ) -> List[WordModel]:
         """
         Build a MongoDB regex filter from a subsequence pattern and delegate to regex finder.
         """
         options = "i" if case_insensitive else ""
         regex = {"$regex": subseq_pattern, "$options": options}
-        cur = self.col.find({"details.word": regex}).limit(max_num)
+        cur = self.col.find({"details.spelling": regex}).limit(max_num)
         return [WordModel.model_validate(doc) for doc in cur]
 
     # --- update ---
