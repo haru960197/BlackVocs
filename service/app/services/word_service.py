@@ -11,7 +11,7 @@ from repositories.user_word_repository import UserWordRepository
 from core.oid import PyObjectId
 import core.config as config
 from core.errors import ServiceError, BadRequestError, ConflictError
-from schemas.word_schemas import DeleteWordRequest, GetUserWordListResponse, GetUserWordListResponseBase, RegisterWordRequest, SuggestWordsRequest, SuggestWordsResponse, SuggestWordsResponseBase
+from schemas.word_schemas import DeleteWordRequest, GetWordContentRequest, GetWordListResponse, GetWordListResponseBase, GetWordContentResponse, RegisterWordRequest, SuggestWordsRequest, SuggestWordsResponse, SuggestWordsResponseBase
 
 DEEPSEEK_API_KEY = config.DEEPSEEK_API_KEY
 MAX_NUM_WORD_SUGGEST = const.MAX_NUM_WORD_SUGGEST
@@ -25,30 +25,54 @@ class WordService:
         self.user_words = UserWordRepository(db)
 
     # --- get user word list --- 
-    def get_user_word_list_by_user_id(self, user_id: PyObjectId) -> GetUserWordListResponse: 
+    def get_word_list_by_user_id(self, user_id: PyObjectId) -> GetWordListResponse: 
         """ 
         Return the word items linked to the given user. 
         """
         try: 
             user_word_models = self.user_words.find_all(user_id=user_id)
 
-            word_list: list[GetUserWordListResponseBase] = []
+            word_list: list[GetWordListResponseBase] = []
 
             for m in user_word_models: 
                 word = self.words.find(word_id=m.word_id)
                 if word is None: 
                     raise ServiceError("Failed to word_model")
 
-                item = GetUserWordListResponseBase(
+                item = GetWordListResponseBase(
                     user_word_id=str(m.id),
                     spelling=word.details.spelling, 
                     meaning=word.details.meaning, 
-                    example_sentence=m.usage_example.sentence,
-                    example_sentence_translation=m.usage_example.translation,
                 )
                 word_list.append(item)
+            return GetWordListResponse(word_list=word_list) 
 
-            return GetUserWordListResponse(word_list=word_list) 
+        except mongo_errors.PyMongoError as e:
+            raise ServiceError(f"Database error: {e}")
+        except Exception as e:
+            raise ServiceError(f"service error: {e}")
+
+    # --- get word content --- 
+    def get_word_content(self, payload: GetWordContentRequest) -> GetWordContentResponse: 
+        try: 
+            # find user_word model
+            user_word_model = self.user_words.find(user_word_id=PyObjectId(payload.user_word_id))
+            if user_word_model is None: 
+                raise ServiceError("failed to find user_word_model")
+
+            # get word model
+            word_model = self.words.find(word_id=user_word_model.word_id)
+            if word_model is None: 
+                raise ServiceError("failed to find word_model")
+           
+            # create response 
+            return GetWordContentResponse(
+                user_word_id=str(user_word_model.id), 
+                spelling=word_model.details.spelling, 
+                meaning=word_model.details.meaning, 
+                example_sentence=user_word_model.usage_example.sentence, 
+                example_sentence_translation=user_word_model.usage_example.translation, 
+            )
 
         except ValidationError as e: 
             raise ServiceError(f"Data validation error: {e}")
