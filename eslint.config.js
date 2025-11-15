@@ -19,9 +19,6 @@ module.exports = [
     },
   },
 
-  // next/core-web-vitals はFlatCompatでは読み込めない
-  // nextPlugin.configs["core-web-vitals"],
-
   {
     ignores: [
       "node_modules/",
