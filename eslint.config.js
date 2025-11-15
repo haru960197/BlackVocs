@@ -13,8 +13,14 @@ module.exports = [
     "prettier"
   ),
 
+  {
+    plugins: {
+      '@next/next': nextPlugin,
+    },
+  },
+
   // next/core-web-vitals はFlatCompatでは読み込めない
-  nextPlugin.configs["core-web-vitals"],
+  // nextPlugin.configs["core-web-vitals"],
 
   {
     ignores: [
