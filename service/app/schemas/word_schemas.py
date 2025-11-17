@@ -6,7 +6,7 @@ from core import const
 # --- get user word list ---
 class GetUserWordListResponseBase(BaseModel):
     user_word_id: str 
-    spelling: str    
+    spelling: str
     meaning: str | None = None 
     example_sentence: str | None = None
     example_sentence_translation: str | None = None
