@@ -58,6 +58,26 @@ class GenerateNewWordEntryResponse(BaseModel):
     example_sentence: str
     example_sentence_translation: str
 
+# --- edit word ---
+class EditWordRequest(BaseModel): 
+    spelling: str = Field(
+        min_length=const.SPELLING_MIN_LEN,
+        max_length=const.SPELLING_MAX_LEN, 
+    )
+    meaning: str | None = Field(
+        max_length=const.MEANING_MAX_LEN,
+    )
+    example_sentence: str | None = Field(
+        max_length=const.EXAMPLE_MAX_LEN,
+    )
+    example_sentence_translation: str | None = Field(
+        max_length=const.EXAMPLE_TRANSLATION_MAX_LEN, 
+    )
+
+    @field_validator("spelling")
+    def to_lowercase(cls, v: str) -> str:
+        return v.strip().lower()
+
 # --- register word ---
 class RegisterWordRequest(BaseModel): 
     spelling: str = Field(

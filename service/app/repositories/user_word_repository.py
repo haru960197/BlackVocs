@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, List
 from pymongo.database import Database
 from pymongo.collection import Collection
 import core.config as config
@@ -17,6 +17,13 @@ class UserWordRepository:
         doc = user_word_model.model_dump(by_alias=True, exclude_none=True)
         res = self.col.insert_one(doc)
         return res.inserted_id
+
+    # --- update --- 
+    def update(self, user_word_id: PyObjectId, update_doc: dict[str, Any]) -> int: 
+        query = {"_id": user_word_id}
+        update_operation = {"$set": update_doc}
+        res = self.col.update_one(query, update_operation)
+        return res.modified_count
 
     # --- read ---
     def find(

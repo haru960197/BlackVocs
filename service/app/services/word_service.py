@@ -1,5 +1,5 @@
 import re
-from typing import List, Tuple 
+from typing import Any, Dict, List, Tuple 
 from pymongo.database import Database
 from pymongo import errors as mongo_errors
 from pydantic import ValidationError
@@ -11,7 +11,7 @@ from repositories.user_word_repository import UserWordRepository
 from core.oid import PyObjectId
 import core.config as config
 from core.errors import ServiceError, BadRequestError, ConflictError
-from schemas.word_schemas import DeleteWordRequest, GetWordContentRequest, GetWordListResponse, GetWordListResponseBase, GetWordContentResponse, RegisterWordRequest, SuggestWordsRequest, SuggestWordsResponse, SuggestWordsResponseBase
+from schemas.word_schemas import DeleteWordRequest, EditWordRequest, GetWordContentRequest, GetWordListResponse, GetWordListResponseBase, GetWordContentResponse, RegisterWordRequest, SuggestWordsRequest, SuggestWordsResponse, SuggestWordsResponseBase
 
 DEEPSEEK_API_KEY = config.DEEPSEEK_API_KEY
 MAX_NUM_WORD_SUGGEST = const.MAX_NUM_WORD_SUGGEST
@@ -114,6 +114,69 @@ class WordService:
                 word_list.append(item)
 
             return SuggestWordsResponse(word_list=word_list)
+        except mongo_errors.PyMongoError as e:
+            raise ServiceError(f"Database error: {e}")
+        except Exception as e:
+            raise ServiceError(f"service error: {e}")
+
+    # --- update ---
+    def update_word_content(self, user_word_id: PyObjectId, payload: EditWordRequest, user_id: PyObjectId) -> None: 
+        try: 
+            # check if user_word_id is included in user_word DB, if none, raise error
+            current_user_word_model = self.user_words.find(user_word_id=user_word_id)
+            if current_user_word_model is None: 
+                raise ServiceError("failed to find user word model")
+
+            # check if the user_id is correct
+            if current_user_word_model.user_id != user_id: 
+                raise ServiceError("user_id does not match the one in user word DB")
+
+            # get word model by current word_id 
+            current_word_model = self.words.find(word_id=current_user_word_model.word_id) 
+            if current_word_model is None: 
+                raise ServiceError("failed to find word model")
+
+            # new word model 
+            new_word_details = WordDetails(
+                spelling=payload.spelling, 
+                meaning=payload.meaning,
+            )
+
+            update_doc: Dict[str, Any] = {}
+            # if some change in word details
+            if current_word_model.details != new_word_details:
+                # if new word_model is not in DB, create new 
+                if self.words.find(word_details=new_word_details) is None:
+                    new_word_model = WordModel(
+                        details=new_word_details
+                    )
+                    new_word_id = self.words.create(new_word_model) 
+                else: 
+                    new_word_model = self.words.find(word_details=new_word_details)
+                    if new_word_model is None: 
+                        raise ServiceError("failed to create new word model")
+                    new_word_id = new_word_model.id
+
+                if new_word_id is None: 
+                    raise ServiceError("new_word_id is None")
+
+                self.words.decrement_registration_count(current_user_word_model.word_id)
+                self.words.increment_registration_count(new_word_id)
+
+                update_doc["word_id"] = new_word_id
+
+            # usage 
+            # if example_sentence is edited 
+            if current_user_word_model.usage_example.sentence != payload.example_sentence: 
+                update_doc["usage_example.sentence"] = payload.example_sentence
+
+            # if example_sentence_translation is edited
+            if current_user_word_model.usage_example.translation != payload.example_sentence_translation: 
+                update_doc["usage_example.translation"] = payload.example_sentence_translation
+
+            if update_doc is not None: 
+                self.user_words.update(user_word_id=user_word_id, update_doc=update_doc)
+
         except mongo_errors.PyMongoError as e:
             raise ServiceError(f"Database error: {e}")
         except Exception as e:

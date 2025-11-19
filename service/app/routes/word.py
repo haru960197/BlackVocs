@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from pymongo.database import Database
 from starlette.status import HTTP_200_OK, HTTP_204_NO_CONTENT
 from core.oid import PyObjectId
@@ -74,6 +74,21 @@ async def register_word(
 ):
     svc = WordService(db)
     svc.register_word(payload, user_id)
+    return 
+
+@router.patch(
+    "/word/{user_word_id}", 
+    operation_id="edit_word", 
+    status_code=HTTP_204_NO_CONTENT, 
+)
+async def edit_word(
+    user_word_id: PyObjectId, 
+    payload: word_schemas.EditWordRequest, 
+    user_id: PyObjectId = Depends(AuthService.get_user_id_from_cookie), 
+    db: Database = Depends(get_db), 
+):
+    svc = WordService(db)
+    svc.update_word_content(user_word_id, payload, user_id) 
     return 
 
 @router.post(
