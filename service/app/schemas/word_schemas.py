@@ -4,15 +4,24 @@ from typing import List
 from core import const
 
 # --- get user word list ---
-class GetUserWordListResponseBase(BaseModel):
+class GetWordListResponseBase(BaseModel):
     user_word_id: str 
     spelling: str
     meaning: str | None = None 
-    example_sentence: str | None = None
-    example_sentence_translation: str | None = None
 
-class GetUserWordListResponse(BaseModel):
-    word_list: List[GetUserWordListResponseBase]
+class GetWordListResponse(BaseModel):
+    word_list: List[GetWordListResponseBase]
+
+# --- user word detail --- 
+class GetWordContentRequest(BaseModel): 
+    user_word_id: str
+
+class GetWordContentResponse(BaseModel): 
+    user_word_id: str
+    spelling: str 
+    meaning: str | None = None
+    example_sentence: str | None = None
+    example_sentence_translation: str | None = None 
 
 # --- suggest ---
 class SuggestWordsRequest(BaseModel): 

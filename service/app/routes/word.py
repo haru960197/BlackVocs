@@ -14,14 +14,26 @@ router = APIRouter(prefix="/word", tags=["word"], responses=common_schemas.COMMO
 @router.get(
     "/get_user_word_list", 
     operation_id="get_user_word_list", 
-    response_model=word_schemas.GetUserWordListResponse, 
+    response_model=word_schemas.GetWordListResponse, 
 )
-async def get_user_word_list(
+async def get_word_list(
     user_id: PyObjectId = Depends(AuthService.get_user_id_from_cookie),
     db: Database = Depends(get_db)
 ):
     svc = WordService(db)
-    return svc.get_user_word_list_by_user_id(user_id)
+    return svc.get_word_list_by_user_id(user_id)
+
+@router.post(
+    "/get_word_content", 
+    operation_id="get_word_content", 
+    response_model=word_schemas.GetWordContentResponse, 
+)
+async def get_word_content(
+    payload: word_schemas.GetWordContentRequest, 
+    db: Database = Depends(get_db)
+):
+    svc = WordService(db)
+    return svc.get_word_content(payload)
 
 @router.post(
     "/suggest_words", 
