@@ -3,7 +3,7 @@
 import { getUserWordList } from "@/lib/api";
 import { WordListItem } from "./WordListItem";
 import { cookies } from "next/headers";
-import { WordInfo } from "@/types/word";
+import { WordOutline } from "@/types/word";
 
 export const WordList = async () => {
   const cookieStore = await cookies();
@@ -15,22 +15,19 @@ export const WordList = async () => {
     },
   });
 
-  const wordInfoList: WordInfo[] = res.data
+  const wordInfoList: WordOutline[] = res.data
     ? res.data.word_list.map((word) => ({
         id: word.user_word_id,
         spelling: word.spelling,
         meaning: word.meaning ?? undefined,
-        exampleSentence: word.example_sentence ?? undefined,
-        exampleSentenceTranslation: word.example_sentence_translation ?? undefined,
       }))
     : [];
 
   return (
-    <ul className="list bg-base-100 rounded-box shadow-md w-full mx-4">
-      <li className="p-4 pb-2 text-xs opacity-60 tracking-wide">英単語一覧</li>
-      {wordInfoList.map((wordInfo) => (
-        <WordListItem key={wordInfo.id} wordInfo={wordInfo} />
+    <div className="flex mx-4 gap-4 w-full">
+      {wordInfoList.map((wordOutline) => (
+        <WordListItem key={wordOutline.id} wordOutline={wordOutline} />
       ))}
-    </ul>
+    </div>
   );
 };

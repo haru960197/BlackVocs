@@ -13,6 +13,7 @@ export const RegisterWordForm = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const { showToast } = useToast();
 
+  // TODO: WordInfoをWordOutlineに変更
   const [suggestions, setSuggestions] = useState<WordInfo[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [isWordInputFocused, setIsWordInputFocused] = useState(false);
