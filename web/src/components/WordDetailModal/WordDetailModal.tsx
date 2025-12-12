@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { WordInfo } from "@/types/word";
 import { getWordContent } from "@/lib/api";
+import { BiSolidTrash } from "react-icons/bi";
+import { useToast } from "@/context/ToastContext";
+import { handleDeleteWord } from "./actions";
 
 type WordDetailModalProps = {
   isOpen: boolean;
@@ -15,6 +18,8 @@ export const WordDetailModal = ({ isOpen, onClose, wordId }: WordDetailModalProp
 
   const [data, setData] = useState<WordInfo | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -71,6 +76,23 @@ export const WordDetailModal = ({ isOpen, onClose, wordId }: WordDetailModalProp
     onClose();
   };
 
+  const handleDeleteClick = async () => {
+    if (!wordId) return;
+
+    setIsDeleting(true);
+
+    const res = await handleDeleteWord(wordId);
+
+    setIsDeleting(false);
+    onClose();
+
+    if (res.success) {
+      showToast("削除に成功しました", "success");
+    } else {
+      showToast("削除に失敗しました", "error");
+    }
+  };
+
   return (
     <dialog ref={dialogRef} className="modal" onClose={handleClose}>
       <div className="modal-box">
@@ -111,7 +133,17 @@ export const WordDetailModal = ({ isOpen, onClose, wordId }: WordDetailModalProp
           <p className="text-error">データの取得に失敗しました。</p>
         )}
 
-        <div className="modal-action">
+        <div className="modal-action flex justify-between">
+          <button className="btn btn-error min-w-[82px]" onClick={handleDeleteClick}>
+            {isDeleting ? (
+              <span className="loading loading-spinner w-6 h-6" />
+            ) : (
+              <>
+                <BiSolidTrash />
+                削除
+              </>
+            )}
+          </button>
           <button className="btn btn-accent" onClick={handleClose}>
             閉じる
           </button>
