@@ -32,7 +32,7 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <ToastProvider>
-              <div className="w-full min-h-screen flex flex-col bg-base-100">
+              <div className="w-full h-screen overflow-hidden flex flex-col bg-base-100">
                 <NavBar />
                 {children}
               </div>
