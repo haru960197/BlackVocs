@@ -13,7 +13,7 @@ export const WordListClient = ({ wordInfoList }: Props) => {
   const [selectedWordId, setSelectedWordId] = useState<string | null>(null);
 
   return (
-    <div className="flex mx-4 gap-4 w-full flex-wrap">
+    <div className="flex mx-4 gap-4 w-full flex-wrap overflow-auto">
       {wordInfoList.map((wordOutline) => (
         <WordListItem
           key={wordOutline.id}
