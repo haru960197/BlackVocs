@@ -1,9 +1,9 @@
 "use server";
 
 import { getUserWordList } from "@/lib/api";
-import { WordListItem } from "./WordListItem";
 import { cookies } from "next/headers";
 import { WordOutline } from "@/types/word";
+import { WordListClient } from "./WordListClient";
 
 export const WordList = async () => {
   const cookieStore = await cookies();
@@ -23,11 +23,5 @@ export const WordList = async () => {
       }))
     : [];
 
-  return (
-    <div className="flex mx-4 gap-4 w-full">
-      {wordInfoList.map((wordOutline) => (
-        <WordListItem key={wordOutline.id} wordOutline={wordOutline} />
-      ))}
-    </div>
-  );
+  return <WordListClient wordInfoList={wordInfoList} />;
 };
