@@ -84,30 +84,25 @@ export const WordDetailModal = ({ isOpen, onClose, wordId }: WordDetailModalProp
         {/* データ表示 */}
         {!isLoading && data && (
           <>
-            <h3 className="font-bold text-2xl mb-2">{data.spelling}</h3>
-            <div className="badge badge-outline mb-4">ID: {data.id}</div>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend border-b-2 w-18 pl-1 text-xl">英単語</legend>
+              <p className="text-3xl p-2">{data.spelling}</p>
+            </fieldset>
 
-            <p className="text-gray-600 mb-2">意味:</p>
-            <p className="text-lg mb-4">{data.meaning}</p>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend border-b-2 w-18 pl-1 text-xl">意味</legend>
+              <p className="text-3xl p-2">{data.meaning}</p>
+            </fieldset>
 
-            {data.exampleSentence && (
-              <div className="alert">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  className="stroke-info shrink-0 w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  ></path>
-                </svg>
-                <span>Example: {data.exampleSentence}</span>
-              </div>
-            )}
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend border-b-2 w-18 pl-1 text-xl">例文</legend>
+              <p className="text-2xl p-2">{data.exampleSentence}</p>
+            </fieldset>
+
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend border-b-2 pl-1 text-xl">例文（日本語訳）</legend>
+              <p className="text-2xl p-2">{data.exampleSentenceTranslation}</p>
+            </fieldset>
           </>
         )}
 
@@ -117,7 +112,7 @@ export const WordDetailModal = ({ isOpen, onClose, wordId }: WordDetailModalProp
         )}
 
         <div className="modal-action">
-          <button className="btn" onClick={handleClose}>
+          <button className="btn btn-accent" onClick={handleClose}>
             閉じる
           </button>
         </div>
