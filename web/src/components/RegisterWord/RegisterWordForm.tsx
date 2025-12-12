@@ -7,14 +7,13 @@ import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { getSuggestWords, handleGenerateWordData, handleRegisterWord } from "./actions";
 import { WordFormInput, wordFormSchema } from "./schema";
-import { WordInfo } from "@/types/word";
+import { WordOutline } from "@/types/word";
 
 export const RegisterWordForm = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const { showToast } = useToast();
 
-  // TODO: WordInfoをWordOutlineに変更
-  const [suggestions, setSuggestions] = useState<WordInfo[]>([]);
+  const [suggestions, setSuggestions] = useState<WordOutline[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [isWordInputFocused, setIsWordInputFocused] = useState(false);
 
@@ -97,13 +96,9 @@ export const RegisterWordForm = () => {
     };
   }, [watchedSpelling]);
 
-  const handleSuggestionClick = (suggestion: WordInfo) => {
+  const handleSuggestionClick = (suggestion: WordOutline) => {
     setValue("spelling", suggestion.spelling, { shouldValidate: true });
     setValue("meaning", suggestion.meaning, { shouldValidate: true });
-    setValue("example", suggestion.exampleSentence ?? "", { shouldValidate: true });
-    setValue("exampleTranslation", suggestion.exampleSentenceTranslation ?? "", {
-      shouldValidate: true,
-    });
 
     setSuggestions([]);
   };
