@@ -34,9 +34,9 @@ export const handleRegisterWord = async (
   const res = await registerWord({
     body: {
       spelling,
-      meaning,
-      example_sentence: example,
-      example_sentence_translation: exampleTranslation,
+      meaning: meaning ?? null,
+      example_sentence: example ?? null,
+      example_sentence_translation: exampleTranslation ?? null,
     },
     headers: {
       Cookie: `${tokenCookie.name}=${tokenCookie.value}`,
@@ -73,9 +73,9 @@ export const handleGenerateWordData = async (
   const res = await generateNewWordEntry({
     body: {
       spelling,
-      meaning,
-      example_sentence: exampleSentence,
-      example_sentence_translation: exampleSentenceTranslation,
+      meaning: meaning ?? null,
+      example_sentence: exampleSentence ?? null,
+      example_sentence_translation: exampleSentenceTranslation ?? null,
     },
     headers: {
       Cookie: `${tokenCookie.name}=${tokenCookie.value}`,
