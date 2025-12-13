@@ -5,3 +5,9 @@ export type WordInfo = {
   exampleSentence?: string;
   exampleSentenceTranslation?: string;
 };
+
+export type WordOutline = {
+  id: string;
+  spelling: string;
+  meaning?: string;
+};

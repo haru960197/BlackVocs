@@ -1,16 +1,27 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 from typing import List
 
+from core import const
+
 # --- get user word list ---
-class GetUserWordListResponseBase(BaseModel):
+class GetWordListResponseBase(BaseModel):
     user_word_id: str 
+    spelling: str
+    meaning: str | None = None 
+
+class GetWordListResponse(BaseModel):
+    word_list: List[GetWordListResponseBase]
+
+# --- user word detail --- 
+class GetWordContentRequest(BaseModel): 
+    user_word_id: str
+
+class GetWordContentResponse(BaseModel): 
+    user_word_id: str
     spelling: str 
     meaning: str | None = None
     example_sentence: str | None = None
-    example_sentence_translation: str | None = None
-
-class GetUserWordListResponse(BaseModel):
-    word_list: List[GetUserWordListResponseBase]
+    example_sentence_translation: str | None = None 
 
 # --- suggest ---
 class SuggestWordsRequest(BaseModel): 
@@ -27,10 +38,19 @@ class SuggestWordsResponse(BaseModel):
 
 # --- generate ---
 class GenerateNewWordEntryRequest(BaseModel): 
-    spelling: str 
-    meaning: str | None = None
-    example_sentence: str | None = None
-    example_sentence_translation: str | None = None
+    spelling: str = Field(
+        min_length=const.SPELLING_MIN_LEN,
+        max_length=const.SPELLING_MAX_LEN, 
+    )
+    meaning: str | None = Field(
+        max_length=const.MEANING_MAX_LEN,
+    )
+    example_sentence: str | None = Field(
+        max_length=const.EXAMPLE_MAX_LEN,
+    )
+    example_sentence_translation: str | None = Field(
+        max_length=const.EXAMPLE_TRANSLATION_MAX_LEN, 
+    )
 
 class GenerateNewWordEntryResponse(BaseModel): 
     spelling: str 
@@ -40,10 +60,19 @@ class GenerateNewWordEntryResponse(BaseModel):
 
 # --- register word ---
 class RegisterWordRequest(BaseModel): 
-    spelling: str 
-    meaning: str | None = None
-    example_sentence: str | None = None
-    example_sentence_translation: str | None = None
+    spelling: str = Field(
+        min_length=const.SPELLING_MIN_LEN,
+        max_length=const.SPELLING_MAX_LEN, 
+    )
+    meaning: str | None = Field(
+        max_length=const.MEANING_MAX_LEN,
+    )
+    example_sentence: str | None = Field(
+        max_length=const.EXAMPLE_MAX_LEN,
+    )
+    example_sentence_translation: str | None = Field(
+        max_length=const.EXAMPLE_TRANSLATION_MAX_LEN, 
+    )
 
     @field_validator("spelling")
     def to_lowercase(cls, v: str) -> str:
