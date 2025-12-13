@@ -3,17 +3,15 @@
 import { WordOutline } from "@/types/word";
 
 type Props = {
-  key: string;
   wordOutline: WordOutline;
   onClick?: () => void;
 };
 
 export const WordListItem = (props: Props) => {
-  const { key, wordOutline, onClick } = props;
+  const { wordOutline, onClick } = props;
 
   return (
     <div
-      key={key}
       onClick={onClick}
       className="card cursor-pointer w-full md:w-48 bg-base-200 card-sm shadow-sm"
     >
