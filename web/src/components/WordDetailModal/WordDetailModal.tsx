@@ -2,10 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { WordInfo } from "@/types/word";
-import { getWordContent } from "@/lib/api";
 import { BiSolidTrash } from "react-icons/bi";
 import { useToast } from "@/context/ToastContext";
-import { handleDeleteWord } from "./actions";
+import { handleDeleteWord, handleGetWordInfo } from "./actions";
 
 type WordDetailModalProps = {
   isOpen: boolean;
@@ -43,20 +42,10 @@ export const WordDetailModal = ({ isOpen, onClose, wordId }: WordDetailModalProp
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const result = await getWordContent({
-          body: {
-            user_word_id: wordId,
-          },
-        });
+        const result = await handleGetWordInfo(wordId);
 
         if (!ignore && result.data) {
-          setData({
-            id: result.data.user_word_id,
-            spelling: result.data.spelling,
-            meaning: result.data.meaning ?? undefined,
-            exampleSentence: result.data.example_sentence ?? undefined,
-            exampleSentenceTranslation: result.data.example_sentence_translation ?? undefined,
-          });
+          setData(result.data);
         }
       } catch (error) {
         console.error("Failed to fetch", error);
