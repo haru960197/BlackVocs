@@ -31,18 +31,20 @@ class WordService:
         """
         try: 
             user_word_models = self.user_words.find_all(user_id=user_id)
+            word_ids = list(set(model.word_id for model in user_word_models))
+            word_models = self.words.find_all(word_ids = word_ids)
+            word_model_dict = {wm.id: wm for wm in word_models}
 
             word_list: list[GetWordListResponseBase] = []
-
             for m in user_word_models: 
-                word = self.words.find(word_id=m.word_id)
-                if word is None: 
-                    raise ServiceError("Failed to word_model")
+                word_model = word_model_dict.get(m.word_id, None)
+                if word_model is None: 
+                    raise ServiceError("failed to find word model")
 
                 item = GetWordListResponseBase(
                     user_word_id=str(m.id),
-                    spelling=word.details.spelling, 
-                    meaning=word.details.meaning, 
+                    spelling=word_model.details.spelling, 
+                    meaning=word_model.details.meaning, 
                 )
                 word_list.append(item)
             return GetWordListResponse(word_list=word_list) 
