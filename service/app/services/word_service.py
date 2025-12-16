@@ -33,14 +33,11 @@ class WordService:
             user_word_models = self.user_words.find_all(user_id=user_id)
             word_ids = list(set(model.word_id for model in user_word_models))
             word_models = self.words.find_all(word_ids = word_ids)
+            word_model_dict = {wm.id: wm for wm in word_models}
 
             word_list: list[GetWordListResponseBase] = []
             for m in user_word_models: 
-                word_model = next(
-                    (wm for wm in word_models if wm.id == m.word_id),
-                    None  
-                )
-
+                word_model = word_model_dict.get(m.word_id, None)
                 if word_model is None: 
                     raise ServiceError("failed to find word model")
 
