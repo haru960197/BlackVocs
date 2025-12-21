@@ -40,6 +40,14 @@ class WordRepository:
         doc = self.col.find_one(query)
         return WordModel.model_validate(doc) if doc else None
 
+    def find_all(
+        self, 
+        *, 
+        word_ids: List[PyObjectId]
+    ) -> List[WordModel]:
+        cur = self.col.find({"_id": {"$in": word_ids}})
+        return [WordModel.model_validate(doc) for doc in cur]
+
     def find_by_word_subseq(
         self,
         subseq_pattern: str,
